@@ -1,4 +1,5 @@
-mod execution;
+pub mod execution;
+pub mod lessons;
 
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
 #[tauri::command]
@@ -11,11 +12,39 @@ async fn run_code(code: String) -> String {
     execution::execute_rust_code(&code)
 }
 
+use tauri_plugin_sql::{Migration, MigrationKind};
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
+    // Only progress table - lessons are now bundled JSON
+    let migrations = vec![Migration {
+        version: 1,
+        description: "create_progress_table",
+        sql: r#"
+            CREATE TABLE IF NOT EXISTS progress (
+                lesson_id TEXT PRIMARY KEY,
+                lesson_read INTEGER DEFAULT 0,
+                completed INTEGER DEFAULT 0,
+                user_code TEXT
+            );
+        "#,
+        kind: MigrationKind::Up,
+    }];
+
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
-        .invoke_handler(tauri::generate_handler![greet, run_code])
+        .plugin(
+            tauri_plugin_sql::Builder::default()
+                .add_migrations("sqlite:crabcademy.db", migrations)
+                .build(),
+        )
+        .invoke_handler(tauri::generate_handler![
+            greet,
+            run_code,
+            lessons::get_all_lessons,
+            lessons::get_lesson,
+            lessons::get_first_lesson
+        ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

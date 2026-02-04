@@ -3,12 +3,17 @@ import { ref } from "vue";
 import SplitPane from "./components/layout/SplitPane.vue";
 import CodeEditor from "./components/editor/CodeEditor.vue";
 import OutputTerminal from "./components/terminal/OutputTerminal.vue";
+import LessonTabs from "./components/lesson/LessonTabs.vue";
 import { useCodeRunner } from "./composables/useCodeRunner";
-import { Play } from "lucide-vue-next";
+import { useLessonState } from "./composables/useLessonState";
+import { markCompleted } from "./db/database";
+import { Play, FlaskConical } from "lucide-vue-next";
 
 const { runCode, isRunning } = useCodeRunner();
+const { currentLesson } = useLessonState();
 const code = ref("// Write your Rust code here\nfn main() {\n    println!(\"Hello, CrabCademy!\");\n}\n");
 const terminalRef = ref<InstanceType<typeof OutputTerminal> | null>(null);
+const isTestRunning = ref(false);
 
 async function handleRun() {
   if (terminalRef.value) {
@@ -18,42 +23,59 @@ async function handleRun() {
     terminalRef.value.write(output);
   }
 }
+
+async function handleRunTests() {
+  if (!terminalRef.value || !currentLesson.value) return;
+  
+  isTestRunning.value = true;
+  terminalRef.value.clear();
+  terminalRef.value.writeln("\x1b[36m🧪 Running tests...\x1b[0m\n");
+  
+  const output = await runCode(code.value);
+  terminalRef.value.write(output);
+  
+  // Check if code ran successfully (no errors)
+  const hasError = output.includes("Error") || output.includes("error") || output.includes("Sandbox Violation");
+  
+  if (hasError) {
+    terminalRef.value.writeln("\n\x1b[31m❌ Test failed! Check the errors above.\x1b[0m");
+  } else {
+    terminalRef.value.writeln("\n\x1b[32m✅ All tests passed! Lesson complete!\x1b[0m");
+    await markCompleted(currentLesson.value.id);
+  }
+  
+  isTestRunning.value = false;
+}
 </script>
 
 <template>
   <SplitPane>
     <template #lesson>
-      <div class="prose prose-invert max-w-none">
-        <!-- Security Warning Banner -->
-        <div class="mb-4 p-3 bg-amber-900/30 border border-amber-600/50 rounded-lg flex items-start gap-3">
-          <span class="text-amber-500 text-lg">⚠️</span>
-          <div class="text-sm">
-            <p class="font-semibold text-amber-400 mb-1">Code runs on your machine</p>
-            <p class="text-amber-200/80 text-xs">A soft sandbox blocks dangerous operations (fs, net, process, unsafe). Do not bypass it with untrusted code.</p>
-          </div>
-        </div>
-        
-        <h1 class="text-3xl font-bold text-orange-500 mb-4">Welcome to CrabCademy 🦀</h1>
-        <p>This is where your lesson content will go. It will support Markdown rendering.</p>
-        <div class="mt-4 p-4 bg-neutral-800 rounded border border-neutral-700">
-          <p class="font-bold text-emerald-400">Mission:</p>
-          <p>Learn Rust by doing.</p>
-        </div>
-      </div>
+      <LessonTabs />
     </template>
 
     <template #editor>
       <div class="h-full flex flex-col">
         <div class="flex items-center justify-between p-2 bg-neutral-900 border-b border-neutral-800">
           <span class="text-sm font-bold text-neutral-400 pl-2">main.rs</span>
-          <button 
-            @click="handleRun" 
-            :disabled="isRunning"
-            class="flex items-center gap-2 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <Play class="w-4 h-4" :class="{ 'fill-current': true }" />
-            {{ isRunning ? 'Running...' : 'Run' }}
-          </button>
+          <div class="flex items-center gap-2">
+            <button 
+              @click="handleRun" 
+              :disabled="isRunning || isTestRunning"
+              class="flex items-center gap-2 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <Play class="w-4 h-4 fill-current" />
+              {{ isRunning ? 'Running...' : 'Run' }}
+            </button>
+            <button 
+              @click="handleRunTests" 
+              :disabled="isRunning || isTestRunning"
+              class="flex items-center gap-2 px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <FlaskConical class="w-4 h-4" />
+              {{ isTestRunning ? 'Testing...' : 'Test' }}
+            </button>
+          </div>
         </div>
         <div class="flex-1 min-h-0">
           <CodeEditor v-model:value="code" language="rust" />

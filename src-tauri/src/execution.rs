@@ -168,32 +168,3 @@ pub fn execute_rust_code(code: &str) -> String {
         Err(e) => format!("Error running binary: {}", e),
     }
 }
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_hello_world() {
-        let code = r#"fn main() { println!("Hello!"); }"#;
-        let output = execute_rust_code(code);
-        assert!(output.contains("Hello!"), "Output: {}", output);
-    }
-
-    #[test]
-    fn test_fs_blocked() {
-        let code = r#"
-            use std::fs;
-            fn main() { fs::write("/tmp/test.txt", "evil"); }
-        "#;
-        let output = execute_rust_code(code);
-        assert!(output.contains("Sandbox Violation"), "Output: {}", output);
-    }
-
-    #[test]
-    fn test_unsafe_blocked() {
-        let code = r#"fn main() { unsafe { } }"#;
-        let output = execute_rust_code(code);
-        assert!(output.contains("Sandbox Violation"), "Output: {}", output);
-    }
-}

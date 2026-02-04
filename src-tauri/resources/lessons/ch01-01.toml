@@ -1,0 +1,44 @@
+id = "ch01-01"
+chapter = "1.1"
+title = "Hello, World!"
+sort_order = 1
+
+content = '''
+# Hello, World!
+
+Welcome to Rust! In this first lesson, you'll write the classic "Hello, World!" program.
+
+## Your First Program
+
+Every Rust program starts with a `main` function. The `main` function is special: it's always the first code that runs.
+
+```rust
+fn main() {
+    println!("Hello, world!" test);
+}
+```
+
+### Breaking it down:
+- `fn` declares a new function
+- `main` is the function name (required entry point)
+- `println!` is a **macro** that prints text to the console
+- The `!` means it's a macro, not a regular function
+
+## Your Turn!
+
+Modify the code to print your own message!
+'''
+
+starter_code = '''
+fn main() {
+    // Change this message!
+    println!("Hello, world! adfadfa");
+}
+'''
+
+test_code = '''
+fn main() {
+    // This test checks that your code prints something
+    println!("Running your code...");
+}
+'''
