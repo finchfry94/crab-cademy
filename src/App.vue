@@ -1,160 +1,90 @@
 <script setup lang="ts">
 import { ref } from "vue";
-import { invoke } from "@tauri-apps/api/core";
+import SplitPane from "./components/layout/SplitPane.vue";
+import CodeEditor from "./components/editor/CodeEditor.vue";
+import OutputTerminal from "./components/terminal/OutputTerminal.vue";
+import { useCodeRunner } from "./composables/useCodeRunner";
+import { Play } from "lucide-vue-next";
 
-const greetMsg = ref("");
-const name = ref("");
+const { runCode, isRunning } = useCodeRunner();
+const code = ref("// Write your Rust code here\nfn main() {\n    println!(\"Hello, CrabCademy!\");\n}\n");
+const terminalRef = ref<InstanceType<typeof OutputTerminal> | null>(null);
 
-async function greet() {
-  // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
-  greetMsg.value = await invoke("greet", { name: name.value });
+async function handleRun() {
+  if (terminalRef.value) {
+    terminalRef.value.clear();
+    terminalRef.value.writeln("\x1b[33mRunning...\x1b[0m");
+    const output = await runCode(code.value);
+    terminalRef.value.write(output);
+  }
 }
 </script>
 
 <template>
-  <main class="container">
-    <h1>Welcome to Tauri + Vue</h1>
+  <SplitPane>
+    <template #lesson>
+      <div class="prose prose-invert max-w-none">
+        <!-- Security Warning Banner -->
+        <div class="mb-4 p-3 bg-amber-900/30 border border-amber-600/50 rounded-lg flex items-start gap-3">
+          <span class="text-amber-500 text-lg">⚠️</span>
+          <div class="text-sm">
+            <p class="font-semibold text-amber-400 mb-1">Code runs on your machine</p>
+            <p class="text-amber-200/80 text-xs">A soft sandbox blocks dangerous operations (fs, net, process, unsafe). Do not bypass it with untrusted code.</p>
+          </div>
+        </div>
+        
+        <h1 class="text-3xl font-bold text-orange-500 mb-4">Welcome to CrabCademy 🦀</h1>
+        <p>This is where your lesson content will go. It will support Markdown rendering.</p>
+        <div class="mt-4 p-4 bg-neutral-800 rounded border border-neutral-700">
+          <p class="font-bold text-emerald-400">Mission:</p>
+          <p>Learn Rust by doing.</p>
+        </div>
+      </div>
+    </template>
 
-    <div class="row">
-      <a href="https://vite.dev" target="_blank">
-        <img src="/vite.svg" class="logo vite" alt="Vite logo" />
-      </a>
-      <a href="https://tauri.app" target="_blank">
-        <img src="/tauri.svg" class="logo tauri" alt="Tauri logo" />
-      </a>
-      <a href="https://vuejs.org/" target="_blank">
-        <img src="./assets/vue.svg" class="logo vue" alt="Vue logo" />
-      </a>
-    </div>
-    <p>Click on the Tauri, Vite, and Vue logos to learn more.</p>
+    <template #editor>
+      <div class="h-full flex flex-col">
+        <div class="flex items-center justify-between p-2 bg-neutral-900 border-b border-neutral-800">
+          <span class="text-sm font-bold text-neutral-400 pl-2">main.rs</span>
+          <button 
+            @click="handleRun" 
+            :disabled="isRunning"
+            class="flex items-center gap-2 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <Play class="w-4 h-4" :class="{ 'fill-current': true }" />
+            {{ isRunning ? 'Running...' : 'Run' }}
+          </button>
+        </div>
+        <div class="flex-1 min-h-0">
+          <CodeEditor v-model:value="code" language="rust" />
+        </div>
+      </div>
+    </template>
 
-    <form class="row" @submit.prevent="greet">
-      <input id="greet-input" v-model="name" placeholder="Enter a name..." />
-      <button type="submit">Greet</button>
-    </form>
-    <p>{{ greetMsg }}</p>
-  </main>
+    <template #terminal>
+      <OutputTerminal ref="terminalRef" />
+    </template>
+  </SplitPane>
 </template>
 
-<style scoped>
-.logo.vite:hover {
-  filter: drop-shadow(0 0 2em #747bff);
-}
-
-.logo.vue:hover {
-  filter: drop-shadow(0 0 2em #249b73);
-}
-
-</style>
 <style>
+/* Remove default root styles to allow SplitPane to reach full height */
 :root {
-  font-family: Inter, Avenir, Helvetica, Arial, sans-serif;
-  font-size: 16px;
-  line-height: 24px;
-  font-weight: 400;
-
-  color: #0f0f0f;
-  background-color: #f6f6f6;
-
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  -webkit-text-size-adjust: 100%;
+  background-color: transparent !important;
+  color: inherit !important;
 }
-
-.container {
+body {
   margin: 0;
-  padding-top: 10vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  text-align: center;
+  padding: 0;
+  height: 100vh;
+  width: 100vw;
 }
-
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: 0.75s;
+#app {
+  height: 100%;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  text-align: left;
 }
-
-.logo.tauri:hover {
-  filter: drop-shadow(0 0 2em #24c8db);
-}
-
-.row {
-  display: flex;
-  justify-content: center;
-}
-
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-
-a:hover {
-  color: #535bf2;
-}
-
-h1 {
-  text-align: center;
-}
-
-input,
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  color: #0f0f0f;
-  background-color: #ffffff;
-  transition: border-color 0.25s;
-  box-shadow: 0 2px 2px rgba(0, 0, 0, 0.2);
-}
-
-button {
-  cursor: pointer;
-}
-
-button:hover {
-  border-color: #396cd8;
-}
-button:active {
-  border-color: #396cd8;
-  background-color: #e8e8e8;
-}
-
-input,
-button {
-  outline: none;
-}
-
-#greet-input {
-  margin-right: 5px;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    color: #f6f6f6;
-    background-color: #2f2f2f;
-  }
-
-  a:hover {
-    color: #24c8db;
-  }
-
-  input,
-  button {
-    color: #ffffff;
-    background-color: #0f0f0f98;
-  }
-  button:active {
-    background-color: #0f0f0f69;
-  }
-}
-
 </style>
