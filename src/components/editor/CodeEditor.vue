@@ -2,7 +2,7 @@
 import { shallowRef } from 'vue'
 import { VueMonacoEditor } from '@guolao/vue-monaco-editor'
 
-const props = defineProps<{
+defineProps<{
   language?: string
 }>()
 
