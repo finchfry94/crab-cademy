@@ -1,42 +1,78 @@
-import { ref, computed, onMounted } from "vue";
-import { invoke } from "@tauri-apps/api/core";
-import { getProgress, markLessonRead, saveUserCode, type Progress } from "../db/database";
+import { ref, computed } from "vue";
+import { getFirstLesson, getLesson, type Lesson } from "../data/lessons";
+import { getProgress, markLessonRead, saveUserCode, type Progress } from "../services/progressStore";
+import type { TestResult } from "../services/codeRunner";
 
-export interface Lesson {
-    id: string;
-    chapter: string;
-    title: string;
-    content: string;
-    starter_code: string;
-    test_code: string;
-    sort_order: number;
-}
+export type { Lesson };
 
 const currentLesson = ref<Lesson | null>(null);
 const progress = ref<Progress | null>(null);
-const activeTab = ref<"lesson" | "objectives" | "tests">("lesson");
+const activeTab = ref<"lesson" | "objectives" | "results">("lesson");
 const isLoading = ref(true);
+const quizCompleted = ref(false);
+const quizAnswers = ref<Record<number, number>>({}); // questionIndex → selectedOptionIndex
+const testResults = ref<TestResult[]>([]);
+const hasRunTests = ref(false);
 
 export function useLessonState() {
     const isLessonRead = computed(() => progress.value?.lesson_read ?? false);
     const isCompleted = computed(() => progress.value?.completed ?? false);
-    const isObjectivesUnlocked = computed(() => true); // Always unlocked
+    const allTestsPassed = computed(() =>
+        testResults.value.length > 0 && testResults.value.every((t) => t.passed)
+    );
 
     async function loadLesson() {
         isLoading.value = true;
         try {
-            console.log("Loading lesson from resources...");
-            currentLesson.value = await invoke<Lesson | null>("get_first_lesson");
-            console.log("Lesson loaded:", currentLesson.value);
+            currentLesson.value = getFirstLesson();
             if (currentLesson.value) {
                 progress.value = await getProgress(currentLesson.value.id);
-                console.log("Progress loaded:", progress.value);
             }
         } catch (error) {
             console.error("Failed to load lesson:", error);
         } finally {
             isLoading.value = false;
         }
+    }
+
+    async function loadLessonById(id: string) {
+        isLoading.value = true;
+        activeTab.value = "lesson";
+        quizCompleted.value = false;
+        quizAnswers.value = {};
+        testResults.value = [];
+        hasRunTests.value = false;
+        try {
+            currentLesson.value = getLesson(id);
+            if (currentLesson.value) {
+                progress.value = await getProgress(currentLesson.value.id);
+            }
+        } catch (error) {
+            console.error("Failed to load lesson:", error);
+        } finally {
+            isLoading.value = false;
+        }
+    }
+
+    function setQuizAnswer(questionIndex: number, optionIndex: number) {
+        quizAnswers.value = { ...quizAnswers.value, [questionIndex]: optionIndex };
+    }
+
+    function submitQuiz() {
+        if (!currentLesson.value) return false;
+        const quiz = currentLesson.value.quiz;
+        const allCorrect = quiz.every(
+            (q, i) => quizAnswers.value[i] === q.correctIndex
+        );
+        if (allCorrect) {
+            quizCompleted.value = true;
+        }
+        return allCorrect;
+    }
+
+    function setTestResults(results: TestResult[]) {
+        testResults.value = results;
+        hasRunTests.value = true;
     }
 
     async function unlockObjectives() {
@@ -52,16 +88,9 @@ export function useLessonState() {
         }
     }
 
-    function setActiveTab(tab: "lesson" | "objectives" | "tests") {
-        if (tab === "objectives" && !isObjectivesUnlocked.value) {
-            return;
-        }
+    function setActiveTab(tab: "lesson" | "objectives" | "results") {
         activeTab.value = tab;
     }
-
-    onMounted(() => {
-        loadLesson();
-    });
 
     return {
         currentLesson,
@@ -70,8 +99,16 @@ export function useLessonState() {
         isLoading,
         isLessonRead,
         isCompleted,
-        isObjectivesUnlocked,
+        quizCompleted,
+        quizAnswers,
+        testResults,
+        hasRunTests,
+        allTestsPassed,
         loadLesson,
+        loadLessonById,
+        setQuizAnswer,
+        submitQuiz,
+        setTestResults,
         unlockObjectives,
         updateUserCode,
         setActiveTab,

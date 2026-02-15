@@ -1,5 +1,5 @@
 import { ref } from 'vue';
-import { invoke } from '@tauri-apps/api/core';
+import { executeRustCode } from '../services/codeRunner';
 
 export function useCodeRunner() {
     const isRunning = ref(false);
@@ -12,7 +12,7 @@ export function useCodeRunner() {
         result.value = '';
 
         try {
-            const output = await invoke<string>('run_code', { code });
+            const output = await executeRustCode(code);
             result.value = output;
             return output;
         } catch (e: any) {
