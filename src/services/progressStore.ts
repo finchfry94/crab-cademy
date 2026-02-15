@@ -69,3 +69,9 @@ export async function markCompleted(lessonId: string): Promise<void> {
     all[lessonId] = progress;
     saveAll(all);
 }
+
+export function resetLesson(lessonId: string): void {
+    const all = loadAll();
+    delete all[lessonId];
+    saveAll(all);
+}

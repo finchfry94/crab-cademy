@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, ref } from "vue";
 import { useRouter } from "vue-router";
 import { getAllLessons } from "../data/lessons";
-import { BookOpen, CheckCircle, ChevronRight} from "lucide-vue-next";
+import { resetLesson } from "../services/progressStore";
+import { BookOpen, CheckCircle, ChevronRight, RotateCcw } from "lucide-vue-next";
 
 const router = useRouter();
 
@@ -43,8 +44,13 @@ const chapters = computed<Chapter[]>(() => {
   }));
 });
 
+// Reactive progress version counter — bumped on reset to trigger re-render
+const progressVersion = ref(0);
+
 // Load progress from localStorage
 function getProgress(lessonId: string) {
+  // Access progressVersion so Vue tracks it as a dependency
+  void progressVersion.value;
   try {
     const raw = localStorage.getItem("crabcademy_progress");
     if (!raw) return null;
@@ -65,6 +71,12 @@ function completedCount(chapter: Chapter): number {
 
 function navigateToLesson(lessonId: string) {
   router.push({ name: "lesson", params: { id: lessonId } });
+}
+
+function resetLessonProgress(event: Event, lessonId: string) {
+  event.stopPropagation();
+  resetLesson(lessonId);
+  progressVersion.value++;
 }
 </script>
 
@@ -146,6 +158,16 @@ function navigateToLesson(lessonId: string) {
                   {{ lesson.title }}
                 </h3>
               </div>
+
+              <!-- Reset button (only for completed lessons) -->
+              <button
+                v-if="isCompleted(lesson.id)"
+                @click="resetLessonProgress($event, lesson.id)"
+                class="w-8 h-8 rounded-lg flex items-center justify-center text-neutral-500 hover:text-orange-400 hover:bg-orange-500/10 transition-all shrink-0"
+                title="Reset lesson progress"
+              >
+                <RotateCcw class="w-4 h-4" />
+              </button>
 
               <!-- Arrow -->
               <ChevronRight class="w-4 h-4 text-neutral-600 group-hover/card:text-orange-400 transition-colors shrink-0" />

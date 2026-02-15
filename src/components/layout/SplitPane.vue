@@ -17,7 +17,7 @@ defineProps<{
       <pane :size="75">
         <splitpanes vertical>
           <!-- Lesson Pane -->
-          <pane :size="30" class="border-r border-neutral-800 bg-neutral-900">
+          <pane :size="30" class="border-r border-neutral-800 bg-black">
              <div class="h-full w-full p-4 overflow-auto">
                 <slot name="lesson">Lesson Content Placeholder</slot>
              </div>
@@ -52,5 +52,10 @@ defineProps<{
 
 .splitpanes.default-theme .splitpanes__splitter:hover {
   background-color: #f97316 !important; /* orange-500 */
+}
+
+/* Force pane backgrounds to be transparent so Tailwind classes take priority */
+.splitpanes.default-theme .splitpanes__pane {
+  background-color: transparent !important;
 }
 </style>

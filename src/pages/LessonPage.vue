@@ -82,7 +82,7 @@ function goHome() {
 <template>
   <SplitPane>
     <template #lesson>
-      <div class="flex items-center gap-2 mb-3">
+      <div class="flex items-center gap-2 mb-3 bg-neutral-900" >
         <button
           @click="goHome"
           class="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-neutral-400 hover:text-orange-400 bg-neutral-900 hover:bg-neutral-800 rounded-lg border border-neutral-800 hover:border-orange-500/40 transition-all duration-200"

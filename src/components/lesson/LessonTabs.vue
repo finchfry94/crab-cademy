@@ -61,7 +61,7 @@ function getTestStatus(testName: string): "pass" | "fail" | "pending" {
 </script>
 
 <template>
-  <div class="h-full flex flex-col bg-neutral-900">
+  <div class="h-full flex flex-col bg-neutral-950">
     <!-- Tab Header -->
     <div class="flex items-center bg-neutral-900 border-b border-neutral-800">
       <button
