@@ -19,9 +19,11 @@
     "vue-router": "^4.6.4"
   },
   "devDependencies": {
+    "@playwright/test": "^1.58.2",
     "@tailwindcss/typography": "^0.5.19",
     "@tailwindcss/vite": "^4.1.18",
     "@types/markdown-it": "^14.1.2",
+    "@types/node": "^25.2.3",
     "@types/splitpanes": "^2.2.6",
     "@vitejs/plugin-vue": "^5.2.1",
     "autoprefixer": "^10.4.24",
