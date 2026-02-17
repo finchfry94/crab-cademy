@@ -5,22 +5,24 @@ test.describe('Chapter 9: Error Handling', () => {
         await page.goto('/path/the-book/lesson/ch09-01');
 
         // Quiz
-        await page.locator('label', { hasText: 'It terminates the program immediately' }).click();
-        await page.locator('label', { hasText: "No, it's unrecoverable" }).click();
+        await page.locator('label', { hasText: 'Terminates the program immediately' }).click();
+        await page.locator('label', { hasText: 'No, use Result to handle it gracefully' }).click();
         await page.click('button:has-text("Check Answers")');
 
         // Coding Challenge
         await page.click('button:has-text("Objectives")');
 
-        const rustCode = `fn verify_positive(n: i32) {
-    if n < 0 {
-        panic!("Number must be positive!");
+        const rustCode = `fn validate_age(age: i32) {
+    if age < 0 {
+        panic!("Too young!");
+    } else if age > 150 {
+        panic!("Too old!");
     }
 }
 
 fn main() {
-    verify_positive(10);
-    println!("10 is ok");
+    // Only call with valid data so main() doesn't panic
+    validate_age(25);
 }`;
 
         await page.evaluate((code) => {
@@ -40,27 +42,23 @@ fn main() {
         await page.goto('/path/the-book/lesson/ch09-02');
 
         // Quiz
-        await page.locator('label', { hasText: 'Panics' }).click();
-        await page.locator('label', { hasText: 'To propagate errors (return early on Err)' }).click();
+        await page.locator('label', { hasText: 'Propagates the error (returns early) or unwraps the value' }).click();
+        await page.locator('label', { hasText: 'unwrap()' }).click();
         await page.click('button:has-text("Check Answers")');
 
         // Coding Challenge
         await page.click('button:has-text("Objectives")');
 
-        const rustCode = `fn divide(a: f64, b: f64) -> Result<f64, String> {
-    if b == 0.0 {
-        Err("Cannot divide by zero".to_string())
+        const rustCode = `fn safe_divide(num: f64, den: f64) -> Result<f64, String> {
+    if den == 0.0 {
+        Err(String::from("Division by zero"))
     } else {
-        Ok(a / b)
+        Ok(num / den)
     }
 }
 
 fn main() {
-    let result = divide(10.0, 2.0);
-    println!("10 / 2 = {:?}", result);
-
-    let error = divide(10.0, 0.0);
-    println!("10 / 0 = {:?}", error);
+    safe_divide(10.0, 2.0);
 }`;
 
         await page.evaluate((code) => {

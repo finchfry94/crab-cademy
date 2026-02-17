@@ -1,492 +1,200 @@
 import { Lesson } from "../../types";
 
-export const ch03Lessons: Lesson[] = [
+export const ch02Lessons: Lesson[] = [
     {
-        id: "ch03-01",
-        chapter: "3.1",
-        title: "Variables and Mutability",
+        id: "ch02-01",
+        chapter: "2.1",
+        title: "Programming a Guessing Game",
         sort_order: 10,
         environment: "browser",
-        content: `# Variables and Mutability
+        content: `# Programming a Guessing Game
 
-In Rust, variables are **immutable by default**. This is one of Rust's key safety features.
+Let's learn Rust by building a project together! In this lesson, we'll explore several important Rust concepts through the lens of a guessing game.
 
-## Immutable Variables
+## Why Start with a Game?
 
-_BT__BT__BT_rust
-let x = 5;
-// x = 6;  // ❌ This won't compile!
-_BT__BT__BT_
+Games are great learning tools because they combine **input, logic, and output** — the three pillars of any program. Our guessing game touches on:
+- Variables and types
+- User interaction (input/output)
+- Comparison logic
+- Enums
 
-## Mutable Variables
+## Key Concepts
 
-Add _BT_mut_BT_ to make a variable mutable:
+### The _BT_match_BT_ Expression
 
-_BT__BT__BT_rust
-let mut x = 5;
-println!("x is: {x}");
-x = 6;  // ✅ This works!
-println!("x is: {x}");
-_BT__BT__BT_
-
-## Constants
-
-Constants are always immutable and must have a type annotation:
+One of Rust's most powerful features. It compares a value against a set of **patterns** and runs code based on which pattern matches:
 
 _BT__BT__BT_rust
-const THREE_HOURS_IN_SECONDS: u32 = 60 * 60 * 3;
+use std::cmp::Ordering;
+
+match guess.cmp(&secret_number) {
+    Ordering::Less    => println!("Too small!"),
+    Ordering::Greater => println!("Too big!"),
+    Ordering::Equal   => println!("You win!"),
+}
 _BT__BT__BT_
 
-## Shadowing
+Unlike _BT_if/else if_BT_ chains, _BT_match_BT_ is **exhaustive** — the compiler ensures you handle every possible case. This prevents bugs where you forget an edge case.
 
-You can declare a new variable with the same name, which **shadows** the previous one:
+### The _BT_Ordering_BT_ Enum
+
+_BT_std::cmp::Ordering_BT_ is an **enum** (enumeration) with exactly three variants:
+- _BT_Ordering::Less_BT_ — the first value is smaller
+- _BT_Ordering::Greater_BT_ — the first value is larger
+- _BT_Ordering::Equal_BT_ — both values are the same
+
+### Parsing Strings to Numbers
+
+User input always comes as text. To do math with it, you need to **parse** it into a number:
 
 _BT__BT__BT_rust
-let x = 5;
-let x = x + 1;  // x is now 6
-let x = x * 2;  // x is now 12
+let guess: u32 = "42".parse().expect("Not a number!");
 _BT__BT__BT_
 
-Shadowing is different from _BT_mut_BT_ — you're creating a new variable each time, and you can even change the type!`.replace(/_BT_/g, '`'),
+The _BT_:u32_BT_ tells Rust what type to parse into. Without it, Rust doesn't know if you want an integer, float, or something else.
+
+### The _BT_.cmp()_BT_ Method
+
+Any type that implements the _BT_Ord_BT_ trait (most numeric types, strings, etc.) has a _BT_.cmp()_BT_ method:
+
+_BT__BT__BT_rust
+let a = 5;
+let b = 10;
+let result = a.cmp(&b); // Returns Ordering::Less
+_BT__BT__BT_
+
+Note the _BT_&_BT_ — we're passing a **reference** to _BT_b_BT_ (borrowing, not moving). We'll cover this in depth in Chapter 4.
+
+## 🌍 Real-World Usage
+
+Pattern matching isn't just for games. In production Rust code, _BT_match_BT_ is used everywhere:
+- Parsing HTTP status codes
+- Handling different API response types
+- State machines in network protocols
+- Error handling with _BT_Result_BT_ and _BT_Option_BT_
+
+## ⚠️ Common Mistakes
+
+1. **Comparing different types** — You can't _BT_.cmp()_BT_ a _BT_u32_BT_ with an _BT_i32_BT_. Both sides must be the same type.
+2. **Forgetting _BT_use std::cmp::Ordering_BT_** — The _BT_Ordering_BT_ enum isn't in scope by default. You need to import it.
+3. **Non-exhaustive match** — If you write a match but don't cover all variants, the compiler will reject your code.`.replace(/_BT_/g, '`'),
         quiz: [
             {
-                question: "Are variables mutable or immutable by default in Rust?",
+                question: "What type does _BT_.cmp()_BT_ return?".replace(/_BT_/g, '`'),
                 options: [
-                    "Mutable by default",
-                    "Immutable by default",
-                    "It depends on the type",
-                    "There's no default",
+                    "bool",
+                    "i32",
+                    "std::cmp::Ordering",
+                    "String",
+                ],
+                correctIndex: 2,
+            },
+            {
+                question: "What are the three variants of _BT_Ordering_BT_?".replace(/_BT_/g, '`'),
+                options: [
+                    "Up, Down, Same",
+                    "Less, Greater, Equal",
+                    "Min, Max, Eq",
+                    "Smaller, Bigger, Even",
                 ],
                 correctIndex: 1,
             },
             {
-                question: "What is shadowing?",
+                question: "What happens if a _BT_match_BT_ expression doesn't cover all possible cases?".replace(/_BT_/g, '`'),
                 options: [
-                    "Making a variable mutable",
-                    "Deleting a variable",
-                    "Declaring a new variable with the same name",
-                    "Creating a reference to a variable",
+                    "It compiles but panics at runtime",
+                    "It returns a default value",
+                    "The compiler rejects the code",
+                    "It silently does nothing",
                 ],
                 correctIndex: 2,
+            },
+            {
+                question: 'What does _BT_"42".parse::<u32>()_BT_ do?'.replace(/_BT_/g, '`'),
+                options: [
+                    "Checks if the string contains the number 42",
+                    'Converts the string "42" into the unsigned integer 42',
+                    "Splits the string into characters",
+                    "Counts the characters in the string",
+                ],
+                correctIndex: 1,
             },
         ],
         objectives: `## Your Mission
 
-Write two functions that demonstrate mutability and shadowing:
+Write two functions that use comparison logic:
 
-1. _BT_double_mut(x: i32) -> i32_BT_ — Takes a value, doubles it using a mutable variable, and returns it
-2. _BT_shadow_add(x: i32, y: i32) -> i32_BT_ — Uses shadowing (not _BT_mut_BT_) to add two numbers
+1. _BT_compare_numbers(a: i32, b: i32) -> String_BT_ — Uses _BT_.cmp()_BT_ and _BT_match_BT_ to return one of:
+   - _BT_"Less"_BT_ if a < b
+   - _BT_"Greater"_BT_ if a > b
+   - _BT_"Equal"_BT_ if a == b
+
+2. _BT_clamp(value: i32, min: i32, max: i32) -> i32_BT_ — Returns:
+   - _BT_min_BT_ if value < min
+   - _BT_max_BT_ if value > max
+   - _BT_value_BT_ otherwise
 
 ### Requirements:
-- _BT_double_mut_BT_ must use _BT_let mut_BT_ internally
-- _BT_shadow_add_BT_ must use _BT_let_BT_ shadowing (re-declare the variable)`.replace(/_BT_/g, '`'),
+- Use _BT_std::cmp::Ordering_BT_ and _BT_match_BT_ in _BT_compare_numbers_BT_
+- _BT_clamp_BT_ can use _BT_if/else_BT_ or _BT_match_BT_ — your choice!`.replace(/_BT_/g, '`'),
         test_code: `#[cfg(test)]
 mod tests {
     use super::*;
 
     #[test]
-    fn test_double_mut_5() {
-        assert_eq!(double_mut(5), 10);
+    fn test_compare_less() {
+        assert_eq!(compare_numbers(1, 5), "Less");
     }
 
     #[test]
-    fn test_double_mut_0() {
-        assert_eq!(double_mut(0), 0);
+    fn test_compare_greater() {
+        assert_eq!(compare_numbers(10, 3), "Greater");
     }
 
     #[test]
-    fn test_shadow_add() {
-        assert_eq!(shadow_add(3, 7), 10);
+    fn test_compare_equal() {
+        assert_eq!(compare_numbers(7, 7), "Equal");
     }
 
     #[test]
-    fn test_shadow_add_negatives() {
-        assert_eq!(shadow_add(-5, 5), 0);
+    fn test_compare_negative() {
+        assert_eq!(compare_numbers(-5, -3), "Less");
+    }
+
+    #[test]
+    fn test_clamp_below_min() {
+        assert_eq!(clamp(-10, 0, 100), 0);
+    }
+
+    #[test]
+    fn test_clamp_above_max() {
+        assert_eq!(clamp(200, 0, 100), 100);
+    }
+
+    #[test]
+    fn test_clamp_in_range() {
+        assert_eq!(clamp(50, 0, 100), 50);
+    }
+
+    #[test]
+    fn test_clamp_at_boundary() {
+        assert_eq!(clamp(0, 0, 100), 0);
+        assert_eq!(clamp(100, 0, 100), 100);
     }
 }`,
-        starter_code: `// Write double_mut(x: i32) -> i32 using a mutable variable
-// Write shadow_add(x: i32, y: i32) -> i32 using shadowing
+        starter_code: `use std::cmp::Ordering;
+
+// Write: compare_numbers(a: i32, b: i32) -> String
+//   Use a.cmp(&b) and match!
+
+// Write: clamp(value: i32, min: i32, max: i32) -> i32
 
 fn main() {
-    println!("double_mut(5) = {}", double_mut(5));
-    println!("shadow_add(3, 7) = {}", shadow_add(3, 7));
-}
-`,
-    },
-    {
-        id: "ch03-02",
-        chapter: "3.2",
-        title: "Data Types",
-        sort_order: 11,
-        environment: "browser",
-        content: `# Data Types
-
-Rust is a **statically typed** language — every variable must have a known type at compile time.
-
-## Scalar Types
-
-Rust has four primary scalar types:
-
-### Integers
-| Length  | Signed | Unsigned |
-|---------|--------|----------|
-| 8-bit   | _BT_i8_BT_   | _BT_u8_BT_     |
-| 32-bit  | _BT_i32_BT_  | _BT_u32_BT_    |
-| 64-bit  | _BT_i64_BT_  | _BT_u64_BT_    |
-
-_BT__BT__BT_rust
-let x: i32 = -42;
-let y: u8 = 255;
-_BT__BT__BT_
-
-### Floating-Point
-_BT__BT__BT_rust
-let x: f64 = 3.14;  // default float type
-let y: f32 = 2.0;
-_BT__BT__BT_
-
-### Boolean
-_BT__BT__BT_rust
-let t: bool = true;
-let f = false;  // type inferred
-_BT__BT__BT_
-
-### Character
-_BT__BT__BT_rust
-let c: char = 'z';
-let emoji: char = '🦀';  // 4 bytes, supports Unicode!
-_BT__BT__BT_
-
-## Compound Types
-
-### Tuples
-Group multiple values of different types:
-
-_BT__BT__BT_rust
-let tup: (i32, f64, bool) = (500, 6.4, true);
-let (x, y, z) = tup;  // destructuring
-let five_hundred = tup.0;  // access by index
-_BT__BT__BT_
-
-### Arrays
-Fixed-size collection of same-type values:
-
-_BT__BT__BT_rust
-let a: [i32; 5] = [1, 2, 3, 4, 5];
-let first = a[0];
-let repeated = [0; 10];  // [0, 0, 0, ..., 0] (10 times)
-_BT__BT__BT_`.replace(/_BT_/g, '`'),
-        quiz: [
-            {
-                question: "What is the default integer type in Rust?",
-                options: ["i8", "i16", "i32", "i64"],
-                correctIndex: 2,
-            },
-            {
-                question: "How do you access the second element of a tuple _BT_t_BT_?".replace(/_BT_/g, '`'),
-                options: ["t[1]", "t.1", "t(1)", "t->1"],
-                correctIndex: 1,
-            },
-            {
-                question: "What does _BT_[0; 5]_BT_ create?".replace(/_BT_/g, '`'),
-                options: [
-                    "An array with one element: 5",
-                    "An array [0, 1, 2, 3, 4]",
-                    "An array [0, 0, 0, 0, 0]",
-                    "A compilation error",
-                ],
-                correctIndex: 2,
-            },
-        ],
-        objectives: `## Your Mission
-
-Work with Rust's type system:
-
-1. _BT_swap_pair(pair: (i32, i32)) -> (i32, i32)_BT_ — Takes a tuple of two integers and returns them swapped
-2. _BT_array_sum(arr: &[i32]) -> i32_BT_ — Returns the sum of all elements in a slice
-3. _BT_classify_number(n: i32) -> &'static str_BT_ — Returns _BT_"positive"_BT_, _BT_"negative"_BT_, or _BT_"zero"_BT_`.replace(/_BT_/g, '`'),
-        test_code: `#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_swap_pair() {
-        assert_eq!(swap_pair((1, 2)), (2, 1));
-        assert_eq!(swap_pair((0, -5)), (-5, 0));
-    }
-
-    #[test]
-    fn test_array_sum() {
-        assert_eq!(array_sum(&[1, 2, 3, 4, 5]), 15);
-        assert_eq!(array_sum(&[]), 0);
-        assert_eq!(array_sum(&[-1, 1]), 0);
-    }
-
-    #[test]
-    fn test_classify_positive() {
-        assert_eq!(classify_number(42), "positive");
-    }
-
-    #[test]
-    fn test_classify_negative() {
-        assert_eq!(classify_number(-7), "negative");
-    }
-
-    #[test]
-    fn test_classify_zero() {
-        assert_eq!(classify_number(0), "zero");
-    }
-}`,
-        starter_code: `// Write: swap_pair(pair: (i32, i32)) -> (i32, i32)
-// Write: array_sum(arr: &[i32]) -> i32
-// Write: classify_number(n: i32) -> &'static str
-
-fn main() {
-    println!("swap (1, 2) = {:?}", swap_pair((1, 2)));
-    println!("sum [1..5] = {}", array_sum(&[1, 2, 3, 4, 5]));
-    println!("42 is {}", classify_number(42));
-}
-`,
-    },
-    {
-        id: "ch03-03",
-        chapter: "3.3",
-        title: "Functions",
-        sort_order: 12,
-        environment: "browser",
-        content: `# Functions
-
-Functions are defined with _BT_fn_BT_. Rust uses **snake_case** for function names.
-
-## Defining Functions
-
-_BT__BT__BT_rust
-fn another_function() {
-    println!("Hello from another function!");
-}
-_BT__BT__BT_
-
-## Parameters
-
-Functions can take parameters. You **must** declare the type of each parameter:
-
-_BT__BT__BT_rust
-fn greet(name: &str) {
-    println!("Hello, {name}!");
-}
-_BT__BT__BT_
-
-## Return Values
-
-Functions return values using _BT_->_BT_ syntax. The last expression is the return value:
-
-_BT__BT__BT_rust
-fn add(a: i32, b: i32) -> i32 {
-    a + b  // no semicolon = return value
-}
-_BT__BT__BT_
-
-> ⚠️ Note: adding a semicolon turns an expression into a statement, which returns _BT_()_BT_ (unit type) instead!
-
-## Multiple Parameters
-
-_BT__BT__BT_rust
-fn print_labeled_measurement(value: i32, unit: &str) {
-    println!("The measurement is: {value}{unit}");
-}
-_BT__BT__BT_`.replace(/_BT_/g, '`'),
-        quiz: [
-            {
-                question: "What happens if you add a semicolon to the last expression in a function?",
-                options: [
-                    "Nothing changes",
-                    "It becomes a statement and returns () instead",
-                    "It causes a runtime error",
-                    "It makes the return explicit",
-                ],
-                correctIndex: 1,
-            },
-            {
-                question: "What naming convention does Rust use for functions?",
-                options: ["camelCase", "PascalCase", "snake_case", "UPPER_CASE"],
-                correctIndex: 2,
-            },
-        ],
-        objectives: `## Your Mission
-
-Write three math helper functions:
-
-1. _BT_square(n: i32) -> i32_BT_ — Returns n squared
-2. _BT_is_even(n: i32) -> bool_BT_ — Returns true if n is even
-3. _BT_celsius_to_fahrenheit(c: f64) -> f64_BT_ — Converts Celsius to Fahrenheit (formula: C × 9/5 + 32)`.replace(/_BT_/g, '`'),
-        test_code: `#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_square_positive() {
-        assert_eq!(square(5), 25);
-    }
-
-    #[test]
-    fn test_square_negative() {
-        assert_eq!(square(-3), 9);
-    }
-
-    #[test]
-    fn test_square_zero() {
-        assert_eq!(square(0), 0);
-    }
-
-    #[test]
-    fn test_is_even_true() {
-        assert!(is_even(4));
-    }
-
-    #[test]
-    fn test_is_even_false() {
-        assert!(!is_even(7));
-    }
-
-    #[test]
-    fn test_celsius_to_fahrenheit() {
-        assert!((celsius_to_fahrenheit(0.0) - 32.0).abs() < 0.01);
-        assert!((celsius_to_fahrenheit(100.0) - 212.0).abs() < 0.01);
-    }
-}`,
-        starter_code: `// Write: square(n: i32) -> i32
-// Write: is_even(n: i32) -> bool
-// Write: celsius_to_fahrenheit(c: f64) -> f64
-
-fn main() {
-    println!("5 squared = {}", square(5));
-    println!("4 is even: {}", is_even(4));
-    println!("100°C = {}°F", celsius_to_fahrenheit(100.0));
-}
-`,
-    },
-    {
-        id: "ch03-05",
-        chapter: "3.5",
-        title: "Control Flow",
-        sort_order: 14,
-        environment: "browser",
-        content: `# Control Flow
-
-## if Expressions
-
-_BT__BT__BT_rust
-let number = 7;
-if number < 5 {
-    println!("less than 5");
-} else {
-    println!("5 or greater");
-}
-_BT__BT__BT_
-
-In Rust, _BT_if_BT_ is an **expression** — it returns a value:
-
-_BT__BT__BT_rust
-let number = if condition { 5 } else { 6 };
-_BT__BT__BT_
-
-## Loops
-
-### loop (infinite)
-_BT__BT__BT_rust
-let mut counter = 0;
-let result = loop {
-    counter += 1;
-    if counter == 10 {
-        break counter * 2;  // returns 20
-    }
-};
-_BT__BT__BT_
-
-### while
-_BT__BT__BT_rust
-let mut n = 3;
-while n != 0 {
-    println!("{n}!");
-    n -= 1;
-}
-_BT__BT__BT_
-
-### for (most common)
-_BT__BT__BT_rust
-for number in 1..=5 {
-    println!("{number}");
-}
-_BT__BT__BT_`.replace(/_BT_/g, '`'),
-        quiz: [
-            {
-                question: "Can _BT_if_BT_ be used as an expression (return a value) in Rust?".replace(/_BT_/g, '`'),
-                options: [
-                    "No, if is always a statement",
-                    "Yes, if is an expression and can return a value",
-                    "Only with the return keyword",
-                    "Only in unsafe blocks",
-                ],
-                correctIndex: 1,
-            },
-            {
-                question: "Which loop is most common in Rust?",
-                options: ["loop", "while", "for", "do-while"],
-                correctIndex: 2,
-            },
-        ],
-        objectives: `## Your Mission
-
-1. _BT_fizzbuzz(n: u32) -> String_BT_ — Classic FizzBuzz:
-   - Divisible by both 3 and 5 → _BT_"FizzBuzz"_BT_
-   - Divisible by 3 → _BT_"Fizz"_BT_
-   - Divisible by 5 → _BT_"Buzz"_BT_
-   - Otherwise → the number as a string
-
-2. _BT_sum_range(start: i32, end: i32) -> i32_BT_ — Sum all integers from start to end (inclusive)`.replace(/_BT_/g, '`'),
-        test_code: `#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_fizzbuzz_fizz() {
-        assert_eq!(fizzbuzz(3), "Fizz");
-        assert_eq!(fizzbuzz(9), "Fizz");
-    }
-
-    #[test]
-    fn test_fizzbuzz_buzz() {
-        assert_eq!(fizzbuzz(5), "Buzz");
-        assert_eq!(fizzbuzz(10), "Buzz");
-    }
-
-    #[test]
-    fn test_fizzbuzz_fizzbuzz() {
-        assert_eq!(fizzbuzz(15), "FizzBuzz");
-        assert_eq!(fizzbuzz(30), "FizzBuzz");
-    }
-
-    #[test]
-    fn test_fizzbuzz_number() {
-        assert_eq!(fizzbuzz(7), "7");
-        assert_eq!(fizzbuzz(1), "1");
-    }
-
-    #[test]
-    fn test_sum_range() {
-        assert_eq!(sum_range(1, 5), 15);
-        assert_eq!(sum_range(0, 0), 0);
-        assert_eq!(sum_range(-2, 2), 0);
-    }
-}`,
-        starter_code: `// Write: fizzbuzz(n: u32) -> String
-// Write: sum_range(start: i32, end: i32) -> i32
-
-fn main() {
-    for i in 1..=20 {
-        println!("{}: {}", i, fizzbuzz(i));
-    }
-    println!("sum 1..=100 = {}", sum_range(1, 100));
+    println!("{}", compare_numbers(5, 10));
+    println!("{}", compare_numbers(10, 5));
+    println!("{}", compare_numbers(5, 5));
+    println!("Clamped: {}", clamp(150, 0, 100));
 }
 `,
     },

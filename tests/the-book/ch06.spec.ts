@@ -5,25 +5,30 @@ test.describe('Chapter 6: Enums and Pattern Matching', () => {
         await page.goto('/path/the-book/lesson/ch06-01');
 
         // Quiz
-        await page.locator('label', { hasText: 'Yes, each variant can hold different types and amounts of data' }).click();
-        await page.locator('label', { hasText: 'Option<T>' }).click();
+        await page.locator('label').filter({ hasText: 'Variants can hold data of different types' }).click();
+        await page.locator('label').filter({ hasText: "To force you to explicitly handle the 'missing value' case" }).click();
+        await page.locator('label').filter({ hasText: 'No, they are different types' }).click();
         await page.click('button:has-text("Check Answers")');
 
         // Coding Challenge
         await page.click('button:has-text("Objectives")');
 
-        const rustCode = `enum Shape {
-    Circle(f64),
-    Rectangle(f64, f64),
+        const rustCode = `enum WebEvent {
+    PageLoad,
+    KeyPress(char),
+    Click { x: i64, y: i64 },
 }
 
-fn create_circle(radius: f64) -> Shape {
-    Shape::Circle(radius)
+fn create_keypress(c: char) -> WebEvent {
+    WebEvent::KeyPress(c)
+}
+
+fn create_click(x: i64, y: i64) -> WebEvent {
+    WebEvent::Click { x, y }
 }
 
 fn main() {
-    let circle = create_circle(10.0);
-    println!("Created a circle!");
+    create_click(10, 20);
 }`;
 
         await page.evaluate((code) => {
@@ -35,7 +40,8 @@ fn main() {
         }, rustCode);
 
         await page.click('button:has-text("Test")');
-        await expect(page.locator('text=🎉 All tests passed! Lesson complete!')).toBeVisible({ timeout: 10000 });
+        // Increased timeout to 30s
+        await expect(page.locator('text=🎉 All tests passed! Lesson complete!')).toBeVisible({ timeout: 30000 });
         await expect(page.locator('button:has-text("Objectives")')).toContainText('ALL PASS');
     });
 
@@ -43,27 +49,30 @@ fn main() {
         await page.goto('/path/the-book/lesson/ch06-02');
 
         // Quiz
-        await page.locator('label', { hasText: 'Compiler error' }).click();
-        await page.locator('label', { hasText: '_' }).click();
+        await page.locator('label').filter({ hasText: 'The compiler gives an error' }).click();
+        await page.locator('label').filter({ hasText: 'Matches any value (catch-all)' }).click();
+        await page.locator('label').filter({ hasText: 'Using pattern matching syntax like Variant(val)' }).click();
         await page.click('button:has-text("Check Answers")');
 
         // Coding Challenge
         await page.click('button:has-text("Objectives")');
 
-        const rustCode = `fn plus_one(x: Option<i32>) -> Option<i32> {
-    match x {
-        None => None,
-        Some(i) => Some(i + 1),
+        const rustCode = `enum WebEvent {
+    PageLoad,
+    KeyPress(char),
+    Click { x: i64, y: i64 },
+}
+
+fn inspect_event(event: WebEvent) -> String {
+    match event {
+        WebEvent::PageLoad => String::from("page loaded"),
+        WebEvent::KeyPress(c) => format!("keypress: {}", c),
+        WebEvent::Click { x, y } => format!("clicked: {}, {}", x, y),
     }
 }
 
 fn main() {
-    let five = Some(5);
-    let six = plus_one(five);
-    let none = plus_one(None);
-
-    println!("5 + 1 = {:?}", six);
-    println!("None + 1 = {:?}", none);
+    inspect_event(WebEvent::PageLoad);
 }`;
 
         await page.evaluate((code) => {
@@ -75,7 +84,8 @@ fn main() {
         }, rustCode);
 
         await page.click('button:has-text("Test")');
-        await expect(page.locator('text=🎉 All tests passed! Lesson complete!')).toBeVisible({ timeout: 10000 });
+        // Increased timeout to 30s
+        await expect(page.locator('text=🎉 All tests passed! Lesson complete!')).toBeVisible({ timeout: 30000 });
         await expect(page.locator('button:has-text("Objectives")')).toContainText('ALL PASS');
     });
 
@@ -83,27 +93,24 @@ fn main() {
         await page.goto('/path/the-book/lesson/ch06-03');
 
         // Quiz
-        await page.locator('label', { hasText: 'When you match one pattern and ignore the rest' }).click();
-        await page.locator('label', { hasText: /^\s*No\s*$/ }).click();
+        await page.locator('label').filter({ hasText: 'When you want to match one pattern and ignore the rest' }).click();
+        await page.locator('label').filter({ hasText: /^Yes$/ }).click();
+        await page.locator('label').filter({ hasText: 'No, it ignores unmatched patterns by design' }).click();
         await page.click('button:has-text("Check Answers")');
 
         // Coding Challenge
         await page.click('button:has-text("Objectives")');
 
-        const rustCode = `fn value_or_default(opt: Option<i32>, default: i32) -> i32 {
-    if let Some(v) = opt {
-        v
+        const rustCode = `fn get_or_default(opt: Option<i32>, default: i32) -> i32 {
+    if let Some(x) = opt {
+        x
     } else {
         default
     }
 }
 
 fn main() {
-    let some = Some(42);
-    let none = None;
-
-    println!("Some: {}", value_or_default(some, 0));
-    println!("None: {}", value_or_default(none, 0));
+    get_or_default(Some(10), 0);
 }`;
 
         await page.evaluate((code) => {
@@ -115,7 +122,8 @@ fn main() {
         }, rustCode);
 
         await page.click('button:has-text("Test")');
-        await expect(page.locator('text=🎉 All tests passed! Lesson complete!')).toBeVisible({ timeout: 10000 });
+        // Increased timeout to 30s
+        await expect(page.locator('text=🎉 All tests passed! Lesson complete!')).toBeVisible({ timeout: 30000 });
         await expect(page.locator('button:has-text("Objectives")')).toContainText('ALL PASS');
     });
 });

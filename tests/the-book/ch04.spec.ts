@@ -5,31 +5,37 @@ test.describe('Chapter 4: Understanding Ownership', () => {
         await page.goto('/path/the-book/lesson/ch04-01');
 
         // Quiz
-        await page.locator('label', { hasText: 'The value is moved (original becomes invalid)' }).click();
-        await page.locator('label', { hasText: 'When the owner goes out of scope' }).click();
+        await page.locator('label', { hasText: 'Exactly one' }).click();
+        await page.locator('label', { hasText: 'The value is dropped (memory is freed)' }).click();
+        await page.locator('label', { hasText: 's1 is moved to s2 (s1 is no longer valid)' }).click();
+        await page.locator('label', { hasText: 'Simple stack types like i32, bool, f64' }).click();
         await page.click('button:has-text("Check Answers")');
 
         // Coding Challenge
         await page.click('button:has-text("Objectives")');
 
-        const rustCode = `fn make_greeting(name: String) -> String {
-    format!("Welcome, {name}!")
+        const rustCode = `fn take_and_return(s: String) -> String {
+    println!("{}", s);
+    s
 }
 
-fn first_word(s: &str) -> String {
-    match s.find(' ') {
-        Some(i) => s[..i].to_string(),
-        None => s.to_string(),
-    }
+fn make_greeting(name: &str) -> String {
+    format!("Hello, {}!", name)
+}
+
+fn clone_and_modify(s: &str) -> String {
+    let mut owned = String::from(s);
+    owned.push_str(" (modified)");
+    owned
 }
 
 fn main() {
-    let name = String::from("Rustacean");
-    let greeting = make_greeting(name);
-    println!("{greeting}");
-
-    let sentence = "hello world";
-    println!("First word: {}", first_word(sentence));
+    let s = String::from("hello");
+    let s = take_and_return(s);
+    println!("{}", s);
+    let greeting = make_greeting("World");
+    println!("{}", greeting);
+    println!("{}", clone_and_modify("original"));
 }`;
 
         await page.evaluate((code) => {
@@ -49,34 +55,36 @@ fn main() {
         await page.goto('/path/the-book/lesson/ch04-02');
 
         // Quiz
-        await page.locator('label', { hasText: 'Exactly one' }).click();
-        await page.locator('label', { hasText: 'The function borrows the value (immutable reference)' }).click();
+        await page.locator('label', { hasText: 'A reference (borrow) to the value' }).click();
+        await page.locator('label', { hasText: 'No — the compiler prevents this' }).click();
+        await page.locator('label', { hasText: 'Data races' }).click();
+        await page.locator('label', { hasText: "Nothing — the reference doesn't own the data" }).click();
         await page.click('button:has-text("Check Answers")');
 
         // Coding Challenge
         await page.click('button:has-text("Objectives")');
 
-        const rustCode = `fn count_chars(s: &str) -> usize {
-    s.chars().count()
+        const rustCode = `fn string_length(s: &String) -> usize {
+    s.len()
 }
 
-fn append_exclaim(s: &mut String) {
-    s.push('!');
+fn append_exclamation(s: &mut String) {
+    s.push_str("!");
 }
 
-fn longest<'a>(a: &'a str, b: &'a str) -> &'a str {
-    if a.len() >= b.len() { a } else { b }
+fn first_word_length(s: &str) -> usize {
+    match s.find(' ') {
+        Some(i) => i,
+        None => s.len(),
+    }
 }
 
 fn main() {
-    let s = String::from("hello");
-    println!("chars: {}", count_chars(&s));
-
-    let mut greeting = String::from("hi");
-    append_exclaim(&mut greeting);
-    println!("{greeting}");
-
-    println!("longest: {}", longest("short", "longer string"));
+    let mut s = String::from("hello world");
+    println!("Length: {}", string_length(&s));
+    append_exclamation(&mut s);
+    println!("After append: {}", s);
+    println!("First word length: {}", first_word_length("hello world"));
 }`;
 
         await page.evaluate((code) => {
@@ -97,7 +105,8 @@ fn main() {
 
         // Quiz
         await page.locator('label', { hasText: /^\s*&str\s*$/ }).click();
-        await page.locator('label', { hasText: 'No, it borrows the data' }).click();
+        await page.locator('label', { hasText: "No, it's just a reference with a length" }).click();
+        await page.locator('label', { hasText: '&str can accept both &String and &str' }).click();
         await page.click('button:has-text("Check Answers")');
 
         // Coding Challenge
@@ -110,20 +119,27 @@ fn main() {
     }
 }
 
-fn trim_ends(arr: &[i32]) -> &[i32] {
-    if arr.len() < 2 {
-        &[]
+fn count_words(s: &str) -> usize {
+    if s.is_empty() {
+        0
     } else {
-        &arr[1..arr.len() - 1]
+        s.split_whitespace().count()
     }
 }
 
-fn main() {
-    let s = "hello world";
-    println!("First word: '{}'", first_word(s));
+fn slice_sum(arr: &[i32]) -> i32 {
+    let mut sum = 0;
+    for &n in arr {
+        sum += n;
+    }
+    sum
+}
 
-    let a = [1, 2, 3, 4, 5];
-    println!("Trimmed: {:?}", trim_ends(&a));
+fn main() {
+    let s = "hello world foo";
+    println!("First word: '{}'", first_word(s));
+    println!("Word count: {}", count_words(s));
+    println!("Sum: {}", slice_sum(&[1, 2, 3, 4, 5]));
 }`;
 
         await page.evaluate((code) => {

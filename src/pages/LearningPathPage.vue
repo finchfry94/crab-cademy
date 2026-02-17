@@ -173,7 +173,7 @@ function goBack() {
                     :class="[
                       'text-[10px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded',
                       lesson.environment === 'browser'
-                        ? 'text-emerald-400 bg-emerald-500/10'
+                        ? 'text-orange-400 bg-orange-500/10'
                         : 'text-amber-400 bg-amber-500/10',
                     ]"
                   >

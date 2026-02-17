@@ -7,13 +7,19 @@ export const ch09Lessons: Lesson[] = [
         title: "Unrecoverable Errors with panic!",
         sort_order: 70,
         environment: "browser",
-        content: `# Unrecoverable Errors with panic!
+        content: `# Unrecoverable Errors
 
-Sometimes bad things happen in your code, and there's nothing you can do about it. In these cases, Rust has the _BT_panic!_BT_ macro.
+Rust groups errors into two categories: **recoverable** (Result) and **unrecoverable** (panic).
 
-When the _BT_panic!_BT_ macro executes, your program will print a failure message, unwind and clean up the stack, and then quit.
+## Panic!
 
-## Explicit Panic
+When something goes horribly wrong and the program cannot continue (like accessing invalid memory), Rust **panics**.
+
+- Prints an error message.
+- Unwinds the stack (cleans up).
+- Extis.
+
+You can trigger this explicitly:
 
 _BT__BT__BT_rust
 fn main() {
@@ -21,61 +27,73 @@ fn main() {
 }
 _BT__BT__BT_
 
-## Implicit Panic
+## When to Panic?
 
-Some operations panic automatically, like accessing an array out of bounds:
+In production code: **Rarely**. You should almost always return _BT_Result_BT_ to let the caller decide what to do.
 
-_BT__BT__BT_rust
-let v = vec![1, 2, 3];
-v[99]; // Panics!
-_BT__BT__BT_`.replace(/_BT_/g, '`'),
+Panic is okay for:
+- Prototype code.
+- Tests (assert! panics on failure).
+- Bugs that violate internal invariants (getting into a state that "should be impossible").
+- Security issues.`.replace(/_BT_/g, '`'),
         quiz: [
             {
-                question: "What does the _BT_panic!_BT_ macro do?".replace(/_BT_/g, '`'),
+                question: "What does `panic!` do?",
                 options: [
-                    "It logs an error and continues",
-                    "It terminates the program immediately",
-                    "It returns a Result::Err",
-                    "It pauses execution for debugging",
+                    "Logs an error and keeps running",
+                    "Terminates the program immediately",
+                    "Returns a boolean false",
+                    "Restarts the server",
                 ],
                 correctIndex: 1,
             },
             {
-                question: "Can you recover from a panic in normal Rust code?",
-                options: ["Yes, with try-catch", "No, it's unrecoverable", "Yes, with recover()", "Yes, by ignoring it"],
+                question: "Should you use `panic!` for checking user input?",
+                options: [
+                    "Yes, teach them a lesson",
+                    "No, use Result to handle it gracefully",
+                    "Yes, it's the standard way",
+                    "Only if the input is a number",
+                ],
                 correctIndex: 1,
             },
         ],
         objectives: `## Your Mission
 
-Write a function _BT_verify_positive(n: i32)_BT_ that panics with the message _BT_"Number must be positive!"_BT_ if the input is negative.
+Write a function _BT_validate_age(age: i32)_BT_ that:
+1. Panics with message "Too young!" if age < 0.
+2. Panics with message "Too old!" if age > 150.
+3. Otherwise does nothing.
 
-If the number is positive or zero, it should do nothing.`.replace(/_BT_/g, '`'),
+(This is an example where panic might be used to enforce internal consistency, though Types are usually better!)`.replace(/_BT_/g, '`'),
         test_code: `#[cfg(test)]
 mod tests {
     use super::*;
 
     #[test]
-    #[should_panic(expected = "Number must be positive!")]
-    fn test_verify_positive_panic() {
-        verify_positive(-5);
+    #[should_panic(expected = "Too young")]
+    fn test_young() {
+        validate_age(-5);
     }
 
     #[test]
-    fn test_verify_positive_ok() {
-        verify_positive(5);
-        verify_positive(0);
+    #[should_panic(expected = "Too old")]
+    fn test_old() {
+        validate_age(200);
+    }
+    
+    #[test]
+    fn test_valid() {
+        validate_age(50);
     }
 }`,
-        starter_code: `// Write: verify_positive(n: i32)
-// Use the panic! macro if n < 0
+        starter_code: `// Write: validate_age(age: i32)
+// Panic if < 0 or > 150
 
 fn main() {
-    verify_positive(10);
-    println!("10 is ok");
-    
-    verify_positive(-1); // Should crash here
-    println!("This line won't run");
+    validate_age(30);
+    println!("30 is valid");
+    validate_age(-1);
 }
 `,
     },
@@ -87,7 +105,9 @@ fn main() {
         environment: "browser",
         content: `# Recoverable Errors with Result
 
-Most errors aren't serious enough to stop the program entirely. Explicit error handling is done with _BT_Result<T, E>_BT_:
+Most errors are not fatal. File not found? Just ask the user for a different file. Network down? Retry.
+
+Rust uses the _BT_Result_BT_ enum for this:
 
 _BT__BT__BT_rust
 enum Result<T, E> {
@@ -96,88 +116,74 @@ enum Result<T, E> {
 }
 _BT__BT__BT_
 
-## Handling Result
+## Propagating Errors
+
+The **? operator** is a magical shorthand for "If Ok, give me the value. If Err, return the Error from the function immediately."
 
 _BT__BT__BT_rust
-let result: Result<i32, &str> = Ok(200);
-
-match result {
-    Ok(code) => println!("Success: {}", code),
-    Err(e) => println!("Error: {}", e),
-}
-_BT__BT__BT_
-
-## Shortcuts: unwrap and expect
-
-- _BT_unwrap()_BT_: Returns the value inside _BT_Ok_BT_, or **panics** if _BT_Err_BT_.
-- _BT_expect(msg)_BT_: Like unwrap, but lets you provide a custom panic message.
-
-## The ? Operator
-
-Propagates errors to the caller function:
-
-_BT__BT__BT_rust
-fn read_username_from_file() -> Result<String, io::Error> {
+fn read_file() -> Result<String, io::Error> {
     let mut s = String::new();
     File::open("hello.txt")?.read_to_string(&mut s)?;
     Ok(s)
 }
-_BT__BT__BT_`.replace(/_BT_/g, '`'),
+_BT__BT__BT_
+
+## Helper Methods
+
+- _BT_unwrap()_BT_: "Give me the value or panic". (Risky!)
+- _BT_expect("msg")_BT_: "Give me the value or panic with this message". (Better than unwrap).
+- _BT_unwrap_or(default)_BT_: "Give me value or use this default". (Safe).
+
+## ⚠️ Common Mistakes
+
+1. **Using unwrap() in production** — If it crashes, your users will be sad. Handle the error!
+2. **Ignoring Result** — Rust will warn you if you call a function returning Result and ignore it.`.replace(/_BT_/g, '`'),
         quiz: [
             {
-                question: "What does _BT_unwrap()_BT_ do if the Result is _BT_Err_BT_?".replace(/_BT_/g, '`'),
+                question: "What does the `?` operator do?",
                 options: [
-                    "Returns the error",
-                    "Returns a default value",
-                    "Panics",
-                    "Does nothing",
+                    "Prints the error",
+                    "Panics on error",
+                    "Propagates the error (returns early) or unwraps the value",
+                    "Retries the operation",
                 ],
                 correctIndex: 2,
             },
             {
-                question: "What is the purpose of the _BT_?_BT_ operator?".replace(/_BT_/g, '`'),
-                options: [
-                    "To ask the user a question",
-                    "To assert that a value is true",
-                    "To propagate errors (return early on Err)",
-                    "To print debug info",
-                ],
+                question: "Which method panics if the Result is Err?",
+                options: ["is_err()", "unwrap_or()", "unwrap()", "map()"],
                 correctIndex: 2,
             },
         ],
         objectives: `## Your Mission
 
-Write a function _BT_divide(a: f64, b: f64) -> Result<f64, String>_BT_.
-1. If _BT_b_BT_ is 0.0, return _BT_Err("Cannot divide by zero".to_string())_BT_.
-2. Otherwise, return _BT_Ok(a / b)_BT_.`.replace(/_BT_/g, '`'),
+Write a function _BT_safe_divide(num: f64, den: f64) -> Result<f64, String>_BT_.
+
+1. If _BT_den_BT_ is 0.0, function returns _BT_Err("Division by zero".to_string())_BT_.
+2. Otherwise returns _BT_Ok(num / den)_BT_.`.replace(/_BT_/g, '`'),
         test_code: `#[cfg(test)]
 mod tests {
     use super::*;
 
     #[test]
-    fn test_divide_ok() {
-        match divide(10.0, 2.0) {
-            Ok(v) => assert_eq!(v, 5.0),
-            Err(_) => panic!("Should result in Ok"),
-        }
+    fn test_ok() {
+        assert_eq!(safe_divide(10.0, 2.0), Ok(5.0));
     }
 
     #[test]
-    fn test_divide_zero() {
-        match divide(10.0, 0.0) {
-            Ok(_) => panic!("Should result in Err"),
-            Err(e) => assert_eq!(e, "Cannot divide by zero"),
-        }
+    fn test_err() {
+        let res = safe_divide(10.0, 0.0);
+        assert!(res.is_err());
+        // Simple check
     }
 }`,
-        starter_code: `// Write: divide(a: f64, b: f64) -> Result<f64, String>
+        starter_code: `// Write: safe_divide(num: f64, den: f64) -> Result<f64, String>
 
 fn main() {
-    let result = divide(10.0, 2.0);
-    println!("10 / 2 = {:?}", result); // Ok(5.0)
-    
-    let error = divide(10.0, 0.0);
-    println!("10 / 0 = {:?}", error); // Err(...)
+    match safe_divide(10.0, 0.0) {
+        Ok(val) => println!("{}", val),
+        Err(e) => println!("Error: {}", e),
+    }
 }
 `,
     },

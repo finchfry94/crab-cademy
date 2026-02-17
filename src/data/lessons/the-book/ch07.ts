@@ -9,90 +9,187 @@ export const ch07Lessons: Lesson[] = [
         environment: "browser",
         content: `# Packages and Crates
 
-As your project grows, you need to organize your code.
+As your code grows, managing it all in one file becomes impossible. Rust uses **Packages**, **Crates**, and **Modules** to organize code.
 
-## Crates
+## The Hierarchy
 
-A **crate** is the smallest amount of code that the Rust compiler considers at a time.
-- **Binary crates** are programs you can run. They have a _BT_main_BT_ function.
-- **Library crates** don't have a _BT_main_BT_ function and provide functionality to be shared with other projects.
+1. **Package**: A bundle of one or more crates. Contains a _BT_Cargo.toml_BT_ file.
+2. **Crate**: A compilation unit.
+   - **Binary Crate**: Has a _BT_main_BT_ function. Compiles to an executable.
+   - **Library Crate**: No _BT_main_BT_. Defines functionality to be shared.
+3. **Module**: Organizes code within a crate.
 
-## Packages
+## Binary vs Library
 
-A **package** is a bundle of one or more crates that provides a set of functionality. A package contains a _BT_Cargo.toml_BT_ file that describes how to build those crates.
+Most packages contain:
+- One library crate (logic, data structures)
+- One or more binary crates (executables that use the library)
 
-_BT__BT__BT_text
-my-project/
-├── Cargo.toml
-└── src/
-    ├── main.rs  (binary crate root)
-    └── lib.rs   (library crate root)
-_BT__BT__BT_
+## ⚠️ Common Mistakes
 
-A package can have multiple binary crates, but only one library crate.`.replace(/_BT_/g, '`'),
+1. **Confusing Package and Crate** — A package *contains* crates.
+2. **Trying to run a library** — Libraries don't run on their own; they are imported by binaries.`.replace(/_BT_/g, '`'),
         quiz: [
             {
-                question: "What is the primary difference between a binary crate and a library crate?",
-                options: [
-                    "Binary crates have a main function, library crates do not",
-                    "Library crates are compiled faster",
-                    "Binary crates cannot use dependencies",
-                    "There is no difference",
-                ],
-                correctIndex: 0,
+                question: "What file defines a Package?",
+                options: ["main.rs", "lib.rs", "Cargo.toml", "package.json"],
+                correctIndex: 2,
             },
             {
-                question: "How many library crates can a package contain?",
-                options: ["Unlimited", "Zero", "Exactly one at most", "Two"],
-                correctIndex: 2,
+                question: "Which type of crate has a _BT_main_BT_ function?".replace(/_BT_/g, '`'),
+                options: ["Library crate", "Binary crate", "Module crate", "Both"],
+                correctIndex: 1,
+            },
+            {
+                question: "How many library crates can a package have?",
+                options: ["Zero or one", "Unlimited", "Exactly one", "At least one"],
+                correctIndex: 0,
             },
         ],
         objectives: `## Your Mission
 
-This lesson is improved by understanding the file structure. Since we are in a single-file environment here, we will simulate modules in the next lesson!
+Simple check: Write a function _BT_is_binary(has_main: bool) -> bool_BT_.
+It should return true if the input _BT_has_main_BT_ is true, representing that binary crates have a main function.
 
-For now, simply **pass the quiz** to prove you understand the concepts of Crates and Packages.`.replace(/_BT_/g, '`'),
+(This is a conceptual lesson, so the code is trivial!)`.replace(/_BT_/g, '`'),
         test_code: `#[cfg(test)]
 mod tests {
+    use super::*;
+
     #[test]
-    fn test_knowledge() {
-        // No code to write for this conceptual lesson
-        assert!(true);
+    fn test_is_binary() {
+        assert_eq!(is_binary(true), true);
+        assert_eq!(is_binary(false), false);
     }
 }`,
-        starter_code: `// This lesson is conceptual.
-// Click "Run" to proceed!
+        starter_code: `// Write: is_binary(has_main: bool) -> bool
+// Return the input value basically...
 
 fn main() {
-    println!("I understand packages and crates!");
+    println!("Is binary? {}", is_binary(true));
 }
 `,
     },
     {
         id: "ch07-02",
         chapter: "7.2",
-        title: "Defining Modules",
+        title: "Defining Modules and Control Visibility",
         sort_order: 51,
         environment: "browser",
-        content: `# Defining Modules
+        content: `# Modules and Visibility
 
-**Modules** let you organize code within a crate for readability and easy reuse. They also control the **privacy** of items (public vs private).
+Modules let you organize code into groups (like folders on a filesystem). They also control **privacy**.
 
 ## The _BT_mod_BT_ Keyword
 
 _BT__BT__BT_rust
 mod front_of_house {
-    mod hosting {
-        fn add_to_waitlist() {}
+    pub mod hosting {
+        pub fn add_to_waitlist() {}
     }
 }
 _BT__BT__BT_
 
-By default, everything inside a module is **private** from the outside.
+## Privacy Rules
 
-## The _BT_pub_BT_ Keyword
+1. **Everything is private by default**.
+2. **Items in parent modules can't access private items in child modules**.
+3. **Items in child modules CAN access items in ancestor modules**.
 
-To make an item accessible, use _BT_pub_BT_:
+To make something accessible to the parent/outside world, you must mark it _BT_pub_BT_.
+
+## Struct Privacy
+
+- Making a struct _BT_pub_BT_ **does NOT** make its fields public. You must explicitly mark each field _BT_pub_BT_ if you want it to be accessible.
+- If a struct has private fields, you can only construct it inside the module where it's defined (usually via a public constructor method like _BT_new_BT_).
+
+## ⚠️ Common Mistakes
+
+1. **Forgetting _BT_pub_BT_ on fields** — Even if the struct is public, you can't read/write private fields from outside.
+2. **Assuming "same file" means "same visibility"** — If you put code in a _BT_mod_BT_ block, it's a separate module with privacy boundaries, even in the same file!`.replace(/_BT_/g, '`'),
+        quiz: [
+            {
+                question: "What is the default visibility of an item in a module?",
+                options: ["Public", "Private", "Protected", "Package-private"],
+                correctIndex: 1,
+            },
+            {
+                question: "If a struct is public, are its fields public by default?",
+                options: ["Yes", "No", "Only if strict mode is off", "Yes, if the module is public"],
+                correctIndex: 1,
+            },
+            {
+                question: "Can a child module access private items in its parent module?",
+                options: ["Yes", "No", "Only if marked pub(super)", "Only data, not functions"],
+                correctIndex: 0,
+            },
+        ],
+        objectives: `## Your Mission
+
+The code below has privacy errors. The module _BT_kitchen_BT_ calculates a meal, but the _BT_make_sandwich_BT_ function can't access the private _BT_Sandwich_BT_ struct or its fields strings.
+
+**Fix the code by adding _BT_pub_BT_ where necessary** so that _BT_make_sandwich_BT_ can run and return a _BT_Sandwich_BT_.
+
+1. Make the _BT_Sandwich_BT_ struct public.
+2. Make the _BT_name_BT_ field public.
+3. Make the _BT_is_tasty_BT_ field public.`.replace(/_BT_/g, '`'),
+        test_code: `#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_make_sandwich() {
+        let s = make_sandwich();
+        assert_eq!(s.name, "BLT");
+        assert_eq!(s.is_tasty, true);
+    }
+}`,
+        starter_code: `mod kitchen {
+    // FIX: Add 'pub' to the struct and fields
+    struct Sandwich {
+        name: String,
+        is_tasty: bool,
+    }
+
+    pub fn prepare_order() -> Sandwich {
+        Sandwich {
+            name: String::from("BLT"),
+            is_tasty: true,
+        }
+    }
+}
+
+use kitchen::prepare_order;
+
+// Note: We need access to the Struct type return type too!
+// That implies the Struct definition itself must be visible.
+
+fn make_sandwich() -> kitchen::Sandwich { // validation will fail if Sandwich is private
+    prepare_order()
+}
+
+fn main() {
+    let s = make_sandwich();
+    println!("Made a {}", s.name); // validation will fail if 'name' is private
+}
+`,
+    },
+    {
+        id: "ch07-03",
+        chapter: "7.3",
+        title: "Paths and use",
+        sort_order: 52,
+        environment: "browser",
+        content: `# Paths and use
+
+To access an item in the module tree, we use a **path**.
+
+- **Absolute path**: Starts with _BT_crate_BT_ (root).
+- **Relative path**: Starts with _BT_self_BT_, _BT_super_BT_, or an identifier.
+
+## The _BT_use_BT_ Keyword
+
+Typing full paths is annoying. _BT_use_BT_ lets you bring an item into scope so you can call it directly.
 
 _BT__BT__BT_rust
 mod front_of_house {
@@ -101,131 +198,77 @@ mod front_of_house {
     }
 }
 
-pub fn eat_at_restaurant() {
-    // We can access hosting because it's public
-    front_of_house::hosting::add_to_waitlist();
-}
-_BT__BT__BT_`.replace(/_BT_/g, '`'),
-        quiz: [
-            {
-                question: "What is the default visibility of an item in a module?",
-                options: ["Public", "Private", "Protected", "Package-private"],
-                correctIndex: 1,
-            },
-            {
-                question: "Which keyword makes an item accessible from outside its module?",
-                options: ["global", "export", "pub", "open"],
-                correctIndex: 2,
-            },
-        ],
-        objectives: `## Your Mission
-
-1. Define a module _BT_math_BT_.
-2. Inside _BT_math_BT_, define a public function _BT_add(a: i32, b: i32) -> i32_BT_.
-3. Define a private function _BT_subtract(a: i32, b: i32) -> i32_BT_.
-4. In _BT_main_BT_, try to call _BT_math::add_BT_.`.replace(/_BT_/g, '`'),
-        test_code: `#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_add_is_public() {
-        assert_eq!(math::add(2, 2), 4);
-    }
-    
-    // We can't strictly test that 'subtract' is private via compilation failure here,
-    // but the presence of 'pub' on 'add' and absence on 'subtract' is the goal.
-}`,
-        starter_code: `// Define module 'math'
-// - pub fn add
-// - fn subtract
-
-fn main() {
-    let sum = math::add(10, 20);
-    println!("Sum: {}", sum);
-    
-    // Uncommenting this should cause an error:
-    // math::subtract(10, 5); 
-}
-`,
-    },
-    {
-        id: "ch07-03",
-        chapter: "7.3",
-        title: "Paths for Referring to an Item",
-        sort_order: 52,
-        environment: "browser",
-        content: `# Paths
-
-To show Rust where to find an item in a module tree, we use a **path**.
-
-## Absolute Paths
-Start from the crate root using the crate name or _BT_crate_BT_:
-
-_BT__BT__BT_rust
-crate::front_of_house::hosting::add_to_waitlist();
-_BT__BT__BT_
-
-## Relative Paths
-Start from the current module using _BT_self_BT_, _BT_super_BT_, or an identifier:
-
-_BT__BT__BT_rust
-front_of_house::hosting::add_to_waitlist();
-_BT__BT__BT_
-
-## The _BT_use_BT_ Keyword
-
-We can bring a path into scope with _BT_use_BT_, creating a shortcut:
-
-_BT__BT__BT_rust
+// Bring it into scope
 use crate::front_of_house::hosting;
 
 pub fn eat_at_restaurant() {
-    hosting::add_to_waitlist();
+    hosting::add_to_waitlist(); // Shorter!
 }
+_BT__BT__BT_
+
+## Idiomatic use
+
+- For **functions**, it's idiomatic to bring the **parent module** into scope, then call _BT_module::function()_BT_.
+- For **structs/enums**, it's idiomatic to bring the **item itself** into scope.
+
+_BT__BT__BT_rust
+use std::collections::HashMap; // Struct -> full path
+use std::fmt;                  // Module -> parent path
 _BT__BT__BT_`.replace(/_BT_/g, '`'),
         quiz: [
             {
-                question: "What keyword starts an absolute path from the current crate root?",
-                options: ["root", "top", "crate", "src"],
+                question: "What keyword brings a path into scope?",
+                options: ["import", "include", "use", "require"],
                 correctIndex: 2,
             },
             {
                 question: "What keyword refers to the parent module?",
-                options: ["parent", "super", "self", "base"],
+                options: ["parent", "super", "self", "root"],
+                correctIndex: 1,
+            },
+            {
+                question: "What is the idiomatic way to bring a function into scope?",
+                options: [
+                    "Bring the function itself",
+                    "Bring the parent module",
+                    "Bring the crate root",
+                    "Don't use use",
+                ],
                 correctIndex: 1,
             },
         ],
         objectives: `## Your Mission
 
-1. Use the module structure provided.
-2. Bring the _BT_add_BT_ function into scope using _BT_use_BT_.
-3. Call _BT_add_BT_ directly without the module prefix.`.replace(/_BT_/g, '`'),
+1. Use the provided _BT_calculator_BT_ module.
+2. Add a **_BT_use_BT_** statement to bring the _BT_add_BT_ function into scope.
+3. Note: In this specific challenge, bring the function itself so you can call _BT_add(1, 2)_BT_ directly, not _BT_calculator::add_BT_.
+
+(This contradicts the idiom lesson slightly, but it's a good test of the _BT_use_BT_ keyword!)`.replace(/_BT_/g, '`'),
         test_code: `#[cfg(test)]
 mod tests {
     use super::*;
 
     #[test]
-    fn test_usage() {
-        // This test mostly verifies the code compiles
-        assert_eq!(compute(5, 5), 10);
+    fn test_compute() {
+        assert_eq!(compute(10, 20), 30);
     }
 }`,
-        starter_code: `mod tools {
+        starter_code: `mod calculator {
     pub fn add(a: i32, b: i32) -> i32 {
         a + b
     }
 }
 
-// Write: use tools::add;
+// Write: use calculator::add;
 
 fn compute(a: i32, b: i32) -> i32 {
-    // Call 'add' directly here!
+    // Call 'add' directly! 
+    // If you don't add the 'use' line, this will error.
     add(a, b)
 }
 
 fn main() {
-    println!("Result: {}", compute(4, 6));
+    println!("{}", compute(1, 2));
 }
 `,
     },

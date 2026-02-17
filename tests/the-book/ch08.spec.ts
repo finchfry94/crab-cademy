@@ -5,27 +5,27 @@ test.describe('Chapter 8: Common Collections', () => {
         await page.goto('/path/the-book/lesson/ch08-01');
 
         // Quiz
-        await page.locator('label', { hasText: /^\s*vec!\s*$/ }).click();
-        await page.locator('label', { hasText: 'The program panics (crashes)' }).click();
+        await page.locator('label', { hasText: 'Heap' }).click();
+        await page.locator('label', { hasText: '.get() is safer' }).click();
+        await page.locator('label', { hasText: 'No, vectors are homogeneous' }).click();
         await page.click('button:has-text("Check Answers")');
 
         // Coding Challenge
         await page.click('button:has-text("Objectives")');
 
         const rustCode = `fn sum_vectors(v1: &Vec<i32>, v2: &Vec<i32>) -> Vec<i32> {
-    let len = v1.len().min(v2.len());
-    let mut result = Vec::new();
+    let mut sum = Vec::new();
+    let len = std::cmp::min(v1.len(), v2.len());
     for i in 0..len {
-        result.push(v1[i] + v2[i]);
+        sum.push(v1[i] + v2[i]);
     }
-    result
+    sum
 }
 
 fn main() {
     let v1 = vec![1, 2, 3];
     let v2 = vec![4, 5, 6];
-    let sum = sum_vectors(&v1, &v2);
-    println!("Sum: {:?}", sum);
+    sum_vectors(&v1, &v2);
 }`;
 
         await page.evaluate((code) => {
@@ -45,22 +45,22 @@ fn main() {
         await page.goto('/path/the-book/lesson/ch08-02');
 
         // Quiz
+        await page.locator('label', { hasText: 'No, never' }).click();
+        await page.locator('label', { hasText: 'Vec<u8>' }).click();
         await page.locator('label', { hasText: 'String' }).click();
-        await page.locator('label', { hasText: 'It is moved (ownership transferred)' }).click();
         await page.click('button:has-text("Check Answers")');
 
         // Coding Challenge
         await page.click('button:has-text("Objectives")');
 
-        const rustCode = `fn add_suffix(mut s: String, suffix: &str) -> String {
-    s.push_str(suffix);
-    s
+        const rustCode = `fn make_excited(s: &str) -> String {
+    let mut owned = s.to_string();
+    owned.push_str("!!");
+    owned
 }
 
 fn main() {
-    let s = String::from("hello");
-    let result = add_suffix(s, " world");
-    println!("{}", result);
+    make_excited("hello");
 }`;
 
         await page.evaluate((code) => {
@@ -80,8 +80,9 @@ fn main() {
         await page.goto('/path/the-book/lesson/ch08-03');
 
         // Quiz
-        await page.locator('label', { hasText: 'std::collections::HashMap' }).click();
-        await page.locator('label', { hasText: 'Option<&V>' }).click();
+        await page.locator('label', { hasText: 'No, you must import it' }).click();
+        await page.locator('label', { hasText: 'It overwrites the old value' }).click();
+        await page.locator('label', { hasText: 'Inserts v only if key is MISSING' }).click();
         await page.click('button:has-text("Check Answers")');
 
         // Coding Challenge
@@ -89,9 +90,9 @@ fn main() {
 
         const rustCode = `use std::collections::HashMap;
 
-fn count_words(text: &str) -> HashMap<String, u32> {
+fn word_frequencies(text: &str) -> HashMap<String, u32> {
     let mut map = HashMap::new();
-    for word in text.split_whitespace() {
+    for word in text.to_lowercase().split_whitespace() {
         let count = map.entry(word.to_string()).or_insert(0);
         *count += 1;
     }
@@ -99,9 +100,7 @@ fn count_words(text: &str) -> HashMap<String, u32> {
 }
 
 fn main() {
-    let text = "hello world hello";
-    let counts = count_words(text);
-    println!("{:?}", counts);
+    word_frequencies("Hello hello");
 }`;
 
         await page.evaluate((code) => {

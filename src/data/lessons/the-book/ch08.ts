@@ -9,89 +9,99 @@ export const ch08Lessons: Lesson[] = [
         environment: "browser",
         content: `# Vectors
 
-Vectors (_BT_Vec<T>_BT_) allow you to store more than one value in a single data structure that puts all the values next to each other in memory.
+A **Vector** (_BT_Vec<T>_BT_) is a growable array. Unlike arrays (_BT_[T; N]_BT_), vectors store their data on the **heap**, meaning they can grow and shrink at runtime.
 
 ## Creating a Vector
 
 _BT__BT__BT_rust
-let v: Vec<i32> = Vec::new();
-let v = vec![1, 2, 3]; // Macro shortcut
+let v: Vec<i32> = Vec::new(); // Explicit type
+let v = vec![1, 2, 3];        // Macro (inferred type)
 _BT__BT__BT_
 
-## Updating a Vector
+## Updating
 
 _BT__BT__BT_rust
 let mut v = Vec::new();
 v.push(5);
 v.push(6);
-v.push(7);
+v.pop(); // Returns Option<T>
 _BT__BT__BT_
 
 ## Reading Elements
 
-You can use indexing syntax or the _BT_get_BT_ method:
+You have two ways to access elements:
+
+1. **Indexing (_BT_&v[i]_BT_)**: Panics if out of bounds. Use when you are certain the index exists.
+2. **_BT_.get(i)_BT_**: Returns _BT_Option<&T>_BT_. Returns _BT_None_BT_ if out of bounds. Safest choice.
 
 _BT__BT__BT_rust
-let v = vec![1, 2, 3, 4, 5];
+let v = vec![1, 2, 3];
+// let does_not_exist = &v[100]; // ❌ Panics!
+let does_not_exist = v.get(100); // ✅ Returns None
+_BT__BT__BT_
 
-let third: &i32 = &v[2]; // Panics if out of bounds
-println!("The third element is {}", third);
+## Iterating
 
-match v.get(2) {
-    Some(third) => println!("The third element is {}", third),
-    None => println!("There is no third element."),
+_BT__BT__BT_rust
+let mut v = vec![100, 32, 57];
+for i in &mut v {
+    *i += 50; // Dereference to modify
 }
-_BT__BT__BT_`.replace(/_BT_/g, '`'),
+_BT__BT__BT_
+
+## ⚠️ Common Mistakes
+
+1. **Modifying while iterating** — You can't start iterating (borrowing) and then push/pop (modify) the vector inside the loop. Rust prevents this to avoid iterator invalidation.
+2. **Indexing blindly** — Always prefer _BT_.get()_BT_ if the index comes from user input.`.replace(/_BT_/g, '`'),
         quiz: [
             {
-                question: "What macro is used to create a vector with initial values?",
-                options: ["Vec!", "array!", "vec!", "list!"],
-                correctIndex: 2,
+                question: "Where do Vectors store their data?",
+                options: ["Stack", "Heap", "Global memory", "Disk"],
+                correctIndex: 1,
             },
             {
-                question: "What happens if you access a vector index that is out of bounds using _BT_[]_BT_ syntax?".replace(/_BT_/g, '`'),
-                options: [
-                    "It returns None",
-                    "It returns 0",
-                    "The program panics (crashes)",
-                    "It compiles but warns",
-                ],
-                correctIndex: 2,
+                question: "Which method is safer for accessing elements: `[]` or `.get()`?",
+                options: ["[] is safer", ".get() is safer", "They are creating equally safe", "Neither is safe"],
+                correctIndex: 1,
+            },
+            {
+                question: "Can different elements of a Vector have different types?",
+                options: ["Yes, always", "No, vectors are homogeneous", "Yes, if you use `Any`", "Only in unsafe blocks"],
+                correctIndex: 1,
             },
         ],
         objectives: `## Your Mission
 
-1. Create a function _BT_sum_vectors(v1: &Vec<i32>, v2: &Vec<i32>) -> Vec<i32>_BT_.
-2. It should return a new vector where each element is the sum of elements at the same position.
-3. If vectors have different lengths, stop at the shorter length.
+Write a function _BT_sum_vectors(v1: &Vec<i32>, v2: &Vec<i32>) -> Vec<i32>_BT_.
 
-Example: _BT_sum_vectors(&vec![1, 2], &vec![3, 4, 5])_BT_ -> _BT_vec![4, 6]_BT_`.replace(/_BT_/g, '`'),
+1. It should return a NEW vector.
+2. The i-th element of the result should be _BT_v1[i] + v2[i]_BT_.
+3. If one vector is longer, ignore the extra elements (stop at the length of the shorter one).
+
+Example:
+_BT_v1 = [1, 2, 3]_BT_
+_BT_v2 = [4, 5]_BT_
+Result: _BT_[5, 7]_BT_`.replace(/_BT_/g, '`'),
         test_code: `#[cfg(test)]
 mod tests {
     use super::*;
 
     #[test]
-    fn test_sum_vectors_equal_length() {
+    fn test_sum_vectors_equal() {
         let v1 = vec![1, 2, 3];
-        let v2 = vec![4, 5, 6];
-        assert_eq!(sum_vectors(&v1, &v2), vec![5, 7, 9]);
+        let v2 = vec![10, 20, 30];
+        assert_eq!(sum_vectors(&v1, &v2), vec![11, 22, 33]);
     }
 
     #[test]
-    fn test_sum_vectors_diff_length() {
+    fn test_sum_vectors_diff() {
         let v1 = vec![1, 2];
-        let v2 = vec![3, 4, 5];
-        assert_eq!(sum_vectors(&v1, &v2), vec![4, 6]);
-    }
-    
-    #[test]
-    fn test_sum_vectors_one_empty() {
-        let v1 = vec![];
-        let v2 = vec![1, 2, 3];
-        assert_eq!(sum_vectors(&v1, &v2), vec![]);
+        let v2 = vec![10, 20, 30];
+        assert_eq!(sum_vectors(&v1, &v2), vec![11, 22]);
     }
 }`,
         starter_code: `// Write: sum_vectors(v1: &Vec<i32>, v2: &Vec<i32>) -> Vec<i32>
+// Use Iterator::zip inside a loop or collect? Or just a simple index loop.
 
 fn main() {
     let v1 = vec![1, 2, 3];
@@ -109,24 +119,27 @@ fn main() {
         environment: "browser",
         content: `# Strings
 
-Rust has only one string type in the core language: the string slice _BT_str_BT_ (usually seen as borrowed _BT_&str_BT_).
+Strings found in other languages are often simple, but in Rust, they are complex because **UTF-8 is complex**.
 
-The _BT_String_BT_ type, provided by Rust’s standard library, is a growable, mutable, owned, UTF-8 encoded string type.
+## String vs &str
 
-## Creating a String
+- **_BT_String_BT_**: A growable, mutable, owned, UTF-8 encoded string buffer. (Like _BT_Vec<u8>_BT_).
+- **_BT_&str_BT_**: A "String Slice". A view into string data (often string literals). Immutable.
+
+## Creating Strings
 
 _BT__BT__BT_rust
-let s = String::new();
-let s = "initial contents".to_string();
-let s = String::from("initial contents");
+let s1 = String::new();
+let s2 = "initial content".to_string();
+let s3 = String::from("initial content");
 _BT__BT__BT_
 
-## Appending
+## Updating Strings
 
 _BT__BT__BT_rust
 let mut s = String::from("foo");
-s.push_str("bar");
-s.push('!'); // append a single char
+s.push_str("bar"); // "foobar"
+s.push('!');       // "foobar!"
 _BT__BT__BT_
 
 ## Concatenation
@@ -134,57 +147,65 @@ _BT__BT__BT_
 _BT__BT__BT_rust
 let s1 = String::from("Hello, ");
 let s2 = String::from("world!");
-let s3 = s1 + &s2; // Note: s1 has been moved here and can no longer be used
+let s3 = s1 + &s2; // s1 is MOVED and cannot be used
 _BT__BT__BT_
 
-The _BT_+_BT_ operator uses the _BT_add_BT_ method, which takes ownership of _BT_self_BT_ (s1) and borrows the second argument.`.replace(/_BT_/g, '`'),
+Why pass _BT_&s2_BT_? Because the _BT_+_BT_ operator calls method _BT_add(self, other: &str)_BT_. It takes ownership of the first string and appends a copy of the second.
+
+## Indexing
+
+**You cannot access characters by index in Rust.**
+_BT_s[0]_BT_ is a compile error. Why? Because some characters take 1 byte, some take 4 bytes. _BT_[0]_BT_ implies O(1) access and returning a "character", but byte 0 might not be a valid char on its own.
+
+## ⚠️ Common Mistakes
+
+1. **Trying to index a String** — Use _BT_.chars()_BT_ iterator instead.
+2. **Confusing String and &str** — Use _BT_&str_BT_ for function arguments usually.
+3. **Forgetting that _BT_+_BT_ consumes the left operand**.`.replace(/_BT_/g, '`'),
         quiz: [
             {
-                question: "Which type is growable and mutable?",
-                options: ["&str", "String", "char", "u8"],
+                question: "Can you index a string like `s[0]`?",
+                options: ["Yes, always", "No, never", "Only if it's ASCII", "Yes, but it returns a byte"],
                 correctIndex: 1,
             },
             {
-                question: "What happens to _BT_s1_BT_ in _BT_let s3 = s1 + &s2;_BT_?".replace(/_BT_/g, '`'),
-                options: [
-                    "It is copied",
-                    "It is borrowed",
-                    "It is moved (ownership transferred)",
-                    "It remains valid",
-                ],
+                question: "What is `String` essentially a wrapper around?",
+                options: ["Vec<char>", "Vec<u8>", "LinkedList<char>", "Box<str>"],
+                correctIndex: 1,
+            },
+            {
+                question: "Which type is growable?",
+                options: ["&str", "str", "String", "char"],
                 correctIndex: 2,
             },
         ],
         objectives: `## Your Mission
 
-Write a function _BT_add_suffix(s: String, suffix: &str) -> String_BT_.
-It should take ownership of the string and append the suffix to it.
+Write a function _BT_make_excited(s: &str) -> String_BT_.
 
-Note: You can use _BT_push_str_BT_ since the string is mutable (you'll need to declare the argument mutably! e.g. _BT_mut s: String_BT_).`.replace(/_BT_/g, '`'),
+1. Convert the input slice to an owned _BT_String_BT_.
+2. Append the string _BT_"!!"_BT_ to it.
+3. Return the result.`.replace(/_BT_/g, '`'),
         test_code: `#[cfg(test)]
 mod tests {
     use super::*;
 
     #[test]
-    fn test_add_suffix() {
-        let s = String::from("hello");
-        let result = add_suffix(s, " world");
-        assert_eq!(result, "hello world");
+    fn test_make_excited() {
+        assert_eq!(make_excited("hello"), "hello!!");
     }
 
     #[test]
-    fn test_add_suffix_empty() {
-        let s = String::from("");
-        let result = add_suffix(s, "test");
-        assert_eq!(result, "test");
+    fn test_make_excited_empty() {
+        assert_eq!(make_excited(""), "!!");
     }
 }`,
-        starter_code: `// Write: add_suffix(mut s: String, suffix: &str) -> String
+        starter_code: `// Write: make_excited(s: &str) -> String
 
 fn main() {
-    let s = String::from("hello");
-    let result = add_suffix(s, " world");
-    println!("{}", result);
+    let s = "hello";
+    let excited = make_excited(s);
+    println!("{}", excited);
 }
 `,
     },
@@ -196,9 +217,9 @@ fn main() {
         environment: "browser",
         content: `# Hash Maps
 
-The type _BT_HashMap<K, V>_BT_ stores a mapping of keys of type _BT_K_BT_ to values of type _BT_V_BT_.
+_BT_HashMap<K, V>_BT_ stores a mapping of keys to values. It uses a **hashing function** to store keys, meaning access is very fast (O(1) on average).
 
-## Creating a Hash Map
+## Creating and Updating
 
 _BT__BT__BT_rust
 use std::collections::HashMap;
@@ -208,69 +229,91 @@ scores.insert(String::from("Blue"), 10);
 scores.insert(String::from("Yellow"), 50);
 _BT__BT__BT_
 
-## Accessing Values
+Note: Like vectors, hash maps store their data on the heap.
+
+## Entry API
+
+A common pattern is "insert if not present". Rust has a beautiful API for this:
 
 _BT__BT__BT_rust
-let team_name = String::from("Blue");
-let score = scores.get(&team_name); // Returns Option<&i32>
+scores.entry(String::from("Blue")).or_insert(50);
 _BT__BT__BT_
 
-## Updating
+This line says: "Get the entry for 'Blue'. If it exists, return a reference to it. If not, insert 50 and return a reference to that."
+
+## Iterating
 
 _BT__BT__BT_rust
-// Overwriting
-scores.insert(String::from("Blue"), 25);
+for (key, value) in &scores {
+    println!("{key}: {value}");
+}
+_BT__BT__BT_
 
-// Inserting only if key has no value
-scores.entry(String::from("Yellow")).or_insert(50);
-_BT__BT__BT_`.replace(/_BT_/g, '`'),
+Iteration order is **arbitrary**! Don't rely on it.
+
+## ⚠️ Common Mistakes
+
+1. **Forgetting to import** — _BT_HashMap_BT_ is not in the prelude. You must _BT_use std::collections::HashMap_BT_.
+2. **Ownership** — For types like String, keys and values are MOVED into the hash map. You can't use them afterwards unless you cloned them.`.replace(/_BT_/g, '`'),
         quiz: [
             {
-                question: "What module must be imported to use HashMap?",
-                options: ["std::io", "std::map", "std::collections::HashMap", "std::prelude"],
+                question: "Is HashMap included in the standard prelude?",
+                options: ["Yes", "No, you must import it", "Only in Rust 2021", "Yes, but under a different name"],
+                correctIndex: 1,
+            },
+            {
+                question: "What happens if you insert a key that already exists?",
+                options: [
+                    "It panics",
+                    "It keeps the old value",
+                    "It overwrites the old value",
+                    "It adds a second entry",
+                ],
                 correctIndex: 2,
             },
             {
-                question: "What does _BT_scores.get(&key)_BT_ return?".replace(/_BT_/g, '`'),
-                options: ["The value directly", "Option<&V>", "Result<V, E>", "bool"],
+                question: "What does `or_insert(v)` do?",
+                options: [
+                    "Inserts v even if key exists",
+                    "Inserts v only if key is MISSING",
+                    "Returns v always",
+                    "Deletes the key",
+                ],
                 correctIndex: 1,
             },
         ],
         objectives: `## Your Mission
 
-Write a function _BT_count_words(text: &str) -> HashMap<String, u32>_BT_.
-It should return a map where keys are words and values are the count of occurrences.
+Write a function _BT_word_frequencies(text: &str) -> HashMap<String, u32>_BT_.
 
-Hint:
-1. Use _BT_text.split_whitespace()_BT_ to iterate over words.
-2. Use _BT_.entry(word.to_string()).or_insert(0)_BT_ to update counts.`.replace(/_BT_/g, '`'),
+1. Convert the text to lowercase.
+2. Split it into words (whitespace).
+3. Count the frequency of each word.
+
+Example: "Hello hello world" -> {"hello": 2, "world": 1}
+
+Hint: Use _BT_.entry(word).or_insert(0)_BT_ and dereference the result to increment it!`.replace(/_BT_/g, '`'),
         test_code: `#[cfg(test)]
 mod tests {
     use super::*;
     use std::collections::HashMap;
 
     #[test]
-    fn test_count_words() {
-        let text = "hello world hello";
-        let map = count_words(text);
+    fn test_word_frequencies() {
+        let text = "Hello hello world";
+        let map = word_frequencies(text);
         assert_eq!(map.get("hello"), Some(&2));
         assert_eq!(map.get("world"), Some(&1));
-    }
-    
-    #[test]
-    fn test_count_words_empty() {
-        let map = count_words("");
-        assert!(map.is_empty());
     }
 }`,
         starter_code: `use std::collections::HashMap;
 
-// Write: count_words(text: &str) -> HashMap<String, u32>
+// Write: word_frequencies(text: &str) -> HashMap<String, u32>
 
 fn main() {
-    let text = "hello world hello";
-    let counts = count_words(text);
-    println!("{:?}", counts);
+    let text = "Hello world hello";
+    let map = word_frequencies(text);
+    println!("{:?}", map);
 }
 `,
     },

@@ -1,24 +1,32 @@
 import { test, expect } from '@playwright/test';
 
-test.describe('Chapter 1: Getting Started', () => {
+test.describe('Chapter 1: Hello, World!', () => {
     test('1.1 Hello, World!', async ({ page }) => {
         await page.goto('/path/the-book/lesson/ch01-01');
 
         // Quiz
         await page.locator('label', { hasText: "It's a macro, not a regular function" }).click();
-        await page.locator('label', { hasText: "main()" }).click();
+        await page.locator('label', { hasText: 'main()' }).click();
+        await page.locator('label', { hasText: 'format! returns a String instead of printing to the console' }).click();
+        await page.locator('label', { hasText: 'println!("hello")' }).nth(1).click();
         await page.click('button:has-text("Check Answers")');
 
         // Coding Challenge
         await page.click('button:has-text("Objectives")');
 
         const rustCode = `fn greet(name: &str) -> String {
-    format!("Hello, {name}!")
+    format!("Hello, {}!", name)
+}
+
+fn farewell(name: &str) -> String {
+    format!("Goodbye, {}!", name)
 }
 
 fn main() {
-    let message = greet("World");
-    println!("{message}");
+    let hello = greet("World");
+    let bye = farewell("World");
+    println!("{hello}");
+    println!("{bye}");
 }`;
 
         await page.evaluate((code) => {
