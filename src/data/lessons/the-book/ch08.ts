@@ -6,6 +6,7 @@ export const ch08Lessons: Lesson[] = [
         chapter: "8.1",
         title: "Vectors",
         sort_order: 60,
+        environment: "browser",
         content: `# Vectors
 
 Vectors (_BT_Vec<T>_BT_) allow you to store more than one value in a single data structure that puts all the values next to each other in memory.
@@ -105,6 +106,7 @@ fn main() {
         chapter: "8.2",
         title: "Strings",
         sort_order: 61,
+        environment: "browser",
         content: `# Strings
 
 Rust has only one string type in the core language: the string slice _BT_str_BT_ (usually seen as borrowed _BT_&str_BT_).
@@ -191,6 +193,7 @@ fn main() {
         chapter: "8.3",
         title: "Hash Maps",
         sort_order: 62,
+        environment: "browser",
         content: `# Hash Maps
 
 The type _BT_HashMap<K, V>_BT_ stores a mapping of keys of type _BT_K_BT_ to values of type _BT_V_BT_.

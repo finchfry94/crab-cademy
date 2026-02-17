@@ -6,6 +6,7 @@ export const ch09Lessons: Lesson[] = [
         chapter: "9.1",
         title: "Unrecoverable Errors with panic!",
         sort_order: 70,
+        environment: "browser",
         content: `# Unrecoverable Errors with panic!
 
 Sometimes bad things happen in your code, and there's nothing you can do about it. In these cases, Rust has the _BT_panic!_BT_ macro.
@@ -83,6 +84,7 @@ fn main() {
         chapter: "9.2",
         title: "Recoverable Errors with Result",
         sort_order: 71,
+        environment: "browser",
         content: `# Recoverable Errors with Result
 
 Most errors aren't serious enough to stop the program entirely. Explicit error handling is done with _BT_Result<T, E>_BT_:

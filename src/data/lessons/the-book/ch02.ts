@@ -6,6 +6,7 @@ export const ch02Lessons: Lesson[] = [
         chapter: "2.1",
         title: "Guessing Game",
         sort_order: 5,
+        environment: "browser",
         content: `# Guessing Game
 
 Let's build a classic "Guessing Game"!

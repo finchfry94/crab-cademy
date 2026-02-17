@@ -33,10 +33,10 @@ watch(
 );
 
 async function handleRun() {
-  if (terminalRef.value) {
+  if (terminalRef.value && currentLesson.value) {
     terminalRef.value.clear();
     terminalRef.value.writeln("\x1b[33mRunning...\x1b[0m");
-    const output = await runCode(code.value);
+    const output = await runCode(code.value, currentLesson.value.environment);
     terminalRef.value.write(colorizeRustOutput(output));
   }
 }
@@ -48,7 +48,7 @@ async function handleRunTests() {
   terminalRef.value.clear();
   terminalRef.value.writeln("\x1b[36m🧪 Running tests...\x1b[0m\n");
 
-  const result = await runTests(code.value, currentLesson.value.test_code);
+  const result = await runTests(code.value, currentLesson.value.test_code, currentLesson.value.environment);
 
   // Show colorized output in terminal
   terminalRef.value.write(colorizeRustOutput(result.rawOutput));

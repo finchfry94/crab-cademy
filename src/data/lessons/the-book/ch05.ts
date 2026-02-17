@@ -6,6 +6,7 @@ export const ch05Lessons: Lesson[] = [
         chapter: "5.1",
         title: "Defining and Using Structs",
         sort_order: 30,
+        environment: "browser",
         content: `# Defining and Using Structs
 
 Structs let you group related data together into a named type.
@@ -138,6 +139,7 @@ fn main() {
         chapter: "5.3",
         title: "Method Syntax",
         sort_order: 32,
+        environment: "browser",
         content: `# Method Syntax
 
 ## Methods vs Functions

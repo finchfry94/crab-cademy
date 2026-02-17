@@ -6,6 +6,7 @@ export const ch03Lessons: Lesson[] = [
         chapter: "3.1",
         title: "Variables and Mutability",
         sort_order: 10,
+        environment: "browser",
         content: `# Variables and Mutability
 
 In Rust, variables are **immutable by default**. This is one of Rust's key safety features.
@@ -117,6 +118,7 @@ fn main() {
         chapter: "3.2",
         title: "Data Types",
         sort_order: 11,
+        environment: "browser",
         content: `# Data Types
 
 Rust is a **statically typed** language — every variable must have a known type at compile time.
@@ -251,6 +253,7 @@ fn main() {
         chapter: "3.3",
         title: "Functions",
         sort_order: 12,
+        environment: "browser",
         content: `# Functions
 
 Functions are defined with _BT_fn_BT_. Rust uses **snake_case** for function names.
@@ -367,6 +370,7 @@ fn main() {
         chapter: "3.5",
         title: "Control Flow",
         sort_order: 14,
+        environment: "browser",
         content: `# Control Flow
 
 ## if Expressions

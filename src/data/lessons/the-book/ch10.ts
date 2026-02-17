@@ -6,6 +6,7 @@ export const ch10Lessons: Lesson[] = [
         chapter: "10.1",
         title: "Generic Data Types",
         sort_order: 80,
+        environment: "browser",
         content: `# Generic Data Types
 
 Generics allow us to create flexible definitions for functions and structs that can work with any data type.
@@ -100,6 +101,7 @@ fn main() {
         chapter: "10.2",
         title: "Traits: Defining Shared Behavior",
         sort_order: 81,
+        environment: "browser",
         content: `# Traits
 
 Traits are similar to **interfaces** in other languages. They define behavior that types can share.
@@ -183,6 +185,7 @@ fn main() {
         chapter: "10.3",
         title: "Validating References with Lifetimes",
         sort_order: 82,
+        environment: "browser",
         content: `# Lifetimes
 
 Lifetimes ensure that references are valid as long as we need them to be.

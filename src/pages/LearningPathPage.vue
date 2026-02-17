@@ -120,7 +120,7 @@ function goBack() {
     </header>
 
     <!-- Lesson Map -->
-    <main class="max-w-4xl mx-auto px-6 pb-20 -mt-4">
+    <main class="max-w-4xl mx-auto px-6 pb-20 mt-8">
       <div class="space-y-6">
         <div
           v-for="chapter in chapters"
@@ -168,6 +168,16 @@ function goBack() {
                     class="text-[10px] font-bold uppercase tracking-wider text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded"
                   >
                     Done
+                  </span>
+                  <span
+                    :class="[
+                      'text-[10px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded',
+                      lesson.environment === 'browser'
+                        ? 'text-emerald-400 bg-emerald-500/10'
+                        : 'text-amber-400 bg-amber-500/10',
+                    ]"
+                  >
+                    {{ lesson.environment === 'browser' ? '🌐 Browser' : '🖥️ Desktop' }}
                   </span>
                 </div>
                 <h3 class="text-sm font-medium text-neutral-200 group-hover/card:text-white transition-colors truncate">

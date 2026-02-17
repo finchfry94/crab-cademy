@@ -6,6 +6,7 @@ export const ch04Lessons: Lesson[] = [
         chapter: "4.1",
         title: "What is Ownership?",
         sort_order: 20,
+        environment: "browser",
         content: `# What is Ownership?
 
 **Ownership** is Rust's most unique feature. It enables memory safety without a garbage collector.
@@ -113,6 +114,7 @@ fn main() {
         chapter: "4.2",
         title: "References and Borrowing",
         sort_order: 21,
+        environment: "browser",
         content: `# References and Borrowing
 
 Instead of transferring ownership, you can **borrow** a value using references.
@@ -225,6 +227,7 @@ fn main() {
         chapter: "4.3",
         title: "The Slice Type",
         sort_order: 22,
+        environment: "browser",
         content: `# The Slice Type
 
 Slices let you reference a **contiguous sequence of elements** in a collection rather than the whole collection.

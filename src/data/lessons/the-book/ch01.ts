@@ -6,6 +6,7 @@ export const ch01Lessons: Lesson[] = [
         chapter: "1.1",
         title: "Hello, World!",
         sort_order: 1,
+        environment: "browser",
         content: `# Hello, World!
 
 Welcome to Rust! In this first lesson, you'll write the classic "Hello, World!" program.

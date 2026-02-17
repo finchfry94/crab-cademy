@@ -3,7 +3,16 @@
  * Supports both running code and running tests with per-test result parsing.
  */
 
+import { invoke } from "@tauri-apps/api/core";
+
 const PLAYGROUND_URL = "https://play.rust-lang.org/execute";
+
+/**
+ * Detect if we are running inside Tauri
+ */
+export function isTauri(): boolean {
+    return !!(window as any).__TAURI_INTERNALS__;
+}
 
 export interface PlaygroundRequest {
     channel: "stable" | "beta" | "nightly";
@@ -34,9 +43,19 @@ export interface TestRunResult {
 }
 
 /**
- * Execute Rust code (no tests).
+ * Execute Rust code. Uses Tauri if running locally and requested, otherwise uses Playground.
  */
-export async function executeRustCode(code: string): Promise<string> {
+export async function executeRustCode(code: string, environment: "browser" | "desktop" = "browser"): Promise<string> {
+    if (environment === "desktop" && isTauri()) {
+        try {
+            // Desktop environment in Tauri: Run natively without sandbox
+            return await invoke<string>("run_code", { code, useSandbox: false });
+        } catch (e: any) {
+            return `Tauri Error: ${e.message || e.toString()}`;
+        }
+    }
+
+    // Default: Playground API
     const request: PlaygroundRequest = {
         channel: "stable",
         mode: "debug",
@@ -75,14 +94,37 @@ export async function executeRustCode(code: string): Promise<string> {
 }
 
 /**
- * Run user code combined with test code through the Playground API in test mode.
- * Parses individual test results from cargo test output.
+ * Run user code combined with test code. 
+ * Routes through Tauri if in desktop environment, otherwise Playground.
  */
-export async function runTests(userCode: string, testCode: string): Promise<TestRunResult> {
-    // Combine user code with test code.
-    // The test code should contain #[cfg(test)] mod tests { ... }
+export async function runTests(
+    userCode: string,
+    testCode: string,
+    environment: "browser" | "desktop" = "browser"
+): Promise<TestRunResult> {
     const combinedCode = `${userCode}\n\n${testCode}`;
 
+    if (environment === "desktop" && isTauri()) {
+        try {
+            const rawOutput = await invoke<string>("run_code", { code: combinedCode, useSandbox: false });
+            const testResults = parseTestOutput(rawOutput);
+
+            return {
+                results: testResults,
+                // For local execution, we look for "ok" in the summary or individual results
+                allPassed: !rawOutput.toLowerCase().includes("failed") && testResults.length > 0 && testResults.every((t) => t.passed),
+                rawOutput,
+            };
+        } catch (e: any) {
+            return {
+                results: [],
+                allPassed: false,
+                rawOutput: `Tauri Error: ${e.message || e.toString()}`,
+            };
+        }
+    }
+
+    // Default: Playground API
     const request: PlaygroundRequest = {
         channel: "stable",
         mode: "debug",
@@ -110,10 +152,6 @@ export async function runTests(userCode: string, testCode: string): Promise<Test
 
         const result: PlaygroundResponse = await response.json();
         const rawOutput = (result.stdout || "") + (result.stderr || "");
-
-        // Parse cargo test output for lines like:
-        // "test tests::test_name ... ok"
-        // "test tests::test_name ... FAILED"
         const testResults = parseTestOutput(rawOutput);
 
         return {

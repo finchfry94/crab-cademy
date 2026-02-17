@@ -6,6 +6,7 @@ export const ch07Lessons: Lesson[] = [
         chapter: "7.1",
         title: "Packages and Crates",
         sort_order: 50,
+        environment: "browser",
         content: `# Packages and Crates
 
 As your project grows, you need to organize your code.
@@ -72,6 +73,7 @@ fn main() {
         chapter: "7.2",
         title: "Defining Modules",
         sort_order: 51,
+        environment: "browser",
         content: `# Defining Modules
 
 **Modules** let you organize code within a crate for readability and easy reuse. They also control the **privacy** of items (public vs private).
@@ -152,6 +154,7 @@ fn main() {
         chapter: "7.3",
         title: "Paths for Referring to an Item",
         sort_order: 52,
+        environment: "browser",
         content: `# Paths
 
 To show Rust where to find an item in a module tree, we use a **path**.

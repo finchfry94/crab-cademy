@@ -9,6 +9,17 @@ import { ch07Lessons } from "./ch07";
 import { ch08Lessons } from "./ch08";
 import { ch09Lessons } from "./ch09";
 import { ch10Lessons } from "./ch10";
+import { ch11Lessons } from "./ch11";
+import { ch12Lessons } from "./ch12";
+import { ch13Lessons } from "./ch13";
+import { ch14Lessons } from "./ch14";
+import { ch15Lessons } from "./ch15";
+import { ch16Lessons } from "./ch16";
+import { ch17Lessons } from "./ch17";
+import { ch18Lessons } from "./ch18";
+import { ch19Lessons } from "./ch19";
+import { ch20Lessons } from "./ch20";
+import { ch21Lessons } from "./ch21";
 
 export const path: LearningPath = {
     id: "the-book",
@@ -30,4 +41,15 @@ export const lessons: Lesson[] = [
     ...ch08Lessons,
     ...ch09Lessons,
     ...ch10Lessons,
+    ...ch11Lessons,
+    ...ch12Lessons,
+    ...ch13Lessons,
+    ...ch14Lessons,
+    ...ch15Lessons,
+    ...ch16Lessons,
+    ...ch17Lessons,
+    ...ch18Lessons,
+    ...ch19Lessons,
+    ...ch20Lessons,
+    ...ch21Lessons,
 ];

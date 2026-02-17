@@ -6,13 +6,13 @@ export function useCodeRunner() {
     const result = ref<string>('');
     const error = ref<string | null>(null);
 
-    async function runCode(code: string) {
+    async function runCode(code: string, environment: "browser" | "desktop" = "browser") {
         isRunning.value = true;
         error.value = null;
         result.value = '';
 
         try {
-            const output = await executeRustCode(code);
+            const output = await executeRustCode(code, environment);
             result.value = output;
             return output;
         } catch (e: any) {

@@ -3,6 +3,7 @@ import { ref } from "vue";
 import { useRouter } from "vue-router";
 import { getAllPaths, getPathLessons, type LearningPath } from "../data/lessons";
 import { BookOpen, ChevronRight, Clock, Sparkles } from "lucide-vue-next";
+import CrabCademyIcon from "../components/icons/CrabCademyIcon.vue";
 
 const router = useRouter();
 
@@ -42,9 +43,7 @@ function navigateToPath(path: LearningPath) {
       <div class="absolute inset-0 bg-gradient-to-br from-orange-600/20 via-neutral-950 to-red-900/10"></div>
       <div class="relative max-w-5xl mx-auto px-6 py-16 text-center">
         <div class="flex items-center justify-center gap-3 mb-4">
-          <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center shadow-lg shadow-orange-500/25">
-            <span class="text-3xl">🦀</span>
-          </div>
+          <CrabCademyIcon :size="100" />
         </div>
         <h1 class="text-5xl font-extrabold tracking-tight mb-3">
           <span class="bg-gradient-to-r from-orange-400 via-orange-300 to-red-400 bg-clip-text text-transparent">CrabCademy</span>
@@ -57,7 +56,7 @@ function navigateToPath(path: LearningPath) {
     </header>
 
     <!-- Learning Path Cards -->
-    <main class="max-w-4xl mx-auto px-6 pb-20 -mt-4">
+    <main class="max-w-4xl mx-auto px-6 pb-20 mt-8">
       <h2 class="text-xl font-semibold text-neutral-200 mb-6">Learning Paths</h2>
       <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <button

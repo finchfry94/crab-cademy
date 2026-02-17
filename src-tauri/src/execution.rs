@@ -113,11 +113,13 @@ fn validate_code(code: &str) -> Result<(), String> {
     }
 }
 
-/// Execute Rust code with soft sandbox validation
-pub fn execute_rust_code(code: &str) -> String {
-    // Step 1: Validate code for security violations
-    if let Err(e) = validate_code(code) {
-        return format!("🛡️ Sandbox Violation:\n{}", e);
+/// Execute Rust code with optional sandbox validation
+pub fn execute_rust_code(code: &str, use_sandbox: bool) -> String {
+    // Step 1: Validate code for security violations if requested
+    if use_sandbox {
+        if let Err(e) = validate_code(code) {
+            return format!("🛡️ Sandbox Violation:\n{}", e);
+        }
     }
 
     // Step 2: Create temp directory

@@ -6,6 +6,7 @@ export const ch06Lessons: Lesson[] = [
         chapter: "6.1",
         title: "Defining Enums",
         sort_order: 40,
+        environment: "browser",
         content: `# Defining Enums
 
 Enums (enumerations) allow you to define a type by enumerating its possible variants.
@@ -103,6 +104,7 @@ fn main() {
         chapter: "6.2",
         title: "The Match Control Flow",
         sort_order: 41,
+        environment: "browser",
         content: `# The Match Control Flow
 
 Constructs like _BT_match_BT_ are extremely powerful in Rust. _BT_match_BT_ allows you to compare a value against a series of patterns and then execute code based on which pattern matches.
@@ -199,6 +201,7 @@ fn main() {
         chapter: "6.3",
         title: "Concise Control Flow with if let",
         sort_order: 42,
+        environment: "browser",
         content: `# Concise Control Flow with if let
 
 The _BT_if let_BT_ syntax lets you combine _BT_if_BT_ and _BT_let_BT_ into a less verbose way to handle values that match one pattern while ignoring the rest.
