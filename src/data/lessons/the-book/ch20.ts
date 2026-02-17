@@ -5,7 +5,7 @@ export const ch20Lessons: Lesson[] = [
         id: "ch20-01",
         chapter: "20.1",
         title: "Unsafe Rust",
-        sort_order: 180,
+        sort_order: 200,
         environment: "browser",
         content: `# Unsafe Rust
 
@@ -61,7 +61,7 @@ mod tests {
         id: "ch20-05",
         chapter: "20.5",
         title: "Macros",
-        sort_order: 184,
+        sort_order: 201,
         environment: "desktop",
         content: `# Macros
 

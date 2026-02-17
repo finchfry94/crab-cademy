@@ -5,7 +5,7 @@ export const ch11Lessons: Lesson[] = [
         id: "ch11-01",
         chapter: "11.1",
         title: "How to Write Tests",
-        sort_order: 90,
+        sort_order: 110,
         environment: "browser",
         content: `# How to Write Tests
 
@@ -78,7 +78,7 @@ fn main() {}
         id: "ch11-02",
         chapter: "11.2",
         title: "Controlling How Tests Are Run",
-        sort_order: 91,
+        sort_order: 111,
         environment: "desktop",
         content: `# Controlling How Tests Are Run
 
@@ -140,7 +140,7 @@ fn main() {}
         id: "ch11-03",
         chapter: "11.3",
         title: "Test Organization",
-        sort_order: 92,
+        sort_order: 112,
         environment: "desktop",
         content: `# Test Organization
 

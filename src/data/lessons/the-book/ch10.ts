@@ -5,7 +5,7 @@ export const ch10Lessons: Lesson[] = [
         id: "ch10-01",
         chapter: "10.1",
         title: "Generic Data Types",
-        sort_order: 80,
+        sort_order: 100,
         environment: "browser",
         content: `# Generic Data Types
 
@@ -100,7 +100,7 @@ fn main() {
         id: "ch10-02",
         chapter: "10.2",
         title: "Traits: Defining Shared Behavior",
-        sort_order: 81,
+        sort_order: 101,
         environment: "browser",
         content: `# Traits
 
@@ -184,7 +184,7 @@ fn main() {
         id: "ch10-03",
         chapter: "10.3",
         title: "Validating References with Lifetimes",
-        sort_order: 82,
+        sort_order: 102,
         environment: "browser",
         content: `# Lifetimes
 

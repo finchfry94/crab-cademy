@@ -5,7 +5,7 @@ export const ch08Lessons: Lesson[] = [
         id: "ch08-01",
         chapter: "8.1",
         title: "Vectors",
-        sort_order: 60,
+        sort_order: 80,
         environment: "browser",
         content: `# Vectors
 
@@ -115,7 +115,7 @@ fn main() {
         id: "ch08-02",
         chapter: "8.2",
         title: "Strings",
-        sort_order: 61,
+        sort_order: 81,
         environment: "browser",
         content: `# Strings
 
@@ -213,7 +213,7 @@ fn main() {
         id: "ch08-03",
         chapter: "8.3",
         title: "Hash Maps",
-        sort_order: 62,
+        sort_order: 82,
         environment: "browser",
         content: `# Hash Maps
 

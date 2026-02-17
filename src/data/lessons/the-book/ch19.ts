@@ -5,7 +5,7 @@ export const ch19Lessons: Lesson[] = [
         id: "ch19-03",
         chapter: "19.3",
         title: "Pattern Syntax",
-        sort_order: 172,
+        sort_order: 190,
         environment: "browser",
         content: `# Pattern Syntax
 

@@ -5,7 +5,7 @@ export const ch15Lessons: Lesson[] = [
         id: "ch15-01",
         chapter: "15.1",
         title: "Using Box<T> to Point to Data on the Heap",
-        sort_order: 130,
+        sort_order: 150,
         environment: "browser",
         content: `# Box<T>
 
@@ -50,7 +50,7 @@ mod tests {
         id: "ch15-04",
         chapter: "15.4",
         title: "Rc<T>, the Reference Counted Smart Pointer",
-        sort_order: 133,
+        sort_order: 151,
         environment: "browser",
         content: `# Rc<T>
 
@@ -103,7 +103,7 @@ fn main() {
         id: "ch15-05",
         chapter: "15.5",
         title: "RefCell<T> and Interior Mutability",
-        sort_order: 134,
+        sort_order: 152,
         environment: "browser",
         content: `# RefCell<T>
 

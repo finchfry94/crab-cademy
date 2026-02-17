@@ -5,7 +5,7 @@ export const ch04Lessons: Lesson[] = [
         id: "ch04-01",
         chapter: "4.1",
         title: "What is Ownership?",
-        sort_order: 20,
+        sort_order: 40,
         environment: "browser",
         content: `# What is Ownership?
 
@@ -201,7 +201,7 @@ fn main() {
         id: "ch04-02",
         chapter: "4.2",
         title: "References and Borrowing",
-        sort_order: 21,
+        sort_order: 41,
         environment: "browser",
         content: `# References and Borrowing
 
@@ -387,7 +387,7 @@ fn main() {
         id: "ch04-03",
         chapter: "4.3",
         title: "The Slice Type",
-        sort_order: 22,
+        sort_order: 42,
         environment: "browser",
         content: `# The Slice Type
 

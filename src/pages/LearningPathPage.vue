@@ -30,8 +30,8 @@ const chapters = computed<Chapter[]>(() => {
 
   const chapterTitles: Record<string, string> = {
     "1": "Getting Started",
-    "2": "Programming a Guessing Game",
-    "3": "Common Programming Concepts",
+    "2": "Common Programming Concepts",
+    "3": "Programming a Guessing Game",
     "4": "Understanding Ownership",
     "5": "Using Structs",
     "6": "Enums and Pattern Matching",

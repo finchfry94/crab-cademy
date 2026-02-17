@@ -5,7 +5,7 @@ export const ch18Lessons: Lesson[] = [
         id: "ch18-02",
         chapter: "18.2",
         title: "Using Trait Objects for Different Types",
-        sort_order: 161,
+        sort_order: 180,
         environment: "browser",
         content: `# Trait Objects
 

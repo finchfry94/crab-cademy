@@ -5,7 +5,7 @@ export const ch13Lessons: Lesson[] = [
         id: "ch13-01",
         chapter: "13.1",
         title: "Closures",
-        sort_order: 110,
+        sort_order: 130,
         environment: "browser",
         content: `# Closures
 
@@ -74,7 +74,7 @@ mod tests {
         id: "ch13-02",
         chapter: "13.2",
         title: "Processing a Series of Items with Iterators",
-        sort_order: 111,
+        sort_order: 131,
         environment: "browser",
         content: `# Iterators
 

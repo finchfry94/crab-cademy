@@ -5,7 +5,7 @@ export const ch07Lessons: Lesson[] = [
         id: "ch07-01",
         chapter: "7.1",
         title: "Packages and Crates",
-        sort_order: 50,
+        sort_order: 70,
         environment: "browser",
         content: `# Packages and Crates
 
@@ -74,7 +74,7 @@ fn main() {
         id: "ch07-02",
         chapter: "7.2",
         title: "Defining Modules and Control Visibility",
-        sort_order: 51,
+        sort_order: 71,
         environment: "browser",
         content: `# Modules and Visibility
 
@@ -178,7 +178,7 @@ fn main() {
         id: "ch07-03",
         chapter: "7.3",
         title: "Paths and use",
-        sort_order: 52,
+        sort_order: 72,
         environment: "browser",
         content: `# Paths and use
 

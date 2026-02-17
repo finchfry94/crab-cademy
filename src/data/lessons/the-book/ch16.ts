@@ -5,7 +5,7 @@ export const ch16Lessons: Lesson[] = [
         id: "ch16-01",
         chapter: "16.1",
         title: "Using Threads to Run Code Simultaneously",
-        sort_order: 140,
+        sort_order: 160,
         environment: "desktop",
         content: `# Threads
 
@@ -79,7 +79,7 @@ fn main() {
         id: "ch16-02",
         chapter: "16.2",
         title: "Message Passing with Channels",
-        sort_order: 141,
+        sort_order: 161,
         environment: "desktop",
         content: `# Channels
 

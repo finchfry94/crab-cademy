@@ -5,7 +5,7 @@ export const ch05Lessons: Lesson[] = [
         id: "ch05-01",
         chapter: "5.1",
         title: "Defining and Instantiating Structs",
-        sort_order: 30,
+        sort_order: 50,
         environment: "browser",
         content: `# Defining and Instantiating Structs
 
@@ -154,7 +154,7 @@ fn main() {
         id: "ch05-03",
         chapter: "5.3",
         title: "Method Syntax",
-        sort_order: 32,
+        sort_order: 52,
         environment: "browser",
         content: `# Method Syntax
 

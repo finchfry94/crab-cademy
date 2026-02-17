@@ -5,7 +5,7 @@ export const ch09Lessons: Lesson[] = [
         id: "ch09-01",
         chapter: "9.1",
         title: "Unrecoverable Errors with panic!",
-        sort_order: 70,
+        sort_order: 90,
         environment: "browser",
         content: `# Unrecoverable Errors
 
@@ -101,7 +101,7 @@ fn main() {
         id: "ch09-02",
         chapter: "9.2",
         title: "Recoverable Errors with Result",
-        sort_order: 71,
+        sort_order: 91,
         environment: "browser",
         content: `# Recoverable Errors with Result
 

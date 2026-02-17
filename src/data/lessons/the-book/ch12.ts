@@ -5,7 +5,7 @@ export const ch12Lessons: Lesson[] = [
         id: "ch12-01",
         chapter: "12.1",
         title: "Accepting Command Line Arguments",
-        sort_order: 100,
+        sort_order: 120,
         environment: "desktop",
         content: `# Accepting Command Line Arguments
 
@@ -70,7 +70,7 @@ fn main() {
         id: "ch12-02",
         chapter: "12.2",
         title: "Reading a File",
-        sort_order: 101,
+        sort_order: 121,
         environment: "desktop",
         content: `# Reading a File
 
@@ -118,7 +118,7 @@ fn main() {
         id: "ch12-04",
         chapter: "12.4",
         title: "Developing with TDD",
-        sort_order: 103,
+        sort_order: 122,
         environment: "browser",
         content: `# Test-Driven Development (TDD)
 

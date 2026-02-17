@@ -5,7 +5,7 @@ export const ch21Lessons: Lesson[] = [
         id: "ch21-01",
         chapter: "21.1",
         title: "Building a Single-Threaded Web Server",
-        sort_order: 190,
+        sort_order: 210,
         environment: "desktop",
         content: `# Building a Web Server
 

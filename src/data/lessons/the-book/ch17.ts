@@ -5,7 +5,7 @@ export const ch17Lessons: Lesson[] = [
         id: "ch17-01",
         chapter: "17.1",
         title: "Futures and the Async Syntax",
-        sort_order: 150,
+        sort_order: 170,
         environment: "desktop",
         content: `# Async / Await
 

@@ -5,7 +5,7 @@ export const ch14Lessons: Lesson[] = [
         id: "ch14-01",
         chapter: "14.1",
         title: "Customizing Builds with Release Profiles",
-        sort_order: 120,
+        sort_order: 140,
         environment: "desktop",
         content: `# Customizing Builds with Release Profiles
 
@@ -55,7 +55,7 @@ opt-level = 1
         id: "ch14-03",
         chapter: "14.3",
         title: "Cargo Workspaces",
-        sort_order: 122,
+        sort_order: 141,
         environment: "desktop",
         content: `# Cargo Workspaces
 

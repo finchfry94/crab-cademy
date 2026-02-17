@@ -5,7 +5,7 @@ export const ch06Lessons: Lesson[] = [
         id: "ch06-01",
         chapter: "6.1",
         title: "Defining Enums",
-        sort_order: 40,
+        sort_order: 60,
         environment: "browser",
         content: `# Defining Enums
 
@@ -139,7 +139,7 @@ fn main() {
         id: "ch06-02",
         chapter: "6.2",
         title: "The Match Control Flow",
-        sort_order: 41,
+        sort_order: 61,
         environment: "browser",
         content: `# The Match Control Flow
 
@@ -279,7 +279,7 @@ fn main() {
         id: "ch06-03",
         chapter: "6.3",
         title: "Concise Control Flow with if let",
-        sort_order: 42,
+        sort_order: 62,
         environment: "browser",
         content: `# Concise Control Flow with if let
 
