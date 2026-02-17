@@ -1,39 +1,43 @@
-import { Lesson, QuizQuestion } from "./types";
-import { ch01Lessons } from "./lessons/ch01";
-import { ch02Lessons } from "./lessons/ch02";
-import { ch03Lessons } from "./lessons/ch03";
-import { ch04Lessons } from "./lessons/ch04";
-import { ch05Lessons } from "./lessons/ch05";
-import { ch06Lessons } from "./lessons/ch06";
-import { ch07Lessons } from "./lessons/ch07";
-import { ch08Lessons } from "./lessons/ch08";
-import { ch09Lessons } from "./lessons/ch09";
-import { ch10Lessons } from "./lessons/ch10";
+import { LearningPath, Lesson, QuizQuestion } from "./types";
 
-export type { Lesson, QuizQuestion };
+import * as theBook from "./lessons/the-book/index";
+import * as reqwest from "./lessons/reqwest/index";
+import * as plotters from "./lessons/plotters/index";
 
-const lessons: Lesson[] = [
-    ...ch01Lessons,
-    ...ch02Lessons,
-    ...ch03Lessons,
-    ...ch04Lessons,
-    ...ch05Lessons,
-    ...ch06Lessons,
-    ...ch07Lessons,
-    ...ch08Lessons,
-    ...ch09Lessons,
-    ...ch10Lessons,
-];
+export type { Lesson, QuizQuestion, LearningPath };
 
-export function getAllLessons(): Lesson[] {
-    return [...lessons].sort((a, b) => a.sort_order - b.sort_order);
+interface PathModule {
+    path: LearningPath;
+    lessons: Lesson[];
 }
 
-export function getLesson(id: string): Lesson | null {
-    return lessons.find((l) => l.id === id) || null;
+const registry: PathModule[] = [theBook, reqwest, plotters];
+
+/** All registered learning paths */
+export function getAllPaths(): LearningPath[] {
+    return registry.map((m) => m.path);
 }
 
-export function getFirstLesson(): Lesson | null {
-    const sorted = getAllLessons();
-    return sorted[0] || null;
+/** Sorted lessons for a specific learning path */
+export function getPathLessons(pathId: string): Lesson[] {
+    const mod = registry.find((m) => m.path.id === pathId);
+    if (!mod) return [];
+    return [...mod.lessons].sort((a, b) => a.sort_order - b.sort_order);
+}
+
+/** Find a learning path by its ID */
+export function getPath(pathId: string): LearningPath | null {
+    return registry.find((m) => m.path.id === pathId)?.path ?? null;
+}
+
+/** Find a single lesson within a learning path */
+export function getLesson(pathId: string, lessonId: string): Lesson | null {
+    const lessons = getPathLessons(pathId);
+    return lessons.find((l) => l.id === lessonId) || null;
+}
+
+/** First lesson in a learning path (by sort_order) */
+export function getFirstLesson(pathId: string): Lesson | null {
+    const lessons = getPathLessons(pathId);
+    return lessons[0] || null;
 }

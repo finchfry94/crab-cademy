@@ -15,3 +15,11 @@ export interface Lesson {
     starter_code: string;
     sort_order: number;
 }
+
+export interface LearningPath {
+    id: string;
+    title: string;
+    description: string;
+    icon: string;
+    color: string; // Tailwind gradient classes, e.g. "from-orange-500 to-red-600"
+}

@@ -21,10 +21,10 @@ export function useLessonState() {
         testResults.value.length > 0 && testResults.value.every((t) => t.passed)
     );
 
-    async function loadLesson() {
+    async function loadLesson(pathId: string) {
         isLoading.value = true;
         try {
-            currentLesson.value = getFirstLesson();
+            currentLesson.value = getFirstLesson(pathId);
             if (currentLesson.value) {
                 progress.value = await getProgress(currentLesson.value.id);
             }
@@ -35,7 +35,7 @@ export function useLessonState() {
         }
     }
 
-    async function loadLessonById(id: string) {
+    async function loadLessonById(pathId: string, id: string) {
         isLoading.value = true;
         activeTab.value = "lesson";
         quizCompleted.value = false;
@@ -43,7 +43,7 @@ export function useLessonState() {
         testResults.value = [];
         hasRunTests.value = false;
         try {
-            currentLesson.value = getLesson(id);
+            currentLesson.value = getLesson(pathId, id);
             if (currentLesson.value) {
                 progress.value = await getProgress(currentLesson.value.id);
             }

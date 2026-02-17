@@ -1,15 +1,22 @@
 import { createRouter, createWebHistory } from "vue-router";
-import HomePage from "../pages/HomePage.vue";
+import LandingPage from "../pages/LandingPage.vue";
+import LearningPathPage from "../pages/LearningPathPage.vue";
 import LessonPage from "../pages/LessonPage.vue";
 
 const routes = [
     {
         path: "/",
-        name: "home",
-        component: HomePage,
+        name: "landing",
+        component: LandingPage,
     },
     {
-        path: "/lesson/:id",
+        path: "/path/:pathId",
+        name: "learningPath",
+        component: LearningPathPage,
+        props: true,
+    },
+    {
+        path: "/path/:pathId/lesson/:id",
         name: "lesson",
         component: LessonPage,
         props: true,

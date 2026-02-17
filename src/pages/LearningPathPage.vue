@@ -1,26 +1,26 @@
 <script setup lang="ts">
 import { computed, ref } from "vue";
 import { useRouter } from "vue-router";
-import { getAllLessons } from "../data/lessons";
+import { getPathLessons, getPath } from "../data/lessons";
 import { resetLesson } from "../services/progressStore";
-import { BookOpen, CheckCircle, ChevronRight, RotateCcw } from "lucide-vue-next";
+import { ArrowLeft, BookOpen, CheckCircle, ChevronRight, RotateCcw } from "lucide-vue-next";
 
+const props = defineProps<{ pathId: string }>();
 const router = useRouter();
 
-// Get all lessons and group by chapter prefix
-const lessons = getAllLessons();
+const pathMeta = computed(() => getPath(props.pathId));
+const lessons = computed(() => getPathLessons(props.pathId));
 
 interface Chapter {
   id: string;
   title: string;
-  lessons: typeof lessons;
+  lessons: ReturnType<typeof getPathLessons>;
 }
 
 const chapters = computed<Chapter[]>(() => {
-  const chapterMap = new Map<string, typeof lessons>();
+  const chapterMap = new Map<string, ReturnType<typeof getPathLessons>>();
 
-  for (const lesson of lessons) {
-    // Group by first digit of chapter (e.g. "1.1" → "1", "3.2" → "3")
+  for (const lesson of lessons.value) {
     const chapterNum = lesson.chapter.split(".")[0];
     if (!chapterMap.has(chapterNum)) {
       chapterMap.set(chapterNum, []);
@@ -70,7 +70,7 @@ function completedCount(chapter: Chapter): number {
 }
 
 function navigateToLesson(lessonId: string) {
-  router.push({ name: "lesson", params: { id: lessonId } });
+  router.push({ name: "lesson", params: { pathId: props.pathId, id: lessonId } });
 }
 
 function resetLessonProgress(event: Event, lessonId: string) {
@@ -78,27 +78,43 @@ function resetLessonProgress(event: Event, lessonId: string) {
   resetLesson(lessonId);
   progressVersion.value++;
 }
+
+function goBack() {
+  router.push({ name: "landing" });
+}
 </script>
 
 <template>
   <div class="min-h-screen bg-neutral-950 text-white">
-    <!-- Hero Section -->
+    <!-- Path Header -->
     <header class="relative overflow-hidden">
       <div class="absolute inset-0 bg-gradient-to-br from-orange-600/20 via-neutral-950 to-red-900/10"></div>
-      <div class="relative max-w-5xl mx-auto px-6 py-16 text-center">
-        <div class="flex items-center justify-center gap-3 mb-4">
-          <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center shadow-lg shadow-orange-500/25">
-            <span class="text-3xl">🦀</span>
+      <div class="relative max-w-5xl mx-auto px-6 py-12 text-center">
+        <button
+          @click="goBack"
+          class="absolute left-6 top-6 flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-neutral-400 hover:text-orange-400 bg-neutral-900/80 hover:bg-neutral-800 rounded-lg border border-neutral-800 hover:border-orange-500/40 transition-all duration-200"
+        >
+          <ArrowLeft class="w-3.5 h-3.5" />
+          All Paths
+        </button>
+
+        <div class="flex items-center justify-center gap-3 mb-4" v-if="pathMeta">
+          <div
+            :class="[
+              'w-14 h-14 rounded-2xl bg-gradient-to-br flex items-center justify-center shadow-lg shadow-orange-500/25',
+              pathMeta.color,
+            ]"
+          >
+            <span class="text-3xl">{{ pathMeta.icon }}</span>
           </div>
         </div>
-        <h1 class="text-5xl font-extrabold tracking-tight mb-3">
-          <span class="bg-gradient-to-r from-orange-400 via-orange-300 to-red-400 bg-clip-text text-transparent">CrabCademy</span>
+        <h1 class="text-4xl font-extrabold tracking-tight mb-2">
+          <span class="bg-gradient-to-r from-orange-400 via-orange-300 to-red-400 bg-clip-text text-transparent">
+            {{ pathMeta?.title ?? "Learning Path" }}
+          </span>
         </h1>
-        <p class="text-lg text-neutral-400 max-w-xl mx-auto leading-relaxed">
-          Learn Rust interactively — inspired by
-          <span class="text-orange-400 font-medium">The Rust Book</span> and
-          <span class="text-orange-400 font-medium">Rustlings</span>.
-          Write and run real Rust code right in your browser.
+        <p class="text-base text-neutral-400 max-w-xl mx-auto leading-relaxed">
+          {{ pathMeta?.description }}
         </p>
       </div>
     </header>

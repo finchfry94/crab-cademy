@@ -11,7 +11,7 @@ import { markCompleted } from "../services/progressStore";
 import { runTests, colorizeRustOutput } from "../services/codeRunner";
 import { Play, FlaskConical, ArrowLeft } from "lucide-vue-next";
 
-const props = defineProps<{ id: string }>();
+const props = defineProps<{ pathId: string; id: string }>();
 const router = useRouter();
 
 const { runCode, isRunning } = useCodeRunner();
@@ -24,7 +24,7 @@ const isTestRunning = ref(false);
 watch(
   () => props.id,
   async (newId) => {
-    await loadLessonById(newId);
+    await loadLessonById(props.pathId, newId);
     if (currentLesson.value) {
       code.value = currentLesson.value.starter_code;
     }
@@ -75,7 +75,7 @@ async function handleRunTests() {
 }
 
 function goHome() {
-  router.push({ name: "home" });
+  router.push({ name: "learningPath", params: { pathId: props.pathId } });
 }
 </script>
 

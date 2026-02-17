@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test';
 test.describe('Lesson 1.1: Hello, World!', () => {
     test('completes the quiz and passes the coding challenge', async ({ page }) => {
         // 1. Navigate to the lesson
-        await page.goto('/lesson/ch01-01');
+        await page.goto('/path/the-book/lesson/ch01-01');
 
         // 2. Complete the quiz
         // Question 1: What does the ! in println! indicate?
