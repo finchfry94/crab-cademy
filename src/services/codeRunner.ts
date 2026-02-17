@@ -111,8 +111,8 @@ export async function runTests(
 
             return {
                 results: testResults,
-                // For local execution, we look for "ok" in the summary or individual results
-                allPassed: !rawOutput.toLowerCase().includes("failed") && testResults.length > 0 && testResults.every((t) => t.passed),
+                // For local execution, we rely on parsed results if available
+                allPassed: testResults.length > 0 ? testResults.every((t) => t.passed) : !rawOutput.toLowerCase().includes("failed"),
                 rawOutput,
             };
         } catch (e: any) {

@@ -1,8 +1,8 @@
 import { test, expect } from '@playwright/test';
 
-test.describe('Chapter 3: Common Programming Concepts', () => {
-    test('3.1 Variables and Mutability', async ({ page }) => {
-        await page.goto('/path/the-book/lesson/ch03-01');
+test.describe('Chapter 2: Common Programming Concepts', () => {
+    test('2.1 Variables and Mutability', async ({ page }) => {
+        await page.goto('/path/the-book/lesson/ch02-01');
 
         // Quiz
         await page.locator('label', { hasText: 'Immutable by default' }).click();
@@ -43,8 +43,8 @@ fn main() {
         await expect(page.locator('button:has-text("Objectives")')).toContainText('ALL PASS');
     });
 
-    test('3.2 Data Types', async ({ page }) => {
-        await page.goto('/path/the-book/lesson/ch03-02');
+    test('2.2 Data Types', async ({ page }) => {
+        await page.goto('/path/the-book/lesson/ch02-02');
 
         // Quiz
         await page.locator('label', { hasText: 'i32' }).click();
@@ -92,8 +92,8 @@ fn main() {
         await expect(page.locator('button:has-text("Objectives")')).toContainText('ALL PASS');
     });
 
-    test('3.3 Functions', async ({ page }) => {
-        await page.goto('/path/the-book/lesson/ch03-03');
+    test('2.3 Functions', async ({ page }) => {
+        await page.goto('/path/the-book/lesson/ch02-03');
 
         // Quiz
         await page.locator('label', { hasText: 'snake_case' }).click();
@@ -135,8 +135,8 @@ fn main() {
         await expect(page.locator('button:has-text("Objectives")')).toContainText('ALL PASS');
     });
 
-    test('3.4 Comments', async ({ page }) => {
-        await page.goto('/path/the-book/lesson/ch03-04');
+    test('2.4 Comments', async ({ page }) => {
+        await page.goto('/path/the-book/lesson/ch02-04');
 
         // Quiz
         await page.locator('label', { hasText: '///' }).click();
@@ -177,8 +177,8 @@ fn main() {
         await expect(page.locator('button:has-text("Objectives")')).toContainText('ALL PASS');
     });
 
-    test('3.5 Control Flow', async ({ page }) => {
-        await page.goto('/path/the-book/lesson/ch03-05');
+    test('2.5 Control Flow', async ({ page }) => {
+        await page.goto('/path/the-book/lesson/ch02-05');
 
         // Quiz
         await page.locator('label', { hasText: "It's an expression that returns a value" }).click();

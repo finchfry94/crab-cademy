@@ -8,29 +8,6 @@ export const ch02Lessons: Lesson[] = [
         sort_order: 20,
         environment: "browser",
         content: `# Variables and Mutability
-... (rest of content) ...
-`,
-// I will need to be careful with the replace here to not miss anything or mess up the large file.
-// Since the file is large (777 lines), I should probably use `sed` or just replace the specific lines that define the IDs and Chapters?
-// Actually, `replace_file_content` with `AllowMultiple` for the IDs strings might be safer than a huge block replacement if I don't want to pass 700 lines.
-// But the prompt says "Replace all occurrences".
-// Let's look at the file content again.
-// ch03Lessons -> ch02Lessons
-// ch03-01 -> ch02-01
-// 3.1 -> 2.1
-// sort_order: 11 -> sort_order: 20
-// ch03-02 -> ch02-02
-// 3.2 -> 2.2
-// sort_order: 12 -> sort_order: 21
-// ... and so on.
-
-    {
-        id: "ch03-01",
-        chapter: "3.1",
-        title: "Variables and Mutability",
-        sort_order: 11,
-        environment: "browser",
-        content: `# Variables and Mutability
 
 In most languages, variables are mutable by default — you can change them anytime. Rust flips this: **variables are immutable by default**. This is a deliberate design choice that makes your code safer and easier to reason about.
 
@@ -177,10 +154,10 @@ fn main() {
 `,
     },
     {
-        id: "ch03-02",
-        chapter: "3.2",
+        id: "ch02-02",
+        chapter: "2.2",
         title: "Data Types",
-        sort_order: 12,
+        sort_order: 21,
         environment: "browser",
         content: `# Data Types
 
@@ -341,10 +318,10 @@ fn main() {
 `,
     },
     {
-        id: "ch03-03",
-        chapter: "3.3",
+        id: "ch02-03",
+        chapter: "2.3",
         title: "Functions",
-        sort_order: 13,
+        sort_order: 22,
         environment: "browser",
         content: `# Functions
 
@@ -490,10 +467,10 @@ fn main() {
 `,
     },
     {
-        id: "ch03-04",
-        chapter: "3.4",
+        id: "ch02-04",
+        chapter: "2.4",
         title: "Comments",
-        sort_order: 14,
+        sort_order: 23,
         environment: "browser",
         content: `# Comments
 
@@ -608,10 +585,10 @@ fn main() {
 `,
     },
     {
-        id: "ch03-05",
-        chapter: "3.5",
+        id: "ch02-05",
+        chapter: "2.5",
         title: "Control Flow",
-        sort_order: 15,
+        sort_order: 24,
         environment: "browser",
         content: `# Control Flow
 

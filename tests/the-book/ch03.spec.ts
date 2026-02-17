@@ -1,45 +1,55 @@
 import { test, expect } from '@playwright/test';
 
-test.describe('Chapter 2: Guessing Game', () => {
-    test('2.1 Programming a Guessing Game', async ({ page }) => {
-        await page.goto('/path/the-book/lesson/ch02-01');
+test.describe('Chapter 3: Programming a Guessing Game', () => {
+    test('3.1 Programming a Guessing Game', async ({ page }) => {
+        await page.goto('/path/the-book/lesson/ch03-01');
 
         // Quiz
         await page.locator('label', { hasText: 'std::cmp::Ordering' }).click();
-        await page.locator('label', { hasText: 'Less, Greater, Equal' }).click();
-        await page.locator('label', { hasText: 'The compiler rejects the code' }).click();
-        await page.locator('label', { hasText: 'Converts the string "42" into the unsigned integer 42' }).click();
+        await page.locator('label', { hasText: 'loop (infinite with break)' }).click();
+        await page.locator('label', { hasText: 'Outside the loop (mutable)' }).click();
         await page.click('button:has-text("Check Answers")');
 
         // Coding Challenge
         await page.click('button:has-text("Objectives")');
 
-        const rustCode = `use std::cmp::Ordering;
+        const rustCode = `
+// Write: validate(guess: i32) -> bool
+fn validate(guess: i32) -> bool {
+    guess >= 1 && guess <= 100
+}
 
-fn compare_numbers(a: i32, b: i32) -> String {
-    match a.cmp(&b) {
-        Ordering::Less => String::from("Less"),
-        Ordering::Greater => String::from("Greater"),
-        Ordering::Equal => String::from("Equal"),
+// Write: check_guess(guess: i32, secret: i32) -> i32
+fn check_guess(guess: i32, secret: i32) -> i32 {
+    if guess < secret {
+        -1
+    } else if guess > secret {
+        1
+    } else {
+        0
     }
 }
 
-fn clamp(value: i32, min: i32, max: i32) -> i32 {
-    if value < min {
-        min
-    } else if value > max {
-        max
-    } else {
-        value
+// Write: count_attempts(guesses: &[i32], secret: i32) -> i32
+fn count_attempts(guesses: &[i32], secret: i32) -> i32 {
+    let mut count = 0;
+    for &guess in guesses {
+        count += 1;
+        if guess == secret {
+            return count;
+        }
     }
+    -1
 }
 
 fn main() {
-    println!("{}", compare_numbers(5, 10));
-    println!("{}", compare_numbers(10, 5));
-    println!("{}", compare_numbers(5, 5));
-    println!("Clamped: {}", clamp(150, 0, 100));
-}`;
+    println!("Is 50 valid? {}", validate(50));
+    println!("Check 10 vs 50: {}", check_guess(10, 50));
+    
+    let game = [10, 40, 70, 42, 90];
+    println!("Attempts to find 42: {}", count_attempts(&game, 42));
+}
+`;
 
         await page.evaluate((code) => {
             // @ts-ignore
