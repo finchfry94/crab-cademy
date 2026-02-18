@@ -80,9 +80,7 @@ function isCompleted(lessonId: string): boolean {
   return getProgress(lessonId)?.completed ?? false;
 }
 
-function isRead(lessonId: string): boolean {
-  return getProgress(lessonId)?.lesson_read ?? false;
-}
+
 
 function getLessonStatus(lessonId: string): 'completed' | 'read' | 'none' {
   const p = getProgress(lessonId);
