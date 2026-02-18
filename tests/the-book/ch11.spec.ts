@@ -1,9 +1,11 @@
 import { test, expect } from '@playwright/test';
 import { mockPlayground } from '../utils/mockPlayground';
+import { mockTauri } from '../utils/mockTauri';
 
 test.describe('Chapter 11: Writing Automated Tests', () => {
     test.beforeEach(async ({ page }) => {
         await mockPlayground(page);
+        await mockTauri(page);
     });
 
     test('11.1 How to Write Tests', async ({ page }) => {
@@ -39,18 +41,6 @@ fn main() {}`;
     });
 
     test('11.2 Controlling How Tests Are Run', async ({ page }) => {
-        // Mock Tauri for desktop environment
-        await page.addInitScript(() => {
-            // @ts-ignore
-            window.__TAURI__ = {
-                // @ts-ignore
-                invoke: async (cmd, args) => {
-                    console.log(`Invoke: ${cmd}`, args);
-                    return { status: "ok", stdout: "I am visible with --show-output\n" };
-                }
-            };
-        });
-
         await page.goto('/path/the-book/lesson/ch11-02');
 
         // Quiz
@@ -83,17 +73,6 @@ mod tests {
     });
 
     test('11.3 Test Organization', async ({ page }) => {
-        // Mock Tauri for desktop environment
-        await page.addInitScript(() => {
-            // @ts-ignore
-            window.__TAURI__ = {
-                // @ts-ignore
-                invoke: async (cmd, args) => {
-                    return { status: "ok", stdout: "test tests::test_internal ... ok" };
-                }
-            };
-        });
-
         await page.goto('/path/the-book/lesson/ch11-03');
 
         // Quiz

@@ -77,24 +77,28 @@ fn main() -> PolarsResult<()> {
         ],
         objectives: `## Your Mission
 
-Write a function that creates a DataFrame representing a simple inventory.
-
-1.  Use the \`df!\` macro.
-2.  Create columns:
+1.  Implement a function \`create_inventory() -> PolarsResult<DataFrame>\`.
+2.  Use the \`df!\` macro inside it.
+3.  Create columns:
     *   "item" (Amphora, Scroll, Gladius)
     *   "count" (10, 50, 3)
     *   "price" (15.5, 5.0, 75.0)
-3.  Print the DataFrame.
+4.  The main function will call yours and print the result.
 
 **Note:** The \`df!\` macro returns a \`Result\`, so you'll need to handle it (e.g., with \`?\` or \`unwrap()\`). For this exercise, \`unwrap()\` is fine since we know the data is valid.
 `,
         starter_code: `use polars::prelude::*;
 
-fn main() {
-    // Create your DataFrame here
-    // let df = df! [ ... ].unwrap();
-    
-    // println!("{}", df);
+pub fn create_inventory() -> PolarsResult<DataFrame> {
+    // let df = df! [ ... ]?;
+    // Ok(df)
+    todo!()
+}
+
+fn main() -> PolarsResult<()> {
+    let df = create_inventory()?;
+    println!("{}", df);
+    Ok(())
 }
 `,
         test_code: `#[cfg(test)]
@@ -103,13 +107,17 @@ mod tests {
     use polars::prelude::*;
 
     #[test]
-    fn test_dataframe_creation() {
-        // We can't easily inspect the stdout in these tests, 
-        // but we can check if the code compiles and potentially returns a DF if we restructure.
-        // For this simple "print" task, we rely on the user running it and simple output matching if needed.
-        // However, to make it a real test, let's ask them to return the DF in a specific function? 
-        // For now, let's keep it simple and just have a dummy test that passes if they write valid Rust.
-        assert!(true);
+    fn test_dataframe_dimensions() {
+        let df = create_inventory().unwrap();
+        // Check that we have 3 rows and 3 columns
+        assert_eq!(df.height(), 3);
+        assert_eq!(df.width(), 3);
+        
+        // Verify columns names
+        let names = df.get_column_names();
+        assert!(names.contains(&"item"));
+        assert!(names.contains(&"count"));
+        assert!(names.contains(&"price"));
     }
 }
 `,

@@ -22,7 +22,10 @@ opt-level = 0
 opt-level = 3
 _BT__BT__BT_
 
-The _BT_opt-level_BT_ setting controls the number of optimizations Rust will apply to your code, ranging from 0 to 3.`.replace(/_BT_/g, '`'),
+The _BT_opt-level_BT_ setting controls the number of optimizations Rust will apply to your code, ranging from 0 to 3.
+
+> [!NOTE]
+> **A Note on Testing**: Because this lesson involves modifying your _BT_Cargo.toml_BT_, we can't run a standard Rust unit test (which only tests _.rs_ files) to verify these changes. In a real project, you would verify this by checking the performance or size of your compiled binary.`.replace(/_BT_/g, '`'),
         quiz: [
             {
                 question: "Which file is used to customize release profiles?",

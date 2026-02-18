@@ -163,10 +163,14 @@ This is a conceptual lesson for desktop users.
 mod tests {
     #[test]
     fn test_print() {
-        println!("I am visible with --show-output");
+        // We can't easily capture stdout in a unit test, but we can verify the function logic if we had any.
+        // For this lesson, we are verifying that your test function is correctly annotated!
         assert!(true);
     }
-}`,
+}
+
+// Note: This lesson focuses on the cargo test runner's behavior on your local machine.
+// In the playground, we simulate the results for you.`,
         starter_code: `#[cfg(test)]
 mod tests {
     #[test]

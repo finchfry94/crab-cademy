@@ -1,56 +1,26 @@
 import { test, expect } from '@playwright/test';
 
-test.describe('Chapter 20: Advanced Features', () => {
-    test('20.1 Unsafe Rust', async ({ page }) => {
-        await page.goto('/path/the-book/lesson/ch20-01');
+test.describe('Chapter 16: Fearless Concurrency', () => {
+    test('16.1 Using Threads to Run Code Simultaneously', async ({ page }) => {
+        await page.goto('/path/the-book/lesson/ch16-01');
 
         // Quiz
-        await page.locator('label', { hasText: "No, it just means the compiler can't verify safety" }).click();
+        await page.locator('label', { hasText: 'All spawned threads are shut down' }).click();
         await page.click('button:has-text("Check Answers")');
 
         // Coding Challenge
         await page.click('button:has-text("Objectives")');
 
-        const rustCode = `fn main() {
-    let x = 42;
-    let p = &x as *const i32;
-    unsafe {
-        println!("Dereferenced: {}", *p);
-    }
-}`;
-
-        await page.evaluate((code) => {
-            // @ts-ignore
-            const models = monaco.editor.getModels();
-            if (models.length > 0) {
-                models[0].setValue(code);
-            }
-        }, rustCode);
-
-        await page.click('button:has-text("Test")');
-        await expect(page.locator('text=🎉 All tests passed! Lesson complete!')).toBeVisible({ timeout: 10000 });
-        await expect(page.locator('button:has-text("Objectives")')).toContainText('ALL PASS');
-    });
-
-    test('20.5 Macros', async ({ page }) => {
-        await page.goto('/path/the-book/lesson/ch20-05');
-
-        // Quiz
-        await page.locator('label', { hasText: 'Macros can take variable arguments' }).click();
-        await page.click('button:has-text("Check Answers")');
-
-        // Coding Challenge
-        await page.click('button:has-text("Objectives")');
-
-        const rustCode = `macro_rules! say_hello {
-    () => {
-        println!("Hello!");
-    };
-}
+        const rustCode = `use std::thread;
 
 fn main() {
-    say_hello!();
-}`;
+    let handle = thread::spawn(|| {
+        println!("Spawned thread!");
+    });
+
+    handle.join().unwrap();
+}
+`;
 
         await page.evaluate((code) => {
             // @ts-ignore
@@ -62,6 +32,42 @@ fn main() {
 
         await page.click('button:has-text("Test")');
         await expect(page.locator('text=🎉 All tests passed! Lesson complete!')).toBeVisible({ timeout: 15000 });
-        await expect(page.locator('button:has-text("Objectives")')).toContainText('ALL PASS');
+    });
+
+    test('16.2 Message Passing with Channels', async ({ page }) => {
+        await page.goto('/path/the-book/lesson/ch16-02');
+
+        // Quiz
+        await page.locator('label', { hasText: 'Multiple Producer, Single Consumer' }).click();
+        await page.click('button:has-text("Check Answers")');
+
+        // Coding Challenge
+        await page.click('button:has-text("Objectives")');
+
+        const rustCode = `use std::sync::mpsc;
+use std::thread;
+
+fn main() {
+    let (tx, rx) = mpsc::channel();
+
+    thread::spawn(move || {
+        tx.send(String::from("hi")).unwrap();
+    });
+
+    let received = rx.recv().unwrap();
+    println!("Got: {}", received);
+}
+`;
+
+        await page.evaluate((code) => {
+            // @ts-ignore
+            const models = monaco.editor.getModels();
+            if (models.length > 0) {
+                models[0].setValue(code);
+            }
+        }, rustCode);
+
+        await page.click('button:has-text("Test")');
+        await expect(page.locator('text=🎉 All tests passed! Lesson complete!')).toBeVisible({ timeout: 15000 });
     });
 });

@@ -24,14 +24,19 @@ test.describe('Polars Chapters 1-4', () => {
         await page.click('button:has-text("Objectives")');
         const code = `use polars::prelude::*;
 
-fn main() {
+pub fn create_inventory() -> PolarsResult<DataFrame> {
     let df = df! [
         "item" => ["Amphora", "Scroll", "Gladius"],
         "count" => [10, 50, 3],
         "price" => [15.5, 5.0, 75.0]
-    ].unwrap();
-    
+    ]?;
+    Ok(df)
+}
+
+fn main() -> PolarsResult<()> {
+    let df = create_inventory()?;
     println!("{}", df);
+    Ok(())
 }
 `;
         await page.evaluate((c) => {

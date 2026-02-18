@@ -90,6 +90,9 @@ Write a function \`process_sensor_data\` that:
 4.  **Collects** the result.
 
 *Note: Since we are in a sandbox, you won't actually have the file. Use a dummy path string.*
+
+> [!CAUTION]
+> **A Note on Testing**: Testing file I/O (like reading Parquet files) in a web-based sandbox is tricky because the file must exist on the ephemeral disk. In this lesson, we primarily verify that your query structure is valid and compiles correctly.
 `,
         starter_code: `use polars::prelude::*;
 

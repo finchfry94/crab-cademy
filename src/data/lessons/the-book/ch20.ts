@@ -102,8 +102,13 @@ _BT__BT__BT_`.replace(/_BT_/g, '`'),
         test_code: `#[cfg(test)]
 mod tests {
     #[test]
-    fn test_conceptual() {
-        assert!(true);
+    fn test_macro_expansion() {
+        // Since say_hello! only prints, we can't easily assert on it,
+        // but we can verify that a macro that returns a value works.
+        macro_rules! add_one {
+            ($x:expr) => { $x + 1 };
+        }
+        assert_eq!(add_one!(5), 6);
     }
 }`,
         starter_code: `macro_rules! say_hello {

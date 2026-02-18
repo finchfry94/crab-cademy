@@ -16,9 +16,9 @@ test.describe('Polars Chapters 5-7', () => {
         await page.goto('/path/polars/lesson/polars-05');
 
         // Quiz
-        await page.locator('label', { hasText: 'Inner Join' }).click();
-        await page.locator('label', { hasText: 'The right columns are filled with nulls' }).click();
-        await page.locator('label', { hasText: 'concat()' }).click();
+        await page.locator('label').filter({ hasText: /^Inner Join$/ }).click();
+        await page.locator('label').filter({ hasText: /^The right columns are filled with nulls$/ }).click();
+        await page.locator('label').filter({ hasText: /^concat\(\)$/ }).click();
         await page.click('button:has-text("Check Answers")');
 
         // Coding
@@ -77,9 +77,9 @@ fn main() -> PolarsResult<()> {
         await page.goto('/path/polars/lesson/polars-06');
 
         // Quiz
-        await page.locator('label', { hasText: 'It delays loading to allow for optimization like predicate pushdown' }).click();
-        await page.locator('label', { hasText: 'Parquet' }).click();
-        await page.locator('label', { hasText: 'Moving filters directly into the file reading process' }).click();
+        await page.locator('label').filter({ hasText: /^It delays loading to allow for optimization like predicate pushdown$/ }).click();
+        await page.locator('label').filter({ hasText: /^Parquet$/ }).click();
+        await page.locator('label').filter({ hasText: /^Moving filters directly into the file reading process$/ }).click();
         await page.click('button:has-text("Check Answers")');
 
         // Coding (Simple compilation test as per lesson)
@@ -130,9 +130,9 @@ fn main() {
         await page.goto('/path/polars/lesson/polars-07');
 
         // Quiz
-        await page.locator('label', { hasText: 'group_by collapses the frame; over keeps all rows' }).click();
-        await page.locator('label', { hasText: '.over()' }).click();
-        await page.locator('label', { hasText: 'Yes, using .rank() and .over()' }).click();
+        await page.locator('label').filter({ hasText: /^group_by collapses the frame; over keeps all rows$/ }).click();
+        await page.locator('label').filter({ hasText: /^\.over\(\)$/ }).click();
+        await page.locator('label').filter({ hasText: /^Yes, using \.rank\(\) and \.over\(\)$/ }).click();
         await page.click('button:has-text("Check Answers")');
 
         // Coding

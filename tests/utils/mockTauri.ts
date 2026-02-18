@@ -14,25 +14,34 @@ declare global {
  */
 export const mockTauri = async (page: Page) => {
     await page.addInitScript(() => {
-        window.__TAURI_INTERNALS__ = {};
-        window.__TAURI__ = {
-            core: {
-                invoke: async (cmd: string, args: any) => {
-                    console.log(`[MockTauri] invoke: ${cmd}`, args);
-                    if (cmd === 'run_code') {
-                        // Simulate a successful test run with multiple potential test names
-                        // We include names for all desktop lessons we are testing
-                        return `
-running 5 tests
+        const mockInvoke = async (cmd: string, args: any) => {
+            console.log(`[MockTauri] invoke: ${cmd}`, args);
+            if (cmd === 'run_code') {
+                // Return a combined output that matches various lesson test names
+                return `
+running 10 tests
 test test_args_collection ... ok
 test test_conceptual ... ok
 test one_result ... ok
 test multiple_results ... ok
-test result: ok. 5 passed; 0 failed;
+test test_print ... ok
+test tests::test_internal ... ok
+test test_logic ... ok
+test test_add_three ... ok
+test test_calculate_total ... ok
+test test_window ... ok
+test result: ok. 10 passed; 0 failed;
 `;
-                    }
-                    return "";
-                }
+            }
+            return "";
+        };
+
+        window.__TAURI_INTERNALS__ = {
+            invoke: mockInvoke
+        };
+        window.__TAURI__ = {
+            core: {
+                invoke: mockInvoke
             }
         };
     });

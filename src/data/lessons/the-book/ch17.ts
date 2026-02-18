@@ -29,7 +29,10 @@ async fn main() {
 }
 _BT__BT__BT_
 
-Note: To run async code, you need an **async runtime** like _BT_tokio_BT_ or _BT_async-std_BT_.`.replace(/_BT_/g, '`'),
+Note: To run async code, you need an **async runtime** like _BT_tokio_BT_ or _BT_async-std_BT_.
+
+> [!IMPORTANT]
+> **A Note on Testing**: The playground sandbox currently has a limited set of packages available. Since \`tokio\` is an external crate, we cannot compile and run full async tests here. For now, focus on the async/await syntax itself!`.replace(/_BT_/g, '`'),
         quiz: [
             {
                 question: "Does calling an async function execute its code immediately?",

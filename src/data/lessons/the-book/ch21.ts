@@ -31,9 +31,12 @@ fn handle_connection(mut stream: TcpStream) {
     
     let response = "HTTP/1.1 200 OK\r\n\r\nHello!";
     stream.write(response.as_bytes()).unwrap();
-    stream.flush().unwrap();
+stream.flush().unwrap();
 }
-_BT__BT__BT_`.replace(/_BT_/g, '`'),
+_BT__BT__BT_
+
+> [!CAUTION]
+> **A Note on Testing**: Due to security restrictions in the playground sandbox, binding to arbitrary network ports (like 7878) is often blocked. This project is best tested on your local machine. In the playground, we focus on the structure of the HTTP handling code.`.replace(/_BT_/g, '`'),
         quiz: [
             {
                 question: "Which port did we use in the example?",

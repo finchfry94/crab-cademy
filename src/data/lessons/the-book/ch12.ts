@@ -175,12 +175,17 @@ _BT__BT__BT_`.replace(/_BT_/g, '`'),
 
 1. Use _BT_fs::read_to_string_BT_ to read a file.
 2. Print the contents to the console.`.replace(/_BT_/g, '`'),
-        test_code: `// No automated test for file I/O in this environment
-#[cfg(test)]
+        test_code: `#[cfg(test)]
 mod tests {
+    use std::fs;
+
     #[test]
-    fn test_conceptual() {
-        assert!(true);
+    fn test_file_reading() {
+        let file_path = "poem.txt";
+        let contents = fs::read_to_string(file_path).expect("Should read the file");
+        // Verify the content matches what we wrote in the starter code
+        assert!(contents.contains("Rust:"));
+        assert!(contents.contains("safe, fast, productive."));
     }
 }`,
         starter_code: `use std::fs;
