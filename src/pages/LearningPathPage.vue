@@ -80,6 +80,17 @@ function isCompleted(lessonId: string): boolean {
   return getProgress(lessonId)?.completed ?? false;
 }
 
+function isRead(lessonId: string): boolean {
+  return getProgress(lessonId)?.lesson_read ?? false;
+}
+
+function getLessonStatus(lessonId: string): 'completed' | 'read' | 'none' {
+  const p = getProgress(lessonId);
+  if (p?.completed) return 'completed';
+  if (p?.lesson_read) return 'read';
+  return 'none';
+}
+
 function completedCount(chapter: Chapter): number {
   return chapter.lessons.filter((l) => isCompleted(l.id)).length;
 }
@@ -165,12 +176,15 @@ function goBack() {
               <div
                 :class="[
                   'w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-colors',
-                  isCompleted(lesson.id)
+                  getLessonStatus(lesson.id) === 'completed'
                     ? 'bg-emerald-500/15 border border-emerald-500/30'
-                    : 'bg-neutral-800 border border-neutral-700 group-hover/card:border-orange-500/30',
+                    : getLessonStatus(lesson.id) === 'read'
+                      ? 'bg-blue-500/15 border border-blue-500/30'
+                      : 'bg-neutral-800 border border-neutral-700 group-hover/card:border-orange-500/30',
                 ]"
               >
-                <CheckCircle v-if="isCompleted(lesson.id)" class="w-5 h-5 text-emerald-400" />
+                <CheckCircle v-if="getLessonStatus(lesson.id) === 'completed'" class="w-5 h-5 text-emerald-400" />
+                <BookOpen v-else-if="getLessonStatus(lesson.id) === 'read'" class="w-5 h-5 text-blue-400" />
                 <BookOpen v-else class="w-5 h-5 text-neutral-400 group-hover/card:text-orange-400 transition-colors" />
               </div>
 
@@ -178,12 +192,21 @@ function goBack() {
               <div class="flex-1 min-w-0">
                 <div class="flex items-center gap-2">
                   <span class="text-xs font-mono text-neutral-500">{{ lesson.chapter }}</span>
+                  
+                  <!-- Status Badges -->
                   <span
-                    v-if="isCompleted(lesson.id)"
-                    class="text-[10px] font-bold uppercase tracking-wider text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded"
+                    v-if="getLessonStatus(lesson.id) === 'completed'"
+                    class="text-[10px] font-bold uppercase tracking-wider text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20"
                   >
-                    Done
+                    Complete
                   </span>
+                  <span
+                    v-else-if="getLessonStatus(lesson.id) === 'read'"
+                    class="text-[10px] font-bold uppercase tracking-wider text-blue-400 bg-blue-500/10 px-1.5 py-0.5 rounded border border-blue-500/20"
+                  >
+                    Read
+                  </span>
+
                   <span
                     :class="[
                       'text-[10px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded',

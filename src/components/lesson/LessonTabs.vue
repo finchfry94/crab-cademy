@@ -16,6 +16,7 @@ const {
   setQuizAnswer,
   submitQuiz,
   setActiveTab,
+  unlockObjectives,
 } = useLessonState();
 
 const md = new MarkdownIt();
@@ -29,6 +30,9 @@ function renderMarkdown(content: string): string {
 function handleQuizSubmit() {
   quizSubmitted.value = true;
   quizPassed.value = submitQuiz();
+  if (quizPassed.value) {
+    unlockObjectives();
+  }
 }
 
 function isQuestionCorrect(index: number): boolean | null {
@@ -197,7 +201,15 @@ function getTestStatus(testName: string): "pass" | "fail" | "pending" {
             v-else
             class="mt-4 p-3 bg-emerald-900/30 rounded-lg border border-emerald-700 text-emerald-400 text-sm"
           >
-            ✅ Quiz complete! Switch to the <strong>Objectives</strong> tab to start coding.
+            <div class="flex flex-col gap-2">
+              <div class="font-bold flex items-center gap-2">
+                <CheckCircle class="w-4 h-4" />
+                <span>Quiz Passed! Read Badge Earned! 🏅</span>
+              </div>
+              <p class="text-emerald-300/80">
+                Switch to the <strong>Objectives</strong> tab to write code and earn the <strong>Complete Badge</strong>.
+              </p>
+            </div>
           </div>
         </div>
       </div>
