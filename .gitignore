@@ -54,3 +54,5 @@ coverage/
 *.pdb
 
 playwright-report
+
+polars_runner/target

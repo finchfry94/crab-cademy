@@ -52,7 +52,7 @@ export async function executeRustCode(code: string, environment: "browser" | "de
     // (though in this app, desktop environment is a superset of browser).
     if (isLocal) {
         try {
-            const rawOutput = await invoke<string>("run_code", { code, useSandbox: false });
+            const rawOutput = await invoke<string>("run_code", { code, useSandbox: false, isTest: false });
             return `\x1b[33m[Running via Local Rust]\x1b[0m\r\n${rawOutput}`;
         } catch (e: any) {
             // Fallback to playground if it wasn't a desktop-required lesson
@@ -120,15 +120,32 @@ export async function runTests(
 
     if (isLocal) {
         try {
-            const rawOutput = await invoke<string>("run_code", { code: combinedCode, useSandbox: false });
+            const rawOutput = await invoke<string>("run_code", { code: combinedCode, useSandbox: false, isTest: true });
+            const cleanOutput = stripAnsi(rawOutput);
             const testResults = parseTestOutput(rawOutput);
 
             // Check for execution errors (like rustc not found)
             const isError = rawOutput.startsWith("Error:") || rawOutput.includes("Error running rustc");
 
+            // Check for explicit "All tests passed!" message (used in Polars runner)
+            const explicitSuccess = cleanOutput.includes("All tests passed!");
+            // Check for standard Rust test summary "test result: ok."
+            const standardSuccess = /test result: ok/.test(cleanOutput);
+
+            const allPassed = !isError && (
+                testResults.length > 0
+                    ? testResults.every((t) => t.passed)
+                    : (!rawOutput.toLowerCase().includes("failed") && (explicitSuccess || standardSuccess))
+            );
+
+            // If explicit success but no individual tests found, synthesize one for UI feedback
+            if ((explicitSuccess || standardSuccess) && testResults.length === 0) {
+                testResults.push({ name: "Lesson Check", passed: true });
+            }
+
             return {
                 results: testResults,
-                allPassed: !isError && (testResults.length > 0 ? testResults.every((t) => t.passed) : !rawOutput.toLowerCase().includes("failed")),
+                allPassed,
                 rawOutput: `\x1b[33m[Running via Local Rust]\x1b[0m\r\n${rawOutput}`,
             };
         } catch (e: any) {
@@ -204,11 +221,12 @@ async function runTestsViaPlayground(combinedCode: string): Promise<Omit<TestRun
  * Matches lines like: "test test_name ... ok" or "test tests::test_name ... FAILED"
  */
 function parseTestOutput(output: string): TestResult[] {
+    const cleanOutput = stripAnsi(output);
     const results: TestResult[] = [];
     const testLineRegex = /^test\s+(.+?)\s+\.\.\.\s+(ok|FAILED)\s*$/gm;
 
     let match;
-    while ((match = testLineRegex.exec(output)) !== null) {
+    while ((match = testLineRegex.exec(cleanOutput)) !== null) {
         const fullName = match[1];
         // Strip "tests::" prefix if present for cleaner display
         const displayName = fullName.replace(/^tests::/, "");
@@ -219,6 +237,10 @@ function parseTestOutput(output: string): TestResult[] {
     }
 
     return results;
+}
+
+function stripAnsi(str: string): string {
+    return str.replace(/[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g, "");
 }
 
 // ─── ANSI color codes ────────────────────────────────────────────

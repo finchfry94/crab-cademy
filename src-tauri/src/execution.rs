@@ -1,6 +1,7 @@
 use std::fs;
 use std::process::Command;
 use syn::visit::Visit;
+use tauri::Manager;
 use tempfile::Builder;
 
 /// Forbidden module paths that indicate dangerous operations
@@ -114,10 +115,15 @@ fn validate_code(code: &str) -> Result<(), String> {
 }
 
 /// Execute Rust code with optional sandbox validation
-pub fn execute_rust_code(code: &str, use_sandbox: bool) -> String {
+pub fn execute_rust_code(
+    app: Option<&tauri::AppHandle>,
+    code: &str,
+    use_sandbox: bool,
+    is_test: bool,
+) -> String {
     // Check if code requires heavy dependencies (Polars)
     if code.contains("polars") {
-        return execute_with_runner(code);
+        return execute_with_runner(app, code, is_test);
     }
 
     // Step 1: Validate code for security violations if requested
@@ -148,6 +154,7 @@ pub fn execute_rust_code(code: &str, use_sandbox: bool) -> String {
     if Command::new(&rustc_path).arg("--version").output().is_err() {
         #[cfg(not(windows))]
         let home = std::env::var("HOME").unwrap_or_default();
+
         #[cfg(windows)]
         let home = std::env::var("USERPROFILE").unwrap_or_default();
 
@@ -163,11 +170,14 @@ pub fn execute_rust_code(code: &str, use_sandbox: bool) -> String {
         }
     }
 
-    let compile = Command::new(&rustc_path)
-        .arg(&main_rs)
-        .arg("-o")
-        .arg(&binary)
-        .output();
+    let mut compile_cmd = Command::new(&rustc_path);
+    compile_cmd.arg(&main_rs).arg("-o").arg(&binary);
+
+    if is_test {
+        compile_cmd.arg("--test");
+    }
+
+    let compile = compile_cmd.output();
 
     let compile = match compile {
         Ok(out) => out,
@@ -197,9 +207,10 @@ pub fn execute_rust_code(code: &str, use_sandbox: bool) -> String {
     }
 }
 
-/// Execute code using the persistent Cargo project 'playground_runner'
-fn execute_with_runner(code: &str) -> String {
-    // Path to the runner project
+/// Execute code using the persistent Cargo project 'polars_runner'
+fn execute_with_runner(app: Option<&tauri::AppHandle>, code: &str, is_test: bool) -> String {
+    // In production, we bundle the runner as a resource.
+    // In dev, it's at the project root.
     // In dev, this is relative to where the command is run (usually project root or src-tauri)
     // We'll try to locate it.
     let possible_paths = [
@@ -208,14 +219,31 @@ fn execute_with_runner(code: &str) -> String {
         "../../polars_runner", // If running from src-tauri/target/debug/...
     ];
 
+    let mut attempted_paths = Vec::new();
     let mut runner_path = std::path::PathBuf::new();
     let mut found = false;
 
     for path in possible_paths {
-        if std::path::Path::new(path).exists() {
+        let p = std::path::Path::new(path);
+        attempted_paths.push(format!("(Relative) {}", path));
+        if p.exists() {
             runner_path = std::path::PathBuf::from(path);
             found = true;
             break;
+        }
+    }
+
+    if !found {
+        // Fallback: Try to find it in Tauri resources (for bundled apps)
+        if let Some(app) = app {
+            if let Ok(res_path) = app.path().resource_dir() {
+                let bundled_path = res_path.join("polars_runner");
+                attempted_paths.push(format!("(Resource) {}", bundled_path.display()));
+                if bundled_path.exists() {
+                    runner_path = bundled_path;
+                    found = true;
+                }
+            }
         }
     }
 
@@ -225,7 +253,8 @@ fn execute_with_runner(code: &str) -> String {
             exe_path.pop(); // binary dir
             exe_path.pop(); // debug/release
             exe_path.pop(); // target
-            exe_path.push("playground_runner");
+            exe_path.push("polars_runner");
+            attempted_paths.push(format!("(Exe Relative) {}", exe_path.display()));
             if exe_path.exists() {
                 runner_path = exe_path;
                 found = true;
@@ -234,7 +263,15 @@ fn execute_with_runner(code: &str) -> String {
     }
 
     if !found {
-        return "Error: Could not locate 'playground_runner' directory.".to_string();
+        let mut msg =
+            String::from("Error: Could not locate 'polars_runner' directory.\nChecked paths:");
+        for path in attempted_paths {
+            msg.push_str(&format!("\n - {}", path));
+        }
+        if let Ok(cwd) = std::env::current_dir() {
+            msg.push_str(&format!("\nCurrent working directory: {}", cwd.display()));
+        }
+        return msg;
     }
 
     // 1. Write the code to src/main.rs
@@ -243,10 +280,16 @@ fn execute_with_runner(code: &str) -> String {
         return format!("Error writing code to runner: {}", e);
     }
 
-    // 2. Run 'cargo run --quiet'
-    // We use --quiet to suppress compilation output, but we might want to capture it if it fails.
-    let output = Command::new("cargo")
-        .arg("run")
+    // 2. Run 'cargo run --quiet' or 'cargo test --quiet'
+    let mut command = Command::new("cargo");
+
+    if is_test {
+        command.arg("test");
+    } else {
+        command.arg("run");
+    }
+
+    let output = command
         .arg("--quiet")
         .arg("--manifest-path")
         .arg(runner_path.join("Cargo.toml"))
