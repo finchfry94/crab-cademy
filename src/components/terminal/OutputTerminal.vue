@@ -1,13 +1,27 @@
 <script setup lang="ts">
-import { onMounted, ref, onBeforeUnmount } from 'vue'
+import { onMounted, ref, onBeforeUnmount, watch } from 'vue'
 import { Terminal } from '@xterm/xterm'
 import { FitAddon } from '@xterm/addon-fit'
 import '@xterm/xterm/css/xterm.css'
+
+const props = defineProps<{
+  environment?: 'browser' | 'desktop'
+}>()
 
 // We will eventually expose methods to write to this terminal from the parent
 const terminalContainer = ref<HTMLElement | null>(null)
 const term = ref<Terminal | null>(null)
 const fitAddon = ref<FitAddon | null>(null)
+
+function writeGreeting() {
+  if (!term.value) return
+  term.value.clear()
+  const msg = props.environment === 'desktop' 
+    ? 'Powered Locally with Rust and Tauri' 
+    : 'Powered by Rust Playground'
+  term.value.writeln(`\x1b[32m${msg}\x1b[0m`)
+  term.value.writeln('Ready to compile...')
+}
 
 onMounted(() => {
   if (terminalContainer.value) {
@@ -29,15 +43,18 @@ onMounted(() => {
     t.open(terminalContainer.value)
     fit.fit()
     
-    t.writeln('\x1b[32mWelcome to CrabCademy Terminal\x1b[0m')
-    t.writeln('Ready to compile...')
-
     term.value = t
     fitAddon.value = fit
+
+    writeGreeting()
     
     // Handle resize
     window.addEventListener('resize', handleResize)
   }
+})
+
+watch(() => props.environment, () => {
+  writeGreeting()
 })
 
 onBeforeUnmount(() => {

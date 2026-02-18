@@ -27,3 +27,4 @@ syn = { version = "2", features = ["full", "visit"] }
 tauri-plugin-sql = { version = "2.3.2", features = ["sqlite"] }
 toml = "0.9.11"
 
+

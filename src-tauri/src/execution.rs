@@ -203,9 +203,9 @@ fn execute_with_runner(code: &str) -> String {
     // In dev, this is relative to where the command is run (usually project root or src-tauri)
     // We'll try to locate it.
     let possible_paths = [
-        "src-tauri/playground_runner",
-        "playground_runner",
-        "../playground_runner", // If running from src-tauri/target/debug/...
+        "polars_runner",
+        "../polars_runner",    // If running from src-tauri
+        "../../polars_runner", // If running from src-tauri/target/debug/...
     ];
 
     let mut runner_path = std::path::PathBuf::new();

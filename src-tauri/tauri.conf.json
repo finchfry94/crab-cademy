@@ -5,9 +5,10 @@
   "identifier": "com.nicholasfinch.crab-cademy",
   "build": {
     "beforeDevCommand": "npm run dev",
-    "devUrl": "http://localhost:1420",
+    "devUrl": "http://localhost:5173",
     "beforeBuildCommand": "npm run build",
-    "frontendDist": "../dist"
+    "frontendDist": "../dist",
+    "additionalWatchFolders": []
   },
   "app": {
     "windows": [

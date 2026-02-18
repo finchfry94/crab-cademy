@@ -129,7 +129,10 @@ function goHome() {
     </template>
 
     <template #terminal>
-      <OutputTerminal ref="terminalRef" />
+      <OutputTerminal 
+        ref="terminalRef" 
+        :environment="currentLesson?.environment"
+      />
     </template>
   </SplitPane>
 </template>
