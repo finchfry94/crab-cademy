@@ -78,9 +78,11 @@ fn main() {
         environment: "browser",
         content: `# Modules and Visibility
 
-Modules let you organize code into groups (like folders on a filesystem). They also control **privacy**.
+If crates are boxes, **modules** are the dividers inside those boxes. They let you organize code into groups (like _BT_front_of_house_BT_, _BT_back_of_house_BT_) and control **privacy** (what is visible to the outside world).
 
 ## The _BT_mod_BT_ Keyword
+
+You define a module with the _BT_mod_BT_ keyword. This nests code inside a namespace:
 
 _BT__BT__BT_rust
 mod front_of_house {
@@ -90,23 +92,28 @@ mod front_of_house {
 }
 _BT__BT__BT_
 
-## Privacy Rules
+## Privacy Rules (The "Private by Default" Rule)
 
-1. **Everything is private by default**.
-2. **Items in parent modules can't access private items in child modules**.
-3. **Items in child modules CAN access items in ancestor modules**.
+In Rust, everything is **private by default**. This is the opposite of languages like Java or Python where things are often public unless you hide them.
 
-To make something accessible to the parent/outside world, you must mark it _BT_pub_BT_.
+1.  **Child modules can access everything in their parent modules.** (Children can see what their parents have).
+2.  **Parent modules CANNOT access private items in child modules.** (Parents can't see inside their children's private diaries).
 
-## Struct Privacy
+To make an item (function, struct, enum, module) accessible to its parent or the outside world, you must explicitly mark it with **_BT_pub_BT_**.
 
-- Making a struct _BT_pub_BT_ **does NOT** make its fields public. You must explicitly mark each field _BT_pub_BT_ if you want it to be accessible.
-- If a struct has private fields, you can only construct it inside the module where it's defined (usually via a public constructor method like _BT_new_BT_).
+## Struct Privacy Logic
+
+This often trips up students coming from other languages:
+
+*   If you make a **struct** public (_BT_pub struct_BT_), its fields are **still private** by default! You must mark each field as _BT_pub_BT_ if you want it to be accessible directly.
+*   Why? This allows you to hide implementation details. You typically provide a public constructor (like _BT_new()_BT_) to create the struct, ensuring it's always created in a valid state.
+
+Valid State Example: Imagine a _BT_BankAccount_BT_ struct. If the _BT_balance_BT_ field were public, anyone could set it to negative one billion. By keeping it private and only exposing a _BT_withdraw()_BT_ method, you enforce the rule "balance cannot be negative".
 
 ## ⚠️ Common Mistakes
 
-1. **Forgetting _BT_pub_BT_ on fields** — Even if the struct is public, you can't read/write private fields from outside.
-2. **Assuming "same file" means "same visibility"** — If you put code in a _BT_mod_BT_ block, it's a separate module with privacy boundaries, even in the same file!`.replace(/_BT_/g, '`'),
+1.  **Forgetting _BT_pub_BT_ on fields** — "Why can't I access _BT_my_struct.name_BT_? The struct is public!" Check the field definition!
+2.  **Assuming "same file" means "same visibility"** — Privacy boundaries correspond to *modules*, not just files. If you put code inside a _BT_mod_BT_ block in the same file, it's a separate module with its own privacy wall.`.replace(/_BT_/g, '`'),
         quiz: [
             {
                 question: "What is the default visibility of an item in a module?",

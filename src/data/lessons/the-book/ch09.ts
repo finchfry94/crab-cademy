@@ -105,39 +105,48 @@ fn main() {
         environment: "browser",
         content: `# Recoverable Errors with Result
 
-Most errors are not fatal. File not found? Just ask the user for a different file. Network down? Retry.
+Most errors aren't fatal. If you try to open a file and it's missing, you shouldn't crash! You should probably create the file, or ask the user for a new path.
 
-Rust uses the _BT_Result_BT_ enum for this:
+Rust uses the \`Result\` enum for this. It's built into the language definition:
 
-_BT__BT__BT_rust
+\`\`\`rust
 enum Result<T, E> {
-    Ok(T),
-    Err(E),
+    Ok(T),  // Operation succeeded, contains value T
+    Err(E), // Operation failed, contains error E
 }
-_BT__BT__BT_
+\`\`\`
 
-## Propagating Errors
+## The ? Operator: Propagating Errors
 
-The **? operator** is a magical shorthand for "If Ok, give me the value. If Err, return the Error from the function immediately."
+Often, you don't want to handle the error *right here*; you want to pass it up to the function that called you. This is called **propagating**.
 
-_BT__BT__BT_rust
-fn read_file() -> Result<String, io::Error> {
+The **?** operator is a beautiful piece of syntactic sugar. It does this:
+"If the value is \`Ok\`, give me the inner value. If it is \`Err\`, return that error from the *current function* immediately."
+
+\`\`\`rust
+use std::fs::File;
+use std::io::{self, Read};
+
+fn read_username_from_file() -> Result<String, io::Error> {
     let mut s = String::new();
+    // If File::open fails, '?' returns the error immediately.
+    // If it succeeds, we get the file and call read_to_string.
     File::open("hello.txt")?.read_to_string(&mut s)?;
     Ok(s)
 }
-_BT__BT__BT_
+\`\`\`
 
-## Helper Methods
+## Unwrap and Expect
 
-- _BT_unwrap()_BT_: "Give me the value or panic". (Risky!)
-- _BT_expect("msg")_BT_: "Give me the value or panic with this message". (Better than unwrap).
-- _BT_unwrap_or(default)_BT_: "Give me value or use this default". (Safe).
+Sometimes you see \`.unwrap()\` or \`.expect()\`. These are shortcuts that say: "I trust this is Ok. If it's Err, just panic."
+
+*   \`unwrap()\` : "Give me value or panic."
+*   \`expect("msg")\` : "Give me value or panic with THIS message." (Always prefer this over unwrap so you know *why* it crashed).
 
 ## ⚠️ Common Mistakes
 
-1. **Using unwrap() in production** — If it crashes, your users will be sad. Handle the error!
-2. **Ignoring Result** — Rust will warn you if you call a function returning Result and ignore it.`.replace(/_BT_/g, '`'),
+1.  **Using unwrap() in production** — It's tempting because it's short, but if it crashes in production, it's unprofessional. Handle your errors!
+2.  **Ignoring Result** — If you call a function that returns instructions on whether it succeeded and you ignore it, Rust will warn you. "Hey, you didn't check if the door locked!"`.replace(/_BT_/g, '`'),
         quiz: [
             {
                 question: "What does the `?` operator do?",

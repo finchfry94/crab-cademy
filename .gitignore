@@ -18,6 +18,8 @@ dist-ssr
 # Tauri / Rust
 src-tauri/target/
 src-tauri/Cargo.lock
+src-tauri/playground_runner/target/
+src-tauri/gen/
 
 # Editor directories and files
 .vscode/*
@@ -46,7 +48,9 @@ Thumbs.db
 coverage/
 
 # Tauri generated files
-src-tauri/gen/
+# (Moved to Tauri / Rust section)
 
 *.exe 
 *.pdb
+
+playwright-report

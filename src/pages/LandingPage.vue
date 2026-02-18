@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { computed, ref } from "vue";
 import { useRouter } from "vue-router";
 import { getAllPaths, getPathLessons, type LearningPath } from "../data/lessons";
 import { BookOpen, ChevronRight, Clock, Sparkles } from "lucide-vue-next";
@@ -16,6 +16,9 @@ function getLessonCount(pathId: string): number {
   void progressVersion.value;
   return getPathLessons(pathId).length;
 }
+
+const availablePaths = computed(() => paths.filter(p => getLessonCount(p.id) > 0));
+const comingSoonPaths = computed(() => paths.filter(p => getLessonCount(p.id) === 0));
 
 function getCompletedCount(pathId: string): number {
   void progressVersion.value;
@@ -56,53 +59,50 @@ function navigateToPath(path: LearningPath) {
     </header>
 
     <!-- Learning Path Cards -->
-    <main class="max-w-4xl mx-auto px-6 pb-20 mt-8">
-      <h2 class="text-xl font-semibold text-neutral-200 mb-6">Learning Paths</h2>
-      <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <button
-          v-for="p in paths"
-          :key="p.id"
-          @click="navigateToPath(p)"
-          :class="[
-            'group relative flex flex-col p-6 rounded-2xl border text-left transition-all duration-300',
-            getLessonCount(p.id) > 0
-              ? 'bg-neutral-900/70 border-neutral-800 hover:border-orange-500/40 hover:bg-neutral-800/80 cursor-pointer hover:shadow-xl hover:shadow-orange-500/5 hover:-translate-y-0.5'
-              : 'bg-neutral-900/40 border-neutral-800/50 cursor-default opacity-60',
-          ]"
-        >
-          <!-- Gradient accent at top -->
-          <div
-            :class="[
-              'absolute inset-x-0 top-0 h-1 rounded-t-2xl bg-gradient-to-r transition-opacity',
-              p.color,
-              getLessonCount(p.id) > 0 ? 'opacity-60 group-hover:opacity-100' : 'opacity-20',
-            ]"
-          ></div>
-
-          <!-- Icon -->
-          <div
-            :class="[
-              'w-12 h-12 rounded-xl flex items-center justify-center text-2xl mb-4 bg-gradient-to-br shadow-lg',
-              p.color,
-              getLessonCount(p.id) > 0 ? 'shadow-orange-500/10' : 'shadow-none',
-            ]"
+    <main class="max-w-4xl mx-auto px-6 pb-20 mt-8 space-y-12">
+      <!-- Available Paths -->
+      <section v-if="availablePaths.length > 0">
+        <h2 class="text-xl font-semibold text-neutral-200 mb-6 flex items-center gap-2">
+          <Sparkles class="w-5 h-5 text-orange-400" />
+          Available Paths
+        </h2>
+        <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <button
+            v-for="p in availablePaths"
+            :key="p.id"
+            @click="navigateToPath(p)"
+            class="group relative flex flex-col p-6 rounded-2xl border text-left transition-all duration-300 bg-neutral-900/70 border-neutral-800 hover:border-orange-500/40 hover:bg-neutral-800/80 cursor-pointer hover:shadow-xl hover:shadow-orange-500/5 hover:-translate-y-0.5"
           >
-            {{ p.icon }}
-          </div>
+            <!-- Gradient accent at top -->
+            <div
+              :class="[
+                'absolute inset-x-0 top-0 h-1 rounded-t-2xl bg-gradient-to-r opacity-60 group-hover:opacity-100 transition-opacity',
+                p.color,
+              ]"
+            ></div>
 
-          <!-- Title -->
-          <h3 class="text-lg font-semibold text-neutral-100 mb-1.5 group-hover:text-white transition-colors">
-            {{ p.title }}
-          </h3>
+            <!-- Icon -->
+            <div
+              :class="[
+                'w-12 h-12 rounded-xl flex items-center justify-center text-2xl mb-4 bg-gradient-to-br shadow-lg shadow-orange-500/10',
+                p.color,
+              ]"
+            >
+              {{ p.icon }}
+            </div>
 
-          <!-- Description -->
-          <p class="text-sm text-neutral-400 leading-relaxed mb-4 flex-1">
-            {{ p.description }}
-          </p>
+            <!-- Title -->
+            <h3 class="text-lg font-semibold text-neutral-100 mb-1.5 group-hover:text-white transition-colors">
+              {{ p.title }}
+            </h3>
 
-          <!-- Footer -->
-          <div class="flex items-center justify-between">
-            <template v-if="getLessonCount(p.id) > 0">
+            <!-- Description -->
+            <p class="text-sm text-neutral-400 leading-relaxed mb-4 flex-1">
+              {{ p.description }}
+            </p>
+
+            <!-- Footer -->
+            <div class="flex items-center justify-between">
               <div class="flex items-center gap-4">
                 <span class="flex items-center gap-1.5 text-xs text-neutral-500">
                   <BookOpen class="w-3.5 h-3.5" />
@@ -117,27 +117,72 @@ function navigateToPath(path: LearningPath) {
                 </span>
               </div>
               <ChevronRight class="w-4 h-4 text-neutral-600 group-hover:text-orange-400 transition-colors" />
-            </template>
-            <template v-else>
+            </div>
+
+            <!-- Progress bar -->
+            <div
+              v-if="getCompletedCount(p.id) > 0"
+              class="mt-3 h-1 rounded-full bg-neutral-800 overflow-hidden"
+            >
+              <div
+                class="h-full rounded-full bg-gradient-to-r from-emerald-500 to-emerald-400 transition-all duration-500"
+                :style="{ width: `${(getCompletedCount(p.id) / getLessonCount(p.id)) * 100}%` }"
+              ></div>
+            </div>
+          </button>
+        </div>
+      </section>
+
+      <!-- Coming Soon Paths -->
+      <section v-if="comingSoonPaths.length > 0">
+        <h2 class="text-xl font-semibold text-neutral-400 mb-6 flex items-center gap-2">
+          <Clock class="w-5 h-5" />
+          Coming Soon
+        </h2>
+        <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div
+            v-for="p in comingSoonPaths"
+            :key="p.id"
+            class="group relative flex flex-col p-6 rounded-2xl border border-neutral-800/50 bg-neutral-900/40 opacity-60 text-left"
+          >
+            <!-- Gradient accent at top -->
+            <div
+              :class="[
+                'absolute inset-x-0 top-0 h-1 rounded-t-2xl bg-gradient-to-r opacity-20',
+                p.color,
+              ]"
+            ></div>
+
+            <!-- Icon -->
+            <div
+              :class="[
+                'w-12 h-12 rounded-xl flex items-center justify-center text-2xl mb-4 bg-gradient-to-br shadow-none',
+                p.color,
+              ]"
+            >
+              {{ p.icon }}
+            </div>
+
+            <!-- Title -->
+            <h3 class="text-lg font-semibold text-neutral-100 mb-1.5">
+              {{ p.title }}
+            </h3>
+
+            <!-- Description -->
+            <p class="text-sm text-neutral-400 leading-relaxed mb-4 flex-1">
+              {{ p.description }}
+            </p>
+
+            <!-- Footer -->
+            <div class="flex items-center justify-between">
               <span class="flex items-center gap-1.5 text-xs text-neutral-500">
                 <Clock class="w-3.5 h-3.5" />
                 Coming Soon
               </span>
-            </template>
+            </div>
           </div>
-
-          <!-- Progress bar -->
-          <div
-            v-if="getLessonCount(p.id) > 0 && getCompletedCount(p.id) > 0"
-            class="mt-3 h-1 rounded-full bg-neutral-800 overflow-hidden"
-          >
-            <div
-              class="h-full rounded-full bg-gradient-to-r from-emerald-500 to-emerald-400 transition-all duration-500"
-              :style="{ width: `${(getCompletedCount(p.id) / getLessonCount(p.id)) * 100}%` }"
-            ></div>
-          </div>
-        </button>
-      </div>
+        </div>
+      </section>
     </main>
   </div>
 </template>

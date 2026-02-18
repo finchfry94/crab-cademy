@@ -23,10 +23,12 @@ export const mockTauri = async (page: Page) => {
                         // Simulate a successful test run with multiple potential test names
                         // We include names for all desktop lessons we are testing
                         return `
-running 3 tests
+running 5 tests
 test test_args_collection ... ok
 test test_conceptual ... ok
-test result: ok. 3 passed; 0 failed;
+test one_result ... ok
+test multiple_results ... ok
+test result: ok. 5 passed; 0 failed;
 `;
                     }
                     return "";

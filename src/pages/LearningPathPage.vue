@@ -35,6 +35,21 @@ const chapters = computed<Chapter[]>(() => {
     "4": "Understanding Ownership",
     "5": "Using Structs",
     "6": "Enums and Pattern Matching",
+    "7": "Managing Growing Projects",
+    "8": "Common Collections",
+    "9": "Error Handling",
+    "10": "Generics, Traits, and Lifetimes",
+    "11": "Writing Automated Tests",
+    "12": "An I/O Project: Command Line Program",
+    "13": "Functional Language Features",
+    "14": "More about Cargo and Crates",
+    "15": "Smart Pointers",
+    "16": "Fearless Concurrency",
+    "17": "Object-Oriented Programming Features",
+    "18": "Patterns and Matching",
+    "19": "Advanced Features",
+    "20": "Final Project: Multithreaded Web Server",
+    "21": "Appendix",
   };
 
   return Array.from(chapterMap.entries()).map(([num, chapterLessons]) => ({

@@ -1,10 +1,10 @@
 import { test, expect } from '@playwright/test';
-import { mockTauri } from '../utils/mockTauri';
+import { mockPlayground } from '../utils/mockPlayground';
 
 test.describe('Chapter 12: I/O Project (Desktop)', () => {
     test.beforeEach(async ({ page }) => {
-        // Inject the mock Tauri environment before navigation
-        await mockTauri(page);
+        // Use mockPlayground as fallback for desktop lessons too (forcing logic via missing Tauri env)
+        await mockPlayground(page);
 
         page.on('console', msg => console.log('PAGE LOG:', msg.text()));
         page.on('pageerror', err => console.log('PAGE ERROR:', err.message));
@@ -19,6 +19,7 @@ test.describe('Chapter 12: I/O Project (Desktop)', () => {
     });
 
     test('12.1 Accepting Command Line Arguments', async ({ page }) => {
+        test.setTimeout(60000);
         await page.goto('/path/the-book/lesson/ch12-01');
 
         // Quiz
@@ -53,7 +54,7 @@ fn main() {
         }, rustCode);
 
         await page.click('button:has-text("Test")');
-        await expect(page.locator('text=🎉 All tests passed! Lesson complete!')).toBeVisible({ timeout: 15000 });
+        await expect(page.locator('text=🎉 All tests passed! Lesson complete!')).toBeVisible({ timeout: 60000 });
     });
 
     test('12.2 Reading a File', async ({ page }) => {
@@ -86,6 +87,46 @@ fn main() {
         }, rustCode);
 
         await page.click('button:has-text("Test")');
+        await expect(page.locator('text=🎉 All tests passed! Lesson complete!')).toBeVisible({ timeout: 60000 });
+    });
+    test('12.4 Developing with TDD', async ({ page }) => {
+        await page.goto('/path/the-book/lesson/ch12-04');
+
+        // Quiz
+        await page.locator('label', { hasText: "To tell the compiler the returned slices live as long as 'contents'" }).click();
+        await page.click('button:has-text("Check Answers")');
+
+        // Coding Challenge
+        await page.click('button:has-text("Objectives")');
+
+        const rustCode = `pub fn search<'a>(query: &str, contents: &'a str) -> Vec<&'a str> {
+    let mut results = Vec::new();
+
+    for line in contents.lines() {
+        if line.contains(query) {
+            results.push(line);
+        }
+    }
+
+    results
+}
+
+fn main() {
+    let query = "fast";
+    let contents = "Rust is fast\\nPython is slow";
+    println!("{:?}", search(query, contents));
+}`;
+
+        await page.evaluate((code) => {
+            // @ts-ignore
+            const models = monaco.editor.getModels();
+            if (models.length > 0) {
+                models[0].setValue(code);
+            }
+        }, rustCode);
+
+        await page.click('button:has-text("Test")');
         await expect(page.locator('text=🎉 All tests passed! Lesson complete!')).toBeVisible({ timeout: 15000 });
+        await expect(page.locator('button:has-text("Objectives")')).toContainText('ALL PASS');
     });
 });

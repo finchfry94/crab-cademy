@@ -7,15 +7,19 @@ export const ch11Lessons: Lesson[] = [
         title: "How to Write Tests",
         sort_order: 110,
         environment: "browser",
-        content: `# How to Write Tests
+        content: `# Writing Tests
 
-Tests are Rust functions that verify that the non-test code is functioning in the expected manner. 
+Welcome to Software Engineering 101.
 
-## The Anatomy of a Test Function
+In many university courses, you write code, submit it, get a grade, and never touch it again. In the real world, code lives for years. It gets modified, refactored, and extended.
 
-A test function is a function that’s annotated with the _BT_#[test]_BT_ attribute. 
+How do you ensure that your changes today didn't break the feature you wrote last year? **Automated Tests.**
 
-_BT__BT__BT_rust
+## The Anatomy of a Rust Test
+
+A test in Rust is just a function annotated with the \`#[test]\` attribute. Using \`cargo test\`, Rust builds a test runner binary that executes these annotated functions.
+
+\`\`\`rust
 #[cfg(test)]
 mod tests {
     #[test]
@@ -24,31 +28,69 @@ mod tests {
         assert_eq!(result, 4);
     }
 }
-_BT__BT__BT_
+\`\`\`
 
-## Macros for Testing
-- _BT_assert!(condition)_BT_: Panics if condition is false.
-- _BT_assert_eq!(a, b)_BT_: Panics if _BT_a != b_BT_.
-- _BT_assert_ne!(a, b)_BT_: Panics if _BT_a == b_BT_.
+## Assertions
 
-## Checking for Panics
-Use the _BT_#[should_panic]_BT_ attribute to verify that code panics when it should!`.replace(/_BT_/g, '`'),
+Tests typically use macros to check conditions:
+
+*   **\`assert!(condition)\`**: Panics if the condition is false.
+*   **\`assert_eq!(left, right)\`**: Panics if \`left != right\`. (Prints both values on failure).
+*   **\`assert_ne!(left, right)\`**: Panics if \`left == right\`.
+
+## Testing Panics
+
+Sometimes, you *expect* code to fail (e.g., validating bad input). You can use \`#[should_panic]\` to verify this behavior:
+
+\`\`\`rust
+#[test]
+#[should_panic(expected = "Divide by zero")]
+fn test_crash() {
+    divide(10, 0); // Should panic!
+}
+\`\`\`
+
+## Unit vs Integration Tests (The Mental Model)
+
+*   **Unit Tests:** Small, focused, fast. They test one function in isolation. They live in the *same file* as the code (usually in a \`mod tests\`). They can test private functions.
+*   **Integration Tests:** Broad, realistic, slower. They test how multiple parts of your library work together. They live in a separate \`tests/\` directory. They can only call \`pub\` functions.
+
+## ⚠️ Common Mistakes
+
+1.  **Testing implementation details** — Try to test *behavior* (what it does), not *implementation* (how it does it). If you refactor the code but the behavior stays the same, your tests shouldn't break.
+2.  **Ignoring test output** — Use \`cargo test -- --nocapture\` if you want to see \`println!\` output from passing tests.`,
         quiz: [
             {
-                question: "Which attribute identifies a function as a test?",
-                options: ["#[cfg(test)]", "#[test]", "#[check]", "#[verify]"],
+                question: "Which attribute marks a function as a test?",
+                options: ["#[test]", "#[check]", "#[verify]", "test:"],
+                correctIndex: 0,
+            },
+            {
+                question: "What macro checks for equality?",
+                options: ["assert!", "assert_eq!", "verify_equals!", "check_eq!"],
                 correctIndex: 1,
             },
             {
-                question: "Which macro would you use to verify that two values are NOT equal?",
-                options: ["assert!", "assert_eq!", "assert_ne!", "panic!"],
-                correctIndex: 2,
+                question: "Where do unit tests usually live?",
+                options: [
+                    "In a separate tests/ folder",
+                    "In the same file as the code, inside a `tests` module",
+                    "In the Cargo.toml file",
+                    "In documentation comments only",
+                ],
+                correctIndex: 1,
             },
         ],
         objectives: `## Your Mission
 
-1. Write a function _BT_add_three(n: i32) -> i32_BT_.
-2. Write a test function _BT_test_add_three_BT_ that uses _BT_assert_eq!_BT_ to verify the function works correctly.`.replace(/_BT_/g, '`'),
+We're not writing "production" code today—we're writing the safety net!
+
+1.  Write a function _BT_add(a: i32, b: i32) -> i32_BT_ (the code to be tested).
+2.  Write a *test function* named _BT_test_add_BT_.
+    *   Annotate it with _BT_#[test]_BT_.
+    *   Inside, assert that _BT_add(2, 2)_BT_ equals _BT_4_BT_.
+
+*Note: In this lesson environment, just write the functions. The runner will execute them.*`.replace(/_BT_/g, '`'),
         test_code: `#[cfg(test)]
 mod tests {
     use super::*;

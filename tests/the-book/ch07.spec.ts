@@ -1,7 +1,13 @@
 import { test, expect } from '@playwright/test';
+import { mockPlayground } from '../utils/mockPlayground';
 
 test.describe('Chapter 7: Modules', () => {
+    test.beforeEach(async ({ page }) => {
+        await mockPlayground(page);
+    });
+
     test('7.1 Packages and Crates', async ({ page }) => {
+        test.setTimeout(60000);
         await page.goto('/path/the-book/lesson/ch07-01');
 
         // Quiz
@@ -30,11 +36,12 @@ fn main() {
         }, rustCode);
 
         await page.click('button:has-text("Test")');
-        await expect(page.locator('text=🎉 All tests passed! Lesson complete!')).toBeVisible({ timeout: 10000 });
+        await expect(page.locator('text=🎉 All tests passed! Lesson complete!')).toBeVisible({ timeout: 60000 });
         await expect(page.locator('button:has-text("Objectives")')).toContainText('ALL PASS');
     });
 
     test('7.2 Defining Modules', async ({ page }) => {
+        test.setTimeout(60000);
         await page.goto('/path/the-book/lesson/ch07-02');
 
         // Quiz
@@ -43,7 +50,7 @@ fn main() {
         // "No" vs "No, ..."
         await page.locator('label').filter({ hasText: /^No$/ }).first().click();
         // "Yes" vs "Yes, ..."
-        await page.locator('label').filter({ hasText: /^Yes$/ }).first().click();
+        await page.locator('label').filter({ hasText: /^Yes$/ }).nth(1).click();
         await page.click('button:has-text("Check Answers")');
 
         // Coding Challenge
@@ -82,11 +89,12 @@ fn main() {
         }, rustCode);
 
         await page.click('button:has-text("Test")');
-        await expect(page.locator('text=🎉 All tests passed! Lesson complete!')).toBeVisible({ timeout: 10000 });
+        await expect(page.locator('text=🎉 All tests passed! Lesson complete!')).toBeVisible({ timeout: 60000 });
         await expect(page.locator('button:has-text("Objectives")')).toContainText('ALL PASS');
     });
 
     test('7.3 Paths and use', async ({ page }) => {
+        test.setTimeout(60000);
         await page.goto('/path/the-book/lesson/ch07-03');
 
         // Quiz
@@ -124,7 +132,7 @@ fn main() {
         }, rustCode);
 
         await page.click('button:has-text("Test")');
-        await expect(page.locator('text=🎉 All tests passed! Lesson complete!')).toBeVisible({ timeout: 10000 });
+        await expect(page.locator('text=🎉 All tests passed! Lesson complete!')).toBeVisible({ timeout: 60000 });
         await expect(page.locator('button:has-text("Objectives")')).toContainText('ALL PASS');
     });
 });

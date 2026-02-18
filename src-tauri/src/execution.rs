@@ -115,6 +115,11 @@ fn validate_code(code: &str) -> Result<(), String> {
 
 /// Execute Rust code with optional sandbox validation
 pub fn execute_rust_code(code: &str, use_sandbox: bool) -> String {
+    // Check if code requires heavy dependencies (Polars)
+    if code.contains("polars") {
+        return execute_with_runner(code);
+    }
+
     // Step 1: Validate code for security violations if requested
     if use_sandbox {
         if let Err(e) = validate_code(code) {
@@ -137,7 +142,28 @@ pub fn execute_rust_code(code: &str, use_sandbox: bool) -> String {
     }
 
     // Step 4: Compile with rustc
-    let compile = Command::new("rustc")
+    let mut rustc_path = "rustc".to_string();
+
+    // Check if rustc works
+    if Command::new(&rustc_path).arg("--version").output().is_err() {
+        #[cfg(not(windows))]
+        let home = std::env::var("HOME").unwrap_or_default();
+        #[cfg(windows)]
+        let home = std::env::var("USERPROFILE").unwrap_or_default();
+
+        if !home.is_empty() {
+            let cargo_rustc = std::path::PathBuf::from(home)
+                .join(".cargo")
+                .join("bin")
+                .join(if cfg!(windows) { "rustc.exe" } else { "rustc" });
+
+            if cargo_rustc.exists() {
+                rustc_path = cargo_rustc.to_string_lossy().into_owned();
+            }
+        }
+    }
+
+    let compile = Command::new(&rustc_path)
         .arg(&main_rs)
         .arg("-o")
         .arg(&binary)
@@ -145,7 +171,7 @@ pub fn execute_rust_code(code: &str, use_sandbox: bool) -> String {
 
     let compile = match compile {
         Ok(out) => out,
-        Err(e) => return format!("Error running rustc: {}", e),
+        Err(e) => return format!("Error running rustc: {} (tried {})", e, rustc_path),
     };
 
     if !compile.status.success() {
@@ -168,5 +194,75 @@ pub fn execute_rust_code(code: &str, use_sandbox: bool) -> String {
             }
         }
         Err(e) => format!("Error running binary: {}", e),
+    }
+}
+
+/// Execute code using the persistent Cargo project 'playground_runner'
+fn execute_with_runner(code: &str) -> String {
+    // Path to the runner project
+    // In dev, this is relative to where the command is run (usually project root or src-tauri)
+    // We'll try to locate it.
+    let possible_paths = [
+        "src-tauri/playground_runner",
+        "playground_runner",
+        "../playground_runner", // If running from src-tauri/target/debug/...
+    ];
+
+    let mut runner_path = std::path::PathBuf::new();
+    let mut found = false;
+
+    for path in possible_paths {
+        if std::path::Path::new(path).exists() {
+            runner_path = std::path::PathBuf::from(path);
+            found = true;
+            break;
+        }
+    }
+
+    if !found {
+        // Fallback: Try to find it relative to the current executable
+        if let Ok(mut exe_path) = std::env::current_exe() {
+            exe_path.pop(); // binary dir
+            exe_path.pop(); // debug/release
+            exe_path.pop(); // target
+            exe_path.push("playground_runner");
+            if exe_path.exists() {
+                runner_path = exe_path;
+                found = true;
+            }
+        }
+    }
+
+    if !found {
+        return "Error: Could not locate 'playground_runner' directory.".to_string();
+    }
+
+    // 1. Write the code to src/main.rs
+    let main_rs = runner_path.join("src/main.rs");
+    if let Err(e) = fs::write(&main_rs, code) {
+        return format!("Error writing code to runner: {}", e);
+    }
+
+    // 2. Run 'cargo run --quiet'
+    // We use --quiet to suppress compilation output, but we might want to capture it if it fails.
+    let output = Command::new("cargo")
+        .arg("run")
+        .arg("--quiet")
+        .arg("--manifest-path")
+        .arg(runner_path.join("Cargo.toml"))
+        .output();
+
+    match output {
+        Ok(out) => {
+            let stdout = String::from_utf8_lossy(&out.stdout);
+            let stderr = String::from_utf8_lossy(&out.stderr);
+            if out.status.success() {
+                format!("{}{}", stdout, stderr) // stderr might contain warnings
+            } else {
+                // If it failed, it might be a compilation error which cargo prints to stderr
+                format!("Execution Error:\n{}{}", stdout, stderr)
+            }
+        }
+        Err(e) => format!("Error executing cargo: {}", e),
     }
 }

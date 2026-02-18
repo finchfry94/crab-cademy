@@ -77,16 +77,27 @@ fn main() {
 Now we’ll add the functionality to read the file specified in the _BT_file_path_BT_ argument.
 
 ## Reading with fs::read_to_string
-We use _BT_std::fs_BT_ to handle files.
+Now that we know *what* the user wants to find (the query) and *where* they want to find it (the filename), we need to actually open and read that file.
+
+## The _BT_std::fs_BT_ Module
+
+Rust's standard library provides the _BT_fs_BT_ (filesystem) module for this.
 
 _BT__BT__BT_rust
 use std::fs;
 
+// read_to_string takes a path and returns a Result<String, Error>
 let contents = fs::read_to_string(file_path)
-    .expect("Should have been able to read the file");
+    .expect("Something went wrong reading the file");
 _BT__BT__BT_
 
-This reads the entire file into a _BT_String_BT_.`.replace(/_BT_/g, '`'),
+This function:
+1.  Opens the file.
+2.  Allocates a new String.
+3.  Reads all bytes from the file into that String.
+4.  Closes the file.
+
+It handles all the messy system calls for you!`.replace(/_BT_/g, '`'),
         quiz: [
             {
                 question: "Which module contains file system functions?",
@@ -122,12 +133,19 @@ fn main() {
         environment: "browser",
         content: `# Test-Driven Development (TDD)
 
-In this lesson, we practice TDD by writing the core search logic for _BT_minigrep_BT_.
+"Red, Green, Refactor." This is the mantra of TDD.
 
-## The search function
-We want a function that takes a query and the file contents, and returns only the lines that contain the query.
+Instead of writing code and then checking if it works, passing TDD means we:
+1.  **Write a test that fails** (Red).
+2.  **Write just enough code to make it pass** (Green).
+3.  **Clean up the code** (Refactor).
+
+## Writing the Search Logic
+
+We want a function _BT_search_BT_ that takes a query and text, and returns only the matching lines.
 
 _BT__BT__BT_rust
+// note the explicit lifetimes 'a!
 pub fn search<'a>(query: &str, contents: &'a str) -> Vec<&'a str> {
     let mut results = Vec::new();
 
@@ -141,7 +159,8 @@ pub fn search<'a>(query: &str, contents: &'a str) -> Vec<&'a str> {
 }
 _BT__BT__BT_
 
-Note the use of lifetimes: the returned vector contains string slices that reference _BT_contents_BT_, so they must live as long as _BT_contents_BT_.`.replace(/_BT_/g, '`'),
+## Why Lifetimes here?
+Returns a _BT_Vec<&'a str>_BT_. We are returning *references* to slices of the original _BT_contents_BT_. Use lifetimes to tell the compiler: "The returned lines are just pointers into the original _BT_contents_BT_ string. Don't drop _BT_contents_BT_ while we are still looking at these lines!"`.replace(/_BT_/g, '`'),
         quiz: [
             {
                 question: "Why do we need lifetime annotations in the search function?",
@@ -156,8 +175,8 @@ Note the use of lifetimes: the returned vector contains string slices that refer
         ],
         objectives: `## Your Mission
 
-Implement the _BT_search_BT_ function.
-It should return all lines from _BT_contents_BT_ that contain the _BT_query_BT_ string.`.replace(/_BT_/g, '`'),
+1. Implement the _BT_search_BT_ function.
+2. It should return all lines from _BT_contents_BT_ that contain the _BT_query_BT_ string.`.replace(/_BT_/g, '`'),
         test_code: `#[cfg(test)]
 mod tests {
     use super::*;
@@ -165,7 +184,7 @@ mod tests {
     #[test]
     fn one_result() {
         let query = "duct";
-        let contents = "\
+        let contents = "\\
 Rust:
 safe, fast, productive.
 Pick three.";
@@ -176,7 +195,7 @@ Pick three.";
     #[test]
     fn multiple_results() {
         let query = "the";
-        let contents = "\
+        let contents = "\\
 The quick brown fox
 jumps over the lazy dog.
 The end.";
@@ -192,7 +211,7 @@ The end.";
 
 fn main() {
     let query = "fast";
-    let contents = "Rust is fast\nPython is slow";
+    let contents = "Rust is fast\\nPython is slow";
     println!("{:?}", search(query, contents));
 }
 `,

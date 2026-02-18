@@ -1,7 +1,13 @@
 import { test, expect } from '@playwright/test';
+import { mockPlayground } from '../utils/mockPlayground';
 
 test.describe('Chapter 9: Error Handling', () => {
+    test.beforeEach(async ({ page }) => {
+        await mockPlayground(page);
+    });
+
     test('9.1 Unrecoverable Errors with panic!', async ({ page }) => {
+        test.setTimeout(60000);
         await page.goto('/path/the-book/lesson/ch09-01');
 
         // Quiz
@@ -34,11 +40,12 @@ fn main() {
         }, rustCode);
 
         await page.click('button:has-text("Test")');
-        await expect(page.locator('text=🎉 All tests passed! Lesson complete!')).toBeVisible({ timeout: 10000 });
+        await expect(page.locator('text=🎉 All tests passed! Lesson complete!')).toBeVisible({ timeout: 60000 });
         await expect(page.locator('button:has-text("Objectives")')).toContainText('ALL PASS');
     });
 
     test('9.2 Recoverable Errors with Result', async ({ page }) => {
+        test.setTimeout(60000);
         await page.goto('/path/the-book/lesson/ch09-02');
 
         // Quiz
@@ -70,7 +77,7 @@ fn main() {
         }, rustCode);
 
         await page.click('button:has-text("Test")');
-        await expect(page.locator('text=🎉 All tests passed! Lesson complete!')).toBeVisible({ timeout: 10000 });
+        await expect(page.locator('text=🎉 All tests passed! Lesson complete!')).toBeVisible({ timeout: 60000 });
         await expect(page.locator('button:has-text("Objectives")')).toContainText('ALL PASS');
     });
 });

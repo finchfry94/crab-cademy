@@ -11,7 +11,7 @@ const PLAYGROUND_URL = "https://play.rust-lang.org/execute";
  * Detect if we are running inside Tauri
  */
 export function isTauri(): boolean {
-    return !!(window as any).__TAURI_INTERNALS__;
+    return !!(window as any).__TAURI_INTERNALS__ || !!(window as any).__TAURI__;
 }
 
 export interface PlaygroundRequest {
@@ -46,22 +46,35 @@ export interface TestRunResult {
  * Execute Rust code. Uses Tauri if running locally and requested, otherwise uses Playground.
  */
 export async function executeRustCode(code: string, environment: "browser" | "desktop" = "browser"): Promise<string> {
-    if (environment === "desktop" && isTauri()) {
+    const isLocal = isTauri();
+
+    // Always prefer Tauri if we are inside it, unless it's explicitly a browser-only task 
+    // (though in this app, desktop environment is a superset of browser).
+    if (isLocal) {
         try {
-            // Desktop environment in Tauri: Run natively without sandbox
-            return await invoke<string>("run_code", { code, useSandbox: false });
+            const rawOutput = await invoke<string>("run_code", { code, useSandbox: false });
+            return `\x1b[33m[Running via Local Rust]\x1b[0m\r\n${rawOutput}`;
         } catch (e: any) {
+            // Fallback to playground if it wasn't a desktop-required lesson
+            if (environment !== "desktop") {
+                const playgroundOutput = await runViaPlayground(code, false);
+                return `\x1b[31mTauri Error: ${e.message || e.toString()}\x1b[0m\r\n\x1b[33m[Falling back to Rust Playground]\x1b[0m\r\n${playgroundOutput}`;
+            }
             return `Tauri Error: ${e.message || e.toString()}`;
         }
     }
 
-    // Default: Playground API
+    const output = await runViaPlayground(code, false);
+    return `\x1b[33m[Running via Rust Playground]\x1b[0m\r\n${output}`;
+}
+
+async function runViaPlayground(code: string, isTest: boolean): Promise<string> {
     const request: PlaygroundRequest = {
         channel: "stable",
         mode: "debug",
         edition: "2021",
         crateType: "bin",
-        tests: false,
+        tests: isTest,
         code,
         backtrace: false,
     };
@@ -103,19 +116,29 @@ export async function runTests(
     environment: "browser" | "desktop" = "browser"
 ): Promise<TestRunResult> {
     const combinedCode = `${userCode}\n\n${testCode}`;
+    const isLocal = isTauri();
 
-    if (environment === "desktop" && isTauri()) {
+    if (isLocal) {
         try {
             const rawOutput = await invoke<string>("run_code", { code: combinedCode, useSandbox: false });
             const testResults = parseTestOutput(rawOutput);
 
+            // Check for execution errors (like rustc not found)
+            const isError = rawOutput.startsWith("Error:") || rawOutput.includes("Error running rustc");
+
             return {
                 results: testResults,
-                // For local execution, we rely on parsed results if available
-                allPassed: testResults.length > 0 ? testResults.every((t) => t.passed) : !rawOutput.toLowerCase().includes("failed"),
-                rawOutput,
+                allPassed: !isError && (testResults.length > 0 ? testResults.every((t) => t.passed) : !rawOutput.toLowerCase().includes("failed")),
+                rawOutput: `\x1b[33m[Running via Local Rust]\x1b[0m\r\n${rawOutput}`,
             };
         } catch (e: any) {
+            if (environment !== "desktop") {
+                const playgroundResult = await runTestsViaPlayground(combinedCode);
+                return {
+                    ...playgroundResult,
+                    rawOutput: `\x1b[31mTauri Error: ${e.message || e.toString()}\x1b[0m\r\n\x1b[33m[Falling back to Rust Playground]\x1b[0m\r\n${playgroundResult.rawOutput}`,
+                };
+            }
             return {
                 results: [],
                 allPassed: false,
@@ -124,6 +147,14 @@ export async function runTests(
         }
     }
 
+    const result = await runTestsViaPlayground(combinedCode);
+    return {
+        ...result,
+        rawOutput: `\x1b[33m[Running via Rust Playground]\x1b[0m\r\n${result.rawOutput}`,
+    };
+}
+
+async function runTestsViaPlayground(combinedCode: string): Promise<Omit<TestRunResult, "rawOutput"> & { rawOutput: string }> {
     // Default: Playground API
     const request: PlaygroundRequest = {
         channel: "stable",

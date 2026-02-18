@@ -8,6 +8,8 @@
     "build": "vue-tsc --noEmit && vite build",
     "preview": "vite preview",
     "test": "npx playwright test",
+    "test:e2e": "npx playwright test",
+    "test:e2e:build": "npm run build && TEST_BUILD=1 npx playwright test",
     "tauri": "tauri",
     "tauri:build": "tauri build"
   },
