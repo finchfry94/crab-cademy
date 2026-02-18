@@ -45,14 +45,14 @@ export interface TestRunResult {
 /**
  * Execute Rust code. Uses Tauri if running locally and requested, otherwise uses Playground.
  */
-export async function executeRustCode(code: string, environment: "browser" | "desktop" = "browser"): Promise<string> {
+export async function executeRustCode(code: string, environment: "browser" | "desktop" = "browser", args: string[] = []): Promise<string> {
     const isLocal = isTauri();
 
     // Always prefer Tauri if we are inside it, unless it's explicitly a browser-only task 
     // (though in this app, desktop environment is a superset of browser).
     if (isLocal) {
         try {
-            const rawOutput = await invoke<string>("run_code", { code, useSandbox: false, isTest: false });
+            const rawOutput = await invoke<string>("run_code", { code, useSandbox: false, isTest: false, args });
             return `\x1b[33m[Running via Local Rust]\x1b[0m\r\n${rawOutput}`;
         } catch (e: any) {
             // Fallback to playground if it wasn't a desktop-required lesson
@@ -113,14 +113,15 @@ async function runViaPlayground(code: string, isTest: boolean): Promise<string> 
 export async function runTests(
     userCode: string,
     testCode: string,
-    environment: "browser" | "desktop" = "browser"
+    environment: "browser" | "desktop" = "browser",
+    args: string[] = []
 ): Promise<TestRunResult> {
     const combinedCode = `${userCode}\n\n${testCode}`;
     const isLocal = isTauri();
 
     if (isLocal) {
         try {
-            const rawOutput = await invoke<string>("run_code", { code: combinedCode, useSandbox: false, isTest: true });
+            const rawOutput = await invoke<string>("run_code", { code: combinedCode, useSandbox: false, isTest: true, args });
             const cleanOutput = stripAnsi(rawOutput);
             const testResults = parseTestOutput(rawOutput);
 

@@ -120,6 +120,7 @@ pub fn execute_rust_code(
     code: &str,
     use_sandbox: bool,
     is_test: bool,
+    args: Vec<String>,
 ) -> String {
     // Check if code requires heavy dependencies (Polars)
     if code.contains("polars") {
@@ -190,7 +191,7 @@ pub fn execute_rust_code(
     }
 
     // Step 5: Run the binary
-    let run = Command::new(&binary).output();
+    let run = Command::new(&binary).args(&args).output();
 
     match run {
         Ok(output) => {

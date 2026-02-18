@@ -9,13 +9,13 @@ import { useCodeRunner } from "../composables/useCodeRunner";
 import { useLessonState } from "../composables/useLessonState";
 import { markCompleted } from "../services/progressStore";
 import { runTests, colorizeRustOutput } from "../services/codeRunner";
-import { Play, FlaskConical, ArrowLeft } from "lucide-vue-next";
+import { Play, FlaskConical, ArrowLeft, ChevronRight } from "lucide-vue-next";
 
 const props = defineProps<{ pathId: string; id: string }>();
 const router = useRouter();
 
 const { runCode, isRunning } = useCodeRunner();
-const { currentLesson, loadLessonById, setTestResults, setActiveTab, allTestsPassed } = useLessonState();
+const { currentLesson, loadLessonById, setTestResults, setActiveTab, allTestsPassed, nextLesson } = useLessonState();
 const code = ref("// Write your Rust code here\nfn main() {\n    println!(\"Hello, CrabCademy!\");\n}\n");
 const terminalRef = ref<InstanceType<typeof OutputTerminal> | null>(null);
 const isTestRunning = ref(false);
@@ -36,7 +36,7 @@ async function handleRun() {
   if (terminalRef.value && currentLesson.value) {
     terminalRef.value.clear();
     terminalRef.value.writeln("\x1b[33mRunning...\x1b[0m");
-    const output = await runCode(code.value, currentLesson.value.environment);
+    const output = await runCode(code.value, currentLesson.value.environment, currentLesson.value.default_args);
     terminalRef.value.write(colorizeRustOutput(output));
   }
 }
@@ -76,6 +76,12 @@ async function handleRunTests() {
 
 function goHome() {
   router.push({ name: "learningPath", params: { pathId: props.pathId } });
+}
+
+function goToNextLesson() {
+  if (nextLesson.value) {
+    router.push({ name: "lesson", params: { pathId: props.pathId, id: nextLesson.value.id } });
+  }
 }
 </script>
 
@@ -118,6 +124,14 @@ function goHome() {
             >
               <Play class="w-4 h-4 fill-current" />
               {{ isRunning ? 'Running...' : 'Run' }}
+            </button>
+            <button
+              v-if="allTestsPassed && nextLesson"
+              @click="goToNextLesson"
+              class="flex items-center gap-2 px-3 py-1.5 bg-neutral-800 hover:bg-neutral-700 text-green-400 hover:text-green-300 rounded-lg text-sm font-medium border border-green-500/30 hover:border-green-500/50 transition-all duration-200 animate-pulse"
+            >
+              <span>Next Lesson</span>
+              <ChevronRight class="w-4 h-4" />
             </button>
             
           </div>

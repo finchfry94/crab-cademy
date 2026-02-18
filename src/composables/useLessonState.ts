@@ -1,11 +1,12 @@
 import { ref, computed } from "vue";
-import { getFirstLesson, getLesson, type Lesson } from "../data/lessons";
+import { getFirstLesson, getLesson, getPathLessons, type Lesson } from "../data/lessons";
 import { getProgress, markLessonRead, saveUserCode, type Progress } from "../services/progressStore";
 import type { TestResult } from "../services/codeRunner";
 
 export type { Lesson };
 
 const currentLesson = ref<Lesson | null>(null);
+const currentPathId = ref<string | null>(null);
 const progress = ref<Progress | null>(null);
 const activeTab = ref<"lesson" | "objectives" | "results">("lesson");
 const isLoading = ref(true);
@@ -21,8 +22,19 @@ export function useLessonState() {
         testResults.value.length > 0 && testResults.value.every((t) => t.passed)
     );
 
+    const nextLesson = computed(() => {
+        if (!currentLesson.value || !currentPathId.value) return null;
+        const lessons = getPathLessons(currentPathId.value);
+        const currentIndex = lessons.findIndex((l) => l.id === currentLesson.value?.id);
+        if (currentIndex === -1 || currentIndex === lessons.length - 1) {
+            return null;
+        }
+        return lessons[currentIndex + 1];
+    });
+
     async function loadLesson(pathId: string) {
         isLoading.value = true;
+        currentPathId.value = pathId;
         try {
             currentLesson.value = getFirstLesson(pathId);
             if (currentLesson.value) {
@@ -37,6 +49,7 @@ export function useLessonState() {
 
     async function loadLessonById(pathId: string, id: string) {
         isLoading.value = true;
+        currentPathId.value = pathId;
         activeTab.value = "lesson";
         quizCompleted.value = false;
         quizAnswers.value = {};
@@ -104,6 +117,7 @@ export function useLessonState() {
         testResults,
         hasRunTests,
         allTestsPassed,
+        nextLesson,
         loadLesson,
         loadLessonById,
         setQuizAnswer,

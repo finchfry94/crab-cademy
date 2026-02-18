@@ -51,9 +51,9 @@ function navigateToPath(path: LearningPath) {
         <h1 class="text-5xl font-extrabold tracking-tight mb-3">
           <span class="bg-gradient-to-r from-orange-400 via-orange-300 to-red-400 bg-clip-text text-transparent">CrabCademy</span>
         </h1>
-        <p class="text-lg text-neutral-400 max-w-xl mx-auto leading-relaxed">
-          Learn Rust interactively — write and run real Rust code right in your browser.
-          Pick a learning path to get started.
+        <p class="text-lg text-neutral-400 max-w-2xl mx-auto leading-relaxed">
+          Start coding Rust instantly in your browser with zero friction. Ready for more? 
+          Download our desktop app to unlock system-level capabilities like file I/O, powered directly by your local machine.
         </p>
       </div>
     </header>

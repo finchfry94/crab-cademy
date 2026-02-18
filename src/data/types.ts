@@ -15,6 +15,7 @@ export interface Lesson {
     starter_code: string;
     sort_order: number;
     environment: "browser" | "desktop";
+    default_args?: string[];
 }
 
 export interface LearningPath {

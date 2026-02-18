@@ -37,6 +37,10 @@ test.describe('Chapter 12: I/O Project (Desktop)', () => {
 fn main() {
     let args: Vec<String> = env::args().collect();
 
+    if args.len() < 3 {
+        return;
+    }
+
     // Extract query and file_path
     let query = &args[1];
     let file_path = &args[2];
@@ -70,7 +74,7 @@ fn main() {
         const rustCode = `use std::fs;
 
 fn main() {
-    let file_path = "test.txt";
+    let file_path = "poem.txt";
     // Read the file and print contents
     let contents = fs::read_to_string(file_path)
         .expect("Should have been able to read the file");

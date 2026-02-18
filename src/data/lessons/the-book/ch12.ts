@@ -7,6 +7,7 @@ export const ch12Lessons: Lesson[] = [
         title: "Accepting Command Line Arguments",
         sort_order: 120,
         environment: "desktop",
+        default_args: ["searchstring", "poem.txt"],
         content: `# Accepting Command Line Arguments
 
 Let's start building _BT_minigrep_BT_! The first step is to accept the two command line arguments: the file path and the string to search for.
@@ -23,7 +24,28 @@ fn main() {
 }
 _BT__BT__BT_
 
-Note: _BT_args[0]_BT_ is the name of the program binary itself.`.replace(/_BT_/g, '`'),
+Note: _BT_args[0]_BT_ is the name of the program binary itself.
+
+## Running with Arguments
+
+### Standard Rust (CLI)
+When working on your local machine, you pass arguments after a double dash:
+_BT_cargo run -- searchstring filename.txt_BT_
+
+### CrabCademy Playground
+In this lesson, the playground is configured to automatically pass _BT_searchstring_BT_ and _BT_poem.txt_BT_ as arguments when you run your code!
+
+> [!NOTE]
+> **Behind the Scenes**: When you click "Run", the playground compiles your code into a real binary and executes it with \`["searchstring", "poem.txt"]\` appended to the command usage. This simulates typing \`cargo run -- searchstring poem.txt\` in a terminal.
+
+### Why no automated tests for main()?
+You might notice the automated tests for this lesson are conceptual (verifying you know how to access vectors) rather than testing your \`main\` function directly.
+
+In Rust, \`main\` is notoriously hard to unit test because:
+1. It has no return value to check.
+2. It relies on global state (\`std::env::args\`).
+
+In **Chapter 12.3**, we will learn the "Rust Way" to solve this: refactoring our logic into a separate module that *can* be easily tested!`.replace(/_BT_/g, '`'),
         quiz: [
             {
                 question: "Which function is used to get command line arguments?",
@@ -40,7 +62,9 @@ Note: _BT_args[0]_BT_ is the name of the program binary itself.`.replace(/_BT_/g
 
 1. Use _BT_std::env::args().collect()_BT_ to get arguments.
 2. Extract the second and third arguments into variables _BT_query_BT_ and _BT_file_path_BT_.`.replace(/_BT_/g, '`'),
-        test_code: `// Conceptual test - verifies collect logic
+        test_code: `// Note: Since main() is hard to unit test directly, this test
+// verifies that you understand how to access vector elements by index.
+// Run your code to see the actual argument parsing in action!
 #[cfg(test)]
 mod tests {
     #[test]
@@ -57,12 +81,14 @@ mod tests {
 fn main() {
     let args: Vec<String> = env::args().collect();
 
+    // The playground passes "searchstring" and "poem.txt" automatically!
+    
     // Extract query and file_path
     // let query = ...
     // let file_path = ...
 
-    println!("Searching for {}", query);
-    println!("In file {}", file_path);
+    // println!("Searching for {}", query);
+    // println!("In file {}", file_path);
 }
 `,
     },
@@ -97,7 +123,47 @@ This function:
 3.  Reads all bytes from the file into that String.
 4.  Closes the file.
 
-It handles all the messy system calls for you!`.replace(/_BT_/g, '`'),
+It handles all the messy system calls for you!
+
+## Where is the file?
+
+### Standard Rust (CLI)
+You would normally create a file called _BT_poem.txt_BT_ in your project's root directory (next to _BT_Cargo.toml_BT_).
+
+### CrabCademy Playground
+The filesystem here is ephemeral. To test your code, you should **write the file first** using _BT_fs::write_BT_.
+
+## Writing with fs::write
+Before we can read a file, it must exist. In a real project, you might create it manually, but in our playground, we'll use _BT_fs::write_BT_ to create a temporary file for our program to use.
+
+_BT__BT__BT_rust
+use std::fs;
+
+fn main() {
+    let file_path = "poem.txt";
+    let content = "Rust:\\nsafe, fast, productive.";
+    
+    // write takes a path and the content to write
+    fs::write(file_path, content).unwrap();
+}
+_BT__BT__BT_
+
+> [!NOTE]
+> **Behind the Scenes**: Our playground runs in a sandboxed temporary directory that is deleted after execution. Because of this, there is no persistent "project root". Your code must create the file *during execution* so that it exists for \`read_to_string\` to find.
+
+_BT__BT__BT_rust
+use std::fs;
+
+fn main() {
+    let file_path = "poem.txt";
+    let content = "I'm nobody! Who are you?\\nAre you nobody, too?";
+    
+    // Create the file so we can read it back!
+    fs::write(file_path, content).unwrap();
+    
+    // Now you can read it...
+}
+_BT__BT__BT_`.replace(/_BT_/g, '`'),
         quiz: [
             {
                 question: "Which module contains file system functions?",
@@ -120,7 +186,11 @@ mod tests {
         starter_code: `use std::fs;
 
 fn main() {
-    let file_path = "test.txt";
+    let file_path = "poem.txt";
+    
+    // DO NOT MODIFY THIS LINE: It creates the file needed for this lesson in the temporary playground environment
+    std::fs::write(file_path, "Rust:\\nsafe, fast, productive.").unwrap();
+
     // Read the file and print contents
 }
 `,

@@ -10,12 +10,12 @@ export default defineConfig({
     workers: process.env.CI ? 1 : undefined,
     reporter: 'html',
     use: {
-        baseURL: isProduction ? 'http://localhost:4173' : 'http://localhost:5173',
+        baseURL: isProduction ? 'http://localhost:4173' : 'http://localhost:1420',
         trace: 'on-first-retry',
     },
     webServer: {
         command: isProduction ? 'npm run preview' : 'npm run dev',
-        url: isProduction ? 'http://localhost:4173' : 'http://localhost:5173',
+        url: isProduction ? 'http://localhost:4173' : 'http://localhost:1420',
         reuseExistingServer: !process.env.CI,
     },
     projects: [

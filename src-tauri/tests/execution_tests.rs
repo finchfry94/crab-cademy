@@ -5,7 +5,7 @@ use crab_cademy_lib::execution::execute_rust_code;
 #[test]
 fn test_hello_world() {
     let code = r#"fn main() { println!("Hello!"); }"#;
-    let output = execute_rust_code(None, code, true, false);
+    let output = execute_rust_code(None, code, true, false, vec![]);
     assert!(output.contains("Hello!"), "Output: {}", output);
 }
 
@@ -15,14 +15,14 @@ fn test_fs_blocked() {
         use std::fs;
         fn main() { fs::write("/tmp/test.txt", "evil"); }
     "#;
-    let output = execute_rust_code(None, code, true, false);
+    let output = execute_rust_code(None, code, true, false, vec![]);
     assert!(output.contains("Sandbox Violation"), "Output: {}", output);
 }
 
 #[test]
 fn test_unsafe_blocked() {
     let code = r#"fn main() { unsafe { } }"#;
-    let output = execute_rust_code(None, code, true, false);
+    let output = execute_rust_code(None, code, true, false, vec![]);
     assert!(output.contains("Sandbox Violation"), "Output: {}", output);
 }
 
@@ -32,7 +32,7 @@ fn test_net_blocked() {
         use std::net::TcpStream;
         fn main() { TcpStream::connect("127.0.0.1:80"); }
     "#;
-    let output = execute_rust_code(None, code, true, false);
+    let output = execute_rust_code(None, code, true, false, vec![]);
     assert!(output.contains("Sandbox Violation"), "Output: {}", output);
 }
 
@@ -42,6 +42,6 @@ fn test_process_blocked() {
         use std::process::Command;
         fn main() { Command::new("ls").status(); }
     "#;
-    let output = execute_rust_code(None, code, true, false);
+    let output = execute_rust_code(None, code, true, false, vec![]);
     assert!(output.contains("Sandbox Violation"), "Output: {}", output);
 }

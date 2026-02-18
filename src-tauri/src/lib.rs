@@ -8,8 +8,20 @@ fn greet(name: &str) -> String {
 }
 
 #[tauri::command]
-async fn run_code(app: tauri::AppHandle, code: String, use_sandbox: bool, is_test: bool) -> String {
-    execution::execute_rust_code(Some(&app), &code, use_sandbox, is_test)
+async fn run_code(
+    app: tauri::AppHandle,
+    code: String,
+    use_sandbox: bool,
+    is_test: bool,
+    args: Option<Vec<String>>,
+) -> String {
+    execution::execute_rust_code(
+        Some(&app),
+        &code,
+        use_sandbox,
+        is_test,
+        args.unwrap_or_default(),
+    )
 }
 
 use tauri_plugin_sql::{Migration, MigrationKind};
