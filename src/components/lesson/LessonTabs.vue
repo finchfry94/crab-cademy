@@ -4,6 +4,10 @@ import { useLessonState } from "../../composables/useLessonState";
 import { CheckCircle, XCircle, CircleDot, Lock, Circle } from "lucide-vue-next";
 import MarkdownIt from "markdown-it";
 
+import TextSelectionHandler from './TextSelectionHandler.vue';
+import SuggestionModal from './SuggestionModal.vue';
+import { MessageSquarePlus } from 'lucide-vue-next';
+
 const {
   currentLesson,
   activeTab,
@@ -22,6 +26,35 @@ const {
 const md = new MarkdownIt();
 const quizSubmitted = ref(false);
 const quizPassed = ref(false);
+
+// Suggestion Logic
+const showSuggestionBtn = ref(false);
+const suggestionBtnPos = ref({ top: 0, left: 0 });
+const selectedText = ref('');
+const isSuggestionModalOpen = ref(false);
+
+function handleSelection({ text, rect }: { text: string; rect: DOMRect | null }) {
+  if (!text || !rect) {
+    showSuggestionBtn.value = false;
+    return;
+  }
+
+  selectedText.value = text;
+  // Position button above selection
+  // We need to account for scroll position if we were using absolute positioning relative to document,
+  // but if we use fixed positioning it's easier.
+  // Let's use fixed positioning for the button to avoid z-index/overflow issues.
+  suggestionBtnPos.value = {
+    top: rect.top - 40, // 40px above selection
+    left: rect.left + (rect.width / 2) - 16, // centered, assuming 32px button width
+  };
+  showSuggestionBtn.value = true;
+}
+
+function openSuggestionModal() {
+  isSuggestionModalOpen.value = true;
+  showSuggestionBtn.value = false;
+}
 
 function renderMarkdown(content: string): string {
   return md.render(content);
@@ -113,10 +146,36 @@ function getTestStatus(testName: string): "pass" | "fail" | "pending" {
         class="h-full overflow-y-auto p-4"
       >
         <!-- Lesson Content -->
-        <div
-          class="prose prose-invert prose-orange max-w-none"
-          v-html="renderMarkdown(currentLesson.content)"
-        />
+        <TextSelectionHandler @selection="handleSelection">
+          <div
+            class="prose prose-invert prose-orange max-w-none"
+            v-html="renderMarkdown(currentLesson.content)"
+          />
+        </TextSelectionHandler>
+
+        <!-- Floating Suggestion Button -->
+        <Teleport to="body">
+          <button
+            v-if="showSuggestionBtn"
+            @click="openSuggestionModal"
+            class="fixed z-50 flex items-center gap-2 px-3 py-2 bg-neutral-800 text-white rounded-lg shadow-xl shadow-black/50 hover:bg-neutral-700 transition-all border border-neutral-700 animate-in fade-in zoom-in duration-200"
+            :style="{
+              top: `${suggestionBtnPos.top}px`,
+              left: `${suggestionBtnPos.left}px`,
+            }"
+          >
+            <MessageSquarePlus class="w-4 h-4 text-orange-400" />
+            <span class="text-xs font-bold">Suggest Edit</span>
+          </button>
+
+          <SuggestionModal
+            :visible="isSuggestionModalOpen"
+            :initial-text="selectedText"
+            :lesson-id="currentLesson.id"
+            :lesson-title="currentLesson.title"
+            @close="isSuggestionModalOpen = false"
+          />
+        </Teleport>
 
         <!-- Quiz Section -->
         <div class="mt-8 border-t border-neutral-800 pt-6">

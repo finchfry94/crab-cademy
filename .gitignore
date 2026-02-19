@@ -57,3 +57,4 @@ playwright-report
 
 polars_runner/target
 **/error-context.md
+.vercel
