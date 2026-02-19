@@ -18,10 +18,18 @@ export interface Lesson {
     default_args?: string[];
 }
 
+export interface Module {
+    id: string;
+    title: string;
+    description?: string;
+    chapters: string[]; // Corresponding to lesson.chapter split[0]
+}
+
 export interface LearningPath {
     id: string;
     title: string;
     description: string;
     icon: string;
     color: string; // Tailwind gradient classes, e.g. "from-orange-500 to-red-600"
+    modules?: Module[];
 }

@@ -9,31 +9,59 @@ export const ch13Lessons: Lesson[] = [
         environment: "browser",
         content: `# Closures
 
-Rust’s **closures** are anonymous functions you can save in a variable or pass as arguments to other functions.
+Rust’s **Closures** are anonymous functions you can save in a variable or pass as arguments to other functions.
 
-## Basic Syntax
-_BT__BT__BT_rust
+Think of them like functions with a "backpack." They can capture variables from the scope where they were defined and carry them around.
+
+## Syntax: The Pipes \`| |\`
+
+Closure syntax looks similar to closure definitions in Ruby or Smalltalk. We use pipes \`| |\` instead of parentheses \`()\` to hold arguments.
+
+\`\`\`rust
 let add_one = |x: i32| x + 1;
-let result = add_one(5);
-_BT__BT__BT_
+//            ^ inputs ^ body
+\`\`\`
 
 ## Capturing the Environment
-Unlike functions, closures can capture values from the scope in which they’re defined.
 
-_BT__BT__BT_rust
+This is the superpower of closures. Regular functions *cannot* see variables outside their own body. Closures can!
+
+\`\`\`rust
 let x = 4;
+
+// This closure "captures" x from the surroundings
 let equal_to_x = |z| z == x;
-assert!(equal_to_x(4));
-_BT__BT__BT_
+
+assert!(equal_to_x(4)); // true
+\`\`\`
+
+If you tried to do this with \`fn equal_to_x(z: i32) { z == x }\`, the compiler would yell at you because \`x\` is not an argument.
 
 ## Moving Ownership
-Use the _BT_move_BT_ keyword to force the closure to take ownership of values it uses.`.replace(/_BT_/g, '`'),
+
+Sometimes you want the closure to take *ownership* of the data it uses (so it can live longer than the current scope, for example). Use the \`move\` keyword:
+
+\`\`\`rust
+let x = vec![1, 2, 3];
+let equal_to_x = move |z| z == x;
+// x is now gone from the outer scope!
+\`\`\`
+
+## ⚠️ Common Mistakes
+
+1.  **Type Inference Confusion**: Closures usually infer types. But if you use strict types in one place, you can't change them later.
+    \`\`\`rust
+    let example = |x| x;
+    let s = example(String::from("hello"));
+    let n = example(5); // Error! Compiler already decided 'x' is a String.
+    \`\`\`
+2.  **Borrowing Rules apply**: If a closure borrows \`x\` immutably, you can't mutate \`x\` elsewhere until the closure is destroyed.`,
         quiz: [
             {
                 question: "What is the main difference between functions and closures?",
                 options: [
                     "Closures are faster",
-                    "Closures can capture their environment",
+                    "Closures can capture their environment (variables)",
                     "Functions can be anonymous",
                     "There is no difference"
                 ],
@@ -47,26 +75,33 @@ Use the _BT_move_BT_ keyword to force the closure to take ownership of values it
         ],
         objectives: `## Your Mission
 
-1. Create a closure that takes an integer and returns its square.
-2. Capture a variable _BT_multiplier_BT_ and use it inside the closure.`.replace(/_BT_/g, '`'),
+1. Create a closure named _BT_double_BT_.
+2. It should take one argument _BT_x_BT_ and return _BT_x * 2_BT_.
+3. Create a variable _BT_multiplier_BT_ = 10.
+4. Create a closure _BT_times_ten_BT_ that captures _BT_multiplier_BT_ and multiplies its input by it.`.replace(/_BT_/g, '`'),
         test_code: `#[cfg(test)]
 mod tests {
     use super::*;
 
     #[test]
     fn test_closure_logic() {
-        // This is a bit hard to test directly if defined in main, 
-        // but we'll verify the concept via a function that takes a closure.
-        let square = |x: i32| x * x;
-        assert_eq!(square(5), 25);
+        let n = 5;
+        let double = |x| x * 2;
+        assert_eq!(double(n), 10);
+        
+        let multiplier = 10;
+        let times_ten = |x| x * multiplier;
+        assert_eq!(times_ten(n), 50);
     }
 }`,
         starter_code: `fn main() {
-    let multiplier = 2;
-    // Define a closure 'double' that uses 'multiplier'
+    // 1. Define 'double' closure
     
-    let result = 10; // double(5)
-    println!("Result: {}", result);
+    // 2. Define 'multiplier' variable and 'times_ten' closure
+    
+    let n = 5;
+    // println!("Double 5: {}", double(5));
+    // println!("5 times 10: {}", times_ten(5));
 }
 `,
     },
@@ -78,31 +113,47 @@ mod tests {
         environment: "browser",
         content: `# Iterators
 
-The iterator pattern allows you to perform some task on a sequence of items in turn. 
+The Iterator pattern allows you to perform some task on a sequence of items in turn. 
 
-## Iterators are Lazy
-In Rust, iterators are **lazy**, meaning they have no effect until you call methods that consume the iterator to use it up.
+## The "Water Pipe" Analogy
 
-_BT__BT__BT_rust
+In Rust, iterators are **Lazy**. This means creating an iterator doesn't actually *do* anything. It's like building a system of water pipes. The water doesn't flow until you turn the tap on at the very end.
+
+\`\`\`rust
 let v1 = vec![1, 2, 3];
-let v1_iter = v1.iter(); // Nothing happens yet
-_BT__BT__BT_
+let v1_iter = v1.iter(); // No work is done here! Just setup.
+\`\`\`
 
-## Consuming Adaptors
-Methods that call _BT_next_BT_ are called **consuming adaptors**. Examples: _BT_sum()_BT_, _BT_collect()_BT_.
+## Consumer vs Adaptor
 
-## Iterator Adaptors
-Methods that produce other iterators. Examples: _BT_map()_BT_, _BT_filter()_BT_. 
+1.  **Iterator Adaptors**: These attach pipes to other pipes. They transform the data but don't pull it through yet.
+    *   \`.map(|x| x + 1)\`: "When data comes through, add 1 to it."
+    *   \`.filter(|x| x > 10)\`: "When data comes through, only let big numbers pass."
 
-_BT__BT__BT_rust
-let v2: Vec<_> = v1.iter().map(|x| x + 1).collect();
-_BT__BT__BT_`.replace(/_BT_/g, '`'),
+2.  **Consuming Adaptors**: These are the "tap" at the end. They pull data through the whole pipeline and give you a result.
+    *   \`.collect()\`: "Run the pipe and gather results into a collection (like a Vec)."
+    *   \`.sum()\`: "Run the pipe and add everything up."
+
+## Example Chain
+
+\`\`\`rust
+let v1 = vec![1, 2, 3];
+let v2: Vec<_> = v1.iter()
+                   .map(|x| x + 1)
+                   .collect();
+// v2 is [2, 3, 4]
+\`\`\`
+
+## ⚠️ Common Mistakes
+
+1.  **Forgetting \`collect()\`**: If you just write \`my_vec.iter().map(|x| x + 1);\`, the compiler will warn you "unused iterator". Why? Because iterators are lazy! Without \`collect\` (or a \`for\` loop), the code *never runs*.
+2.  **Type Annotations**: \`collect()\` is magical—it can turn an iterator into a Vec, a HashMap, a Set, etc. Because it's so flexible, Rust often needs a hint: \`let v: Vec<i32> = ...\`.`,
         quiz: [
             {
                 question: "What does it mean that iterators are 'lazy'?",
                 options: [
                     "They use very little memory",
-                    "They don't do anything until consumed",
+                    "They don't do anything until consumed (the 'tap' is turned on)",
                     "They are slower than loops",
                     "They only work on small collections"
                 ],
@@ -116,10 +167,10 @@ _BT__BT__BT_`.replace(/_BT_/g, '`'),
         ],
         objectives: `## Your Mission
 
-1. Create a vector of numbers.
-2. Use an iterator to filter out the odd numbers.
-3. Multiply each remaining (even) number by 10.
-4. Collect the result into a new vector.`.replace(/_BT_/g, '`'),
+We have a list of numbers: 1 through 6.
+1.  Filter to keep only **even** numbers.
+2.  Multiply them by **10**.
+3.  Collect them into a new Vector.`.replace(/_BT_/g, '`'),
         test_code: `#[cfg(test)]
 mod tests {
     use super::*;
@@ -138,10 +189,13 @@ mod tests {
         starter_code: `fn main() {
     let numbers = vec![1, 2, 3, 4, 5, 6];
     
-    // Use .iter(), .filter(), .map(), and .collect()
-    let evens_times_ten: Vec<i32> = vec![]; 
+    // Fill in the blanks!
+    // let result: Vec<i32> = numbers.into_iter()
+    //     .filter(...)
+    //     .map(...)
+    //     .collect();
 
-    println!("{:?}", evens_times_ten);
+    // println!("{:?}", result);
 }
 `,
     },

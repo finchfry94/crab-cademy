@@ -122,8 +122,8 @@ pub fn execute_rust_code(
     is_test: bool,
     args: Vec<String>,
 ) -> String {
-    // Check if code requires heavy dependencies (Polars)
-    if code.contains("polars") {
+    // Check if code requires heavy dependencies (Polars, Tokio)
+    if code.contains("polars") || code.contains("tokio") {
         return execute_with_runner(app, code, is_test);
     }
 
@@ -208,16 +208,16 @@ pub fn execute_rust_code(
     }
 }
 
-/// Execute code using the persistent Cargo project 'polars_runner'
+/// Execute code using the persistent Cargo project 'tauri_runner'
 fn execute_with_runner(app: Option<&tauri::AppHandle>, code: &str, is_test: bool) -> String {
     // In production, we bundle the runner as a resource.
     // In dev, it's at the project root.
     // In dev, this is relative to where the command is run (usually project root or src-tauri)
     // We'll try to locate it.
     let possible_paths = [
-        "polars_runner",
-        "../polars_runner",    // If running from src-tauri
-        "../../polars_runner", // If running from src-tauri/target/debug/...
+        "tauri_runner",
+        "../tauri_runner",    // If running from src-tauri
+        "../../tauri_runner", // If running from src-tauri/target/debug/...
     ];
 
     let mut attempted_paths = Vec::new();
@@ -238,7 +238,7 @@ fn execute_with_runner(app: Option<&tauri::AppHandle>, code: &str, is_test: bool
         // Fallback: Try to find it in Tauri resources (for bundled apps)
         if let Some(app) = app {
             if let Ok(res_path) = app.path().resource_dir() {
-                let bundled_path = res_path.join("polars_runner");
+                let bundled_path = res_path.join("tauri_runner");
                 attempted_paths.push(format!("(Resource) {}", bundled_path.display()));
                 if bundled_path.exists() {
                     runner_path = bundled_path;
@@ -254,7 +254,7 @@ fn execute_with_runner(app: Option<&tauri::AppHandle>, code: &str, is_test: bool
             exe_path.pop(); // binary dir
             exe_path.pop(); // debug/release
             exe_path.pop(); // target
-            exe_path.push("polars_runner");
+            exe_path.push("tauri_runner");
             attempted_paths.push(format!("(Exe Relative) {}", exe_path.display()));
             if exe_path.exists() {
                 runner_path = exe_path;
@@ -265,7 +265,7 @@ fn execute_with_runner(app: Option<&tauri::AppHandle>, code: &str, is_test: bool
 
     if !found {
         let mut msg =
-            String::from("Error: Could not locate 'polars_runner' directory.\nChecked paths:");
+            String::from("Error: Could not locate 'tauri_runner' directory.\nChecked paths:");
         for path in attempted_paths {
             msg.push_str(&format!("\n - {}", path));
         }

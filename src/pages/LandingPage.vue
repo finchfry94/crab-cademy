@@ -55,6 +55,15 @@ function navigateToPath(path: LearningPath) {
           Start coding Rust instantly in your browser with zero friction. Ready for more? 
           Download our desktop app to unlock system-level capabilities like file I/O, powered directly by your local machine.
         </p>
+
+        <div class="mt-8 flex justify-center gap-4">
+             <button
+               @click="router.push({ name: 'how-to' })"
+               class="px-6 py-2.5 rounded-xl bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-neutral-300 font-medium transition-colors"
+             >
+               How it Works
+             </button>
+        </div>
       </div>
     </header>
 

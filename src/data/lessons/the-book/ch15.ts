@@ -9,40 +9,76 @@ export const ch15Lessons: Lesson[] = [
         environment: "browser",
         content: `# Box<T>
 
-_BT_Box<T>_BT_ is the most straightforward smart pointer. It allows you to store data on the heap rather than the stack. 
+\u0060Box<T>\u0060 is the most straightforward smart pointer. It allows you to store data on the **Heap** rather than the **Stack**.
 
-## When to use Box
-- When you have a type whose size can’t be known at compile time (recursive types).
-- When you have a large amount of data and you want to transfer ownership but ensure the data won’t be copied.
-- When you want to own a value and you care only that it’s a type that implements a particular trait rather than being of a specific type.
+## Stack vs Heap Refresher
 
-_BT__BT__BT_rust
+*   **Stack**: Fast, organized, but limited size. Data *must* have a known, fixed size at compile time (like \`i32\`).
+*   **Heap**: Slower, disorganized, huge. Can store data of dynamic size (like \`String\` or \`Vec\`).
+
+What if you have a struct that is huge, or recursive? You can't put it on the stack. You put it in a \`Box\` (on the heap) and keep the simple pointer on the stack.
+
+\`\`\`rust
 let b = Box::new(5);
 println!("b = {}", b);
-_BT__BT__BT_`.replace(/_BT_/g, '`'),
+\`\`\`
+
+Here, \`b\` is a pointer stored on the stack. It points to the value \`5\`, which lives on the heap.
+
+## When to use Box
+1.  **Recursive Types**: A type that contains itself (like a Linked List node). Without indirection (a pointer), the size would be infinite!
+2.  **Huge Data**: Transferring ownership of large data is cheap with Box (just copying the pointer) vs expensive on stack (copying all the bits).
+3.  **Trait Objects**: When you care about a specific Trait, not the concrete type.
+
+## ⚠️ Common Mistakes
+
+1.  **Unnecessary Boxing**: Beginners sometimes Box everything coming from Java/Python. Don't! Stack allocation is free and fast. Only Box when you *have* to.
+2.  **Dereferencing**: To get the value *out* of the box, you often need to dereference it with \`*\`.
+    \`\`\`rust
+    let x = 5;
+    let y = Box::new(x);
+    assert_eq!(5, *y); // Verify the value pointed to is 5
+    \`\`\`
+`,
         quiz: [
             {
                 question: "Where does Box<T> store its data?",
                 options: ["Stack", "Heap", "Static memory", "Registers"],
                 correctIndex: 1,
             },
+            {
+                question: "Why do recursive types need a Box?",
+                options: [
+                    "To make them faster",
+                    "To give them a known, fixed size (the size of a pointer)",
+                    "Because recursion is dangerous",
+                    "They don't need a Box"
+                ],
+                correctIndex: 1,
+            },
         ],
         objectives: `## Your Mission
 
-1. Create a _BT_Box_BT_ containing an array of 1000 integers.
-2. Demonstrate that you can still access the data normally.`.replace(/_BT_/g, '`'),
+1. Create a _BT_Box_BT_ containing the number 1000.
+2. Dereference the box to multiply the inner value by 2.
+3. Print the result.`.replace(/_BT_/g, '`'),
         test_code: `#[cfg(test)]
 mod tests {
     #[test]
     fn test_box() {
-        let b = Box::new([0; 1000]);
-        assert_eq!(b.len(), 1000);
+        let b = Box::new(1000);
+        let val = *b * 2;
+        assert_eq!(val, 2000);
     }
 }`,
         starter_code: `fn main() {
-    // Create a Boxed array
-    let b = Box::new([0; 1000]);
-    println!("Length: {}", b.len());
+    // 1. Create a Box with 1000
+    // let b = ...
+    
+    // 2. Dereference and multiply
+    // let result = ...
+    
+    // println!("{}", result);
 }
 `,
     },
@@ -52,50 +88,70 @@ mod tests {
         title: "Rc<T>, the Reference Counted Smart Pointer",
         sort_order: 151,
         environment: "browser",
-        content: `# Rc<T>
+        content: `# Rc<T>: Reference Counting
 
-_BT_Rc<T>_BT_ stands for **reference counting**. It keeps track of the number of references to a value to determine whether or not the value is still in use. If there are zero references to a value, the value can be cleaned up.
+In Rust, ownership is usually clear: one variable owns the data. But some scenarios (like Graph data structures) require **Multiple Ownership**.
 
-## Single Ownership vs Multiple Ownership
-- _BT_Box<T>_BT_ has a single owner.
-- _BT_Rc<T>_BT_ allows multiple owners for a single value.
+Imagine a TV in a family room.
+*   When Mom enters, she turns it on (Count = 1).
+*   When Dad enters, the TV stays on (Count = 2).
+*   Mom leaves (Count = 1).
+*   Dad leaves (Count = 0). **The TV turns off.**
 
-Note: _BT_Rc<T>_BT_ is only for use in single-threaded scenarios!`.replace(/_BT_/g, '`'),
+This is exactly how \`Rc<T>\` (Reference Counted) works. It keeps track of the number of references to a value. When the count hits zero, the value is cleaned up.
+
+## Usage
+
+\`\`\`rust
+use std::rc::Rc;
+
+let a = Rc::new(String::from("Shared Data"));
+let b = Rc::clone(&a); // Count is now 2
+let c = Rc::clone(&a); // Count is now 3
+\`\`\`
+
+Note: \`Rc::clone\` doesn't copy the data (deep copy). It just increments the counter (fast!).
+
+## ⚠️ Common Mistakes
+
+1.  **Using \`Rc\` multiple threads**: \`Rc\` is NOT thread-safe. If you need shared ownership across threads, you must use **\`Arc\`** (Atomic Reference Counted).
+2.  **Reference Cycles**: If Item A holds an \`Rc\` to Item B, and Item B holds an \`Rc\` to Item A, the count will never reach zero. This is a memory leak! Rust guarantees memory safety, but not absence of leaks (though they are rare).`,
         quiz: [
             {
-                question: "What does Rc stand for?",
-                options: ["Runtime Container", "Reference Counting", "Recursive Call", "Read-only Collection"],
+                question: "What happens when Rc count reaches zero?",
+                options: ["nothing", "the data is cleaned up (dropped)", "the program panics", "it resets to 1"],
                 correctIndex: 1,
             },
             {
-                question: "Can Rc<T> be used to share data between threads safely?",
-                options: ["Yes", "No, only in single-threaded scenarios", "Only if T is Sync", "Only if T is Send"],
+                question: "Can Rc<T> be used to share data between threads safe?",
+                options: ["Yes", "No, use Arc<T> instead", "Only if T is Sync", "Only if T is Send"],
                 correctIndex: 1,
             },
         ],
         objectives: `## Your Mission
 
-1. Create an _BT_Rc_BT_ wrapping a String.
-2. Use _BT_Rc::clone(&a)_BT_ to create multiple references.
-3. Print the reference count using _BT_Rc::strong_count(&a)_BT_.`.replace(/_BT_/g, '`'),
+1. Create an _BT_Rc_BT_ wrapping a String "Rust".
+2. Create two clones of it.
+3. Assert that the strong count is 3.`.replace(/_BT_/g, '`'),
         test_code: `#[cfg(test)]
 mod tests {
     use std::rc::Rc;
 
     #[test]
     fn test_rc_count() {
-        let a = Rc::new(String::from("test"));
+        let a = Rc::new(String::from("Rust"));
         let b = Rc::clone(&a);
-        assert_eq!(Rc::strong_count(&a), 2);
+        let c = Rc::clone(&a);
+        assert_eq!(Rc::strong_count(&a), 3);
     }
 }`,
         starter_code: `use std::rc::Rc;
 
 fn main() {
-    let a = Rc::new(String::from("hello"));
-    let b = Rc::clone(&a);
+    let a = Rc::new(String::from("Rust"));
+    // Clone 'a' into 'b' and 'c'
     
-    println!("Count: {}", Rc::strong_count(&a));
+    // println!("Count: {}", Rc::strong_count(&a));
 }
 `,
     },
@@ -107,48 +163,67 @@ fn main() {
         environment: "browser",
         content: `# RefCell<T>
 
-**Interior mutability** is a design pattern in Rust that allows you to mutate data even when there are immutable references to that data.
+**Interior mutability** is a design pattern in Rust that arguably "cheats" the borrow checker. It allows you to mutate data even when there are immutable references to that data.
 
-## Borrowing Rules at Runtime
-Unlike _BT_Box<T>_BT_, _BT_RefCell<T>_BT_ enforces the borrowing rules **at runtime** instead of compile time. 
+## Runtime Borrow Checking
 
-- Use _BT_borrow()_BT_ for an immutable borrow.
-- Use _BT_borrow_mut()_BT_ for a mutable borrow.
+*   **Box<T>**: Checks borrowing rules at **Compile Time**. If you mess up, code doesn't compile.
+*   **RefCell<T>**: Checks borrowing rules at **Run Time**. If you mess up, the program **panics** (crashes).
 
-If you violate the rules (e.g., two mutable borrows), the program will panic at runtime.`.replace(/_BT_/g, '`'),
+Why use it? sometimes the compiler is too strict. You know your code is safe, but the compiler can't prove it. \`RefCell\` lets you say "Trust me, I'll handle it at runtime."
+
+## Syntax
+
+*   Use \`borrow()\` to get an immutable reference.
+*   Use \`borrow_mut()\` to get a mutable reference.
+
+## ⚠️ Common Mistakes
+
+1.  **Panicking**: Just because it compiles doesn't mean it's right! If you call \`borrow_mut()\` twice in the same scope, your program *will* crash.
+    \`\`\`rust
+    let x = RefCell::new(5);
+    let mut one = x.borrow_mut();
+    let mut two = x.borrow_mut(); // PANIC! Already borrowed mutably.
+    \`\`\`
+2.  **Overusing**: \`RefCell\` has a small runtime performance cost. Prefer standard borrowing if possible.`,
         quiz: [
             {
                 question: "When does RefCell<T> check borrowing rules?",
                 options: ["Compile time", "Runtime", "Initialization time", "It doesn't check them"],
                 correctIndex: 1,
             },
+            {
+                question: "What happens if you violate borrowing rules with RefCell?",
+                options: ["Compiler error", "Undefined behavior", "Runtime Panic", "Silent failure"],
+                correctIndex: 2,
+            },
         ],
         objectives: `## Your Mission
 
-1. Create a _BT_RefCell_BT_ containing a value.
-2. Mutate the value inside an immutable reference using _BT_borrow_mut()_BT_.`.replace(/_BT_/g, '`'),
+We have an immutable variable \`data\`. Use \`RefCell\` to mutate it anyway.
+
+1.  Wrap the integer 10 in a \`RefCell\`.
+2.  Use \`borrow_mut()\` to change the value to 20.
+3.  Print the new value using \`borrow()\`.`.replace(/_BT_/g, '`'),
         test_code: `#[cfg(test)]
 mod tests {
     use std::cell::RefCell;
 
     #[test]
     fn test_refcell() {
-        let x = RefCell::new(5);
-        {
-            let mut y = x.borrow_mut();
-            *y += 1;
-        }
-        assert_eq!(*x.borrow(), 6);
+        let data = RefCell::new(10);
+        *data.borrow_mut() = 20;
+        assert_eq!(*data.borrow(), 20);
     }
 }`,
         starter_code: `use std::cell::RefCell;
 
 fn main() {
-    let x = RefCell::new(10);
+    let data = RefCell::new(10);
     
-    // Mutate x using a borrow_mut()
+    // Mutate it to 20!
     
-    println!("Value: {}", x.borrow());
+    println!("Value: {}", data.borrow());
 }
 `,
     },

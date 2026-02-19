@@ -11,13 +11,15 @@ export const ch11Lessons: Lesson[] = [
 
 Welcome to Software Engineering 101.
 
-In many university courses, you write code, submit it, get a grade, and never touch it again. In the real world, code lives for years. It gets modified, refactored, and extended.
+In many university courses, you write code, submit it, get a grade, and never touch it again. In the real world, code lives for years. It gets modified, refactored, and extended by people who (gasp!) might not be you.
 
 How do you ensure that your changes today didn't break the feature you wrote last year? **Automated Tests.**
 
+Tests are not "extra work." They are the **safety net** that allows you to move fast without breaking things.
+
 ## The Anatomy of a Rust Test
 
-A test in Rust is just a function annotated with the \`#[test]\` attribute. Using \`cargo test\`, Rust builds a test runner binary that executes these annotated functions.
+A test in Rust is just a function annotated with the \`#[test]\` attribute. When you run \`cargo test\`, Rust builds a special binary that finds and executes these annotated functions.
 
 \`\`\`rust
 #[cfg(test)]
@@ -30,35 +32,40 @@ mod tests {
 }
 \`\`\`
 
-## Assertions
+### Key Components
 
-Tests typically use macros to check conditions:
+| Code Fragment | Meaning |
+|---|---|
+| \`#[cfg(test)]\` | "Only compile this module when running tests." (Saves compile time and binary size for production). |
+| \`mod tests\` | It's convention to group unit tests in a module named \`tests\`. |
+| \`#[test]\` | "This function is a test. Run it!" |
+| \`assert_eq!\` | "Panic (fail) if these two values are not equal." |
 
-*   **\`assert!(condition)\`**: Panics if the condition is false.
-*   **\`assert_eq!(left, right)\`**: Panics if \`left != right\`. (Prints both values on failure).
-*   **\`assert_ne!(left, right)\`**: Panics if \`left == right\`.
+## Assertions: The Referee
+
+Tests typically use macros to check conditions. If an assertion fails, the test thread panics, and Rust reports a failure.
+
+*   **\`assert!(condition)\`**: "I assert this is TRUE." Usage: \`assert!(x > 5)\`.
+*   **\`assert_eq!(left, right)\`**: "I assert these are EQUAL." Usage: \`assert_eq!(2 + 2, 4)\`.
+*   **\`assert_ne!(left, right)\`**: "I assert these are NOT EQUAL." Usage: \`assert_ne!(result, "error")\`
 
 ## Testing Panics
 
-Sometimes, you *expect* code to fail (e.g., validating bad input). You can use \`#[should_panic]\` to verify this behavior:
+Sometimes, you *expect* code to crash (e.g., if someone divides by zero). You can verify this with \`#[should_panic]\`.
 
 \`\`\`rust
 #[test]
 #[should_panic(expected = "Divide by zero")]
 fn test_crash() {
-    divide(10, 0); // Should panic!
+    divide(10, 0); // If this DOESN'T panic, the test FAILS!
 }
 \`\`\`
 
-## Unit vs Integration Tests (The Mental Model)
-
-*   **Unit Tests:** Small, focused, fast. They test one function in isolation. They live in the *same file* as the code (usually in a \`mod tests\`). They can test private functions.
-*   **Integration Tests:** Broad, realistic, slower. They test how multiple parts of your library work together. They live in a separate \`tests/\` directory. They can only call \`pub\` functions.
-
 ## ⚠️ Common Mistakes
 
-1.  **Testing implementation details** — Try to test *behavior* (what it does), not *implementation* (how it does it). If you refactor the code but the behavior stays the same, your tests shouldn't break.
-2.  **Ignoring test output** — Use \`cargo test -- --nocapture\` if you want to see \`println!\` output from passing tests.`,
+1.  **Forgetting \`#[test]\`**: If you write a check function but forget the attribute, \`cargo test\` will simply ignore it. You'll think your code is perfect because 0 tests failed... but 0 tests ran!
+2.  **Logic inside \`main\`**: Beginners often try to test by printing in \`main()\`. This is manual testing. It's slow and error-prone. Move logic to functions and test them automatically.
+3.  **Testing Implementation vs Behavior**: Try to test *what* the code does (Output for a given Input), not *how* it does it. If you change the internal algorithm but the result is the same, your tests should still pass.`,
         quiz: [
             {
                 question: "Which attribute marks a function as a test?",
@@ -83,34 +90,37 @@ fn test_crash() {
         ],
         objectives: `## Your Mission
 
-We're not writing "production" code today—we're writing the safety net!
+We're going to write a simple calculator function and verify it.
 
-1.  Write a function _BT_add(a: i32, b: i32) -> i32_BT_ (the code to be tested).
-2.  Write a *test function* named _BT_test_add_BT_.
-    *   Annotate it with _BT_#[test]_BT_.
-    *   Inside, assert that _BT_add(2, 2)_BT_ equals _BT_4_BT_.
+1.  Write a function \`add(a: i32, b: i32) -> i32\`.
+2.  Write a **test module** \`tests\`.
+3.  Inside logic, write two tests:
+    *   \`test_add_positive\`: Verify \`add(2, 2)\` is \`4\`.
+    *   \`test_add_negative\`: Verify \`add(-1, -1)\` is \`-2\`.
 
-*Note: In this lesson environment, just write the functions. The runner will execute them.*`.replace(/_BT_/g, '`'),
+(The playground handles the \`mod tests\` wrapper for the runner, but write it out to practice!)`,
         test_code: `#[cfg(test)]
 mod tests {
     use super::*;
 
     #[test]
-    fn test_logic() {
-        assert_eq!(add_three(10), 13);
-        assert_eq!(add_three(-3), 0);
+    fn test_positive() {
+        assert_eq!(add(2, 2), 4);
+    }
+
+    #[test]
+    fn test_negative() {
+        assert_eq!(add(-1, -1), -2);
     }
 }`,
-        starter_code: `// Write: add_three(n: i32) -> i32
+        starter_code: `// Write: fn add(a: i32, b: i32) -> i32
 
 #[cfg(test)]
 mod tests {
     use super::*;
 
-    #[test]
-    fn test_add_three() {
-        // Use assert_eq! here
-    }
+    // Write: #[test] fn test_add_positive()
+    // Write: #[test] fn test_add_negative()
 }
 
 fn main() {}
@@ -124,18 +134,35 @@ fn main() {}
         environment: "desktop",
         content: `# Controlling How Tests Are Run
 
-Just as _BT_cargo run_BT_ compiles and then runs your binary, _BT_cargo test_BT_ compiles your code in test mode and runs the resulting binary.
+Just as \`cargo run\` compiles and then runs your binary, \`cargo test\` compiles your code in test mode and runs the resulting binary.
 
-## Running Tests in Parallel or Consecutively
-By default, Rust runs tests in parallel using threads. You can control this with:
-_BT_cargo test -- --test-threads=1_BT_
+## Parallelism
 
-## Showing Function Output
-By default, if a test passes, Rust captures anything printed to stdout. To see output even for passing tests:
-_BT_cargo test -- --show-output_BT_
+By default, Rust runs tests in **parallel** using threads. This makes testing fast! However, it can cause issues if your tests share state (like writing to the same file or database row).
 
-## Running a Subset of Tests by Name
-_BT_cargo test test_name_BT_`.replace(/_BT_/g, '`'),
+If tests behave weirdly randomly, try running them one by one:
+\`cargo test -- --test-threads=1\`
+
+## Output Capture
+
+By default, if a test passes, Rust **captures** (hides) anything printed to stdout. It keeps your console clean. You only see output if a test fails.
+
+To see output even for passing tests:
+\`cargo test -- --show-output\`
+
+## Running Specific Tests
+
+You don't always have to run the whole suite. You can pass a name to filter:
+
+*   \`cargo test add\` (Runs any test containing "add" in its name)
+*   \`cargo test test_name\` (Runs that specific test)
+
+## ⚠️ Common Mistakes
+
+1.  **Shared State in Parallel Tests**: If Test A writes "Hello" to \`test.txt\` and Test B writes "World" to \`test.txt\` at the same time, one of them will fail unpredictably. *Solution*: Use unique filenames, mock databases, or run with \`--test-threads=1\`.
+2.  **Confusing CLI Args**: Arguments for *Cargo* come before \`--\`. Arguments for the *test binary* come after \`--\`.
+    *   \`cargo test --lib\` (Tell Cargo to test the library)
+    *   \`cargo test -- --nocapture\` (Tell the test binary to show output)`,
         quiz: [
             {
                 question: "How do you run tests one at a time (no parallelism)?",
@@ -154,28 +181,25 @@ _BT_cargo test test_name_BT_`.replace(/_BT_/g, '`'),
             },
         ],
         objectives: `## Your Mission
-
-This is a conceptual lesson for desktop users. 
-
-1. Create a passing test that prints something.
-2. Run it locally with _BT_cargo test -- --show-output_BT_ to verify you can see the print message.`.replace(/_BT_/g, '`'),
+ 
+1. Create a passing test function named \`test_print_success\`.
+2. Inside, use \`println!("I am visible!");\`.
+3. Use \`assert!(true)\` to make it pass.
+4. Run it locally with \`cargo test -- --show-output\` to verify you see the message.`,
         test_code: `#[cfg(test)]
 mod tests {
     #[test]
-    fn test_print() {
-        // We can't easily capture stdout in a unit test, but we can verify the function logic if we had any.
-        // For this lesson, we are verifying that your test function is correctly annotated!
+    fn test_print_success() {
+        println!("I am visible!");
         assert!(true);
     }
 }
-
-// Note: This lesson focuses on the cargo test runner's behavior on your local machine.
-// In the playground, we simulate the results for you.`,
+`,
         starter_code: `#[cfg(test)]
 mod tests {
     #[test]
-    fn test_print() {
-        // Print something and assert true
+    fn test_print_success() {
+        // Print and assert
     }
 }
 
@@ -190,19 +214,40 @@ fn main() {}
         environment: "desktop",
         content: `# Test Organization
 
-Rust community thinks about tests in two main categories: **unit tests** and **integration tests**.
+The Rust community implies a strict discipline on how tests are organized. We think in two main categories: **Unit Tests** and **Integration Tests**.
 
-## Unit Tests
-- Small and more focused
-- Test one module in isolation
-- Can test private interfaces
-- Live in the same files as the code, in a _BT_tests_BT_ module with _BT_#[cfg(test)]_BT_
+## Unit Tests: The Microscope
 
-## Integration Tests
-- Entirely external to your library
-- Use your library in the same way any other client code would
-- Can only test public interfaces
-- Live in a top-level _BT_tests_BT_ directory`.replace(/_BT_/g, '`'),
+*   **Goal**: Test one small piece of logic in isolation.
+*   **Location**: Same file as the code.
+*   **Privileges**: Can access **private** helper functions.
+
+\`\`\`rust
+fn internal_helper() -> i32 { 5 } // Private!
+
+#[cfg(test)]
+mod tests {
+    use super::*; // Bring parent scope items into test scope
+
+    #[test]
+    fn test_internal() {
+        assert_eq!(internal_helper(), 5); // Works!
+    }
+}
+\`\`\`
+
+## Integration Tests: The Black Box
+
+*   **Goal**: Test how your library works when used by others.
+*   **Location**: A special folder named \`tests/\` at the root of your project (next to \`src/\`).
+*   **Privileges**: EXACTLY the same as any other user. Can ONLY access **public** (\`pub\`) functions.
+
+This ensures you have exposed the correct public API. If it works in a unit test but fails in an integration test, you probably forgot to make something \`pub\`.
+
+## ⚠️ Common Mistakes
+
+1.  **Testing Private Code in Integration Tests**: You cannot call private functions from the \`tests/\` directory. If you need to test deep internals, use a Unit Test.
+2.  ** forgetting \`use super::*;\`**: In a unit test module, you are inside a *child module* (like a folder). You need \`use super::*;\` to "see" the functions defined in the parent file.`,
         quiz: [
             {
                 question: "Where do integration tests live?",
@@ -222,20 +267,21 @@ Rust community thinks about tests in two main categories: **unit tests** and **i
         ],
         objectives: `## Your Mission
 
-1. Define a private function _BT_internal_compute(n: i32) -> i32_BT_.
-2. Write a unit test inside a _BT_tests_BT_ module that calls this private function.`.replace(/_BT_/g, '`'),
+1. Define a **private** function _BT_internal_math(n: i32) -> i32_BT_ that returns _BT_n * n_BT_.
+2. Write a unit test module _BT_tests_BT_.
+3. Verify you can call this private function from the unit test.
+
+(If you tried to do this from _BT_tests/integration.rs_BT_, it would fail!)`.replace(/_BT_/g, '`'),
         test_code: `#[cfg(test)]
 mod tests {
     use super::*;
 
     #[test]
     fn test_internal() {
-        assert_eq!(internal_compute(5), 10);
+        assert_eq!(internal_math(5), 25);
     }
 }`,
-        starter_code: `fn internal_compute(n: i32) -> i32 {
-    n * 2
-}
+        starter_code: `// Write: fn internal_math(n: i32) -> i32
 
 #[cfg(test)]
 mod tests {
@@ -243,7 +289,7 @@ mod tests {
 
     #[test]
     fn test_internal() {
-        // Call internal_compute here
+        // Call internal_math here
     }
 }
 

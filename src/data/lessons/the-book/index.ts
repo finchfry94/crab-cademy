@@ -28,6 +28,44 @@ export const path: LearningPath = {
         "Work through The Rust Programming Language book interactively — from Hello World to advanced ownership.",
     icon: "📖",
     color: "from-orange-500 to-red-600",
+    modules: [
+        {
+            id: "basics",
+            title: "Module 1: Foundations",
+            description: "Getting set up and learning the core syntax of Rust.",
+            chapters: ["1", "2", "3"],
+        },
+        {
+            id: "ownership",
+            title: "Module 2: The Core Secret",
+            description: "Ownership, Borrowing, and Structs — the heart of Rust.",
+            chapters: ["4", "5", "6"],
+        },
+        {
+            id: "organization",
+            title: "Module 3: Project Structure",
+            description: "Modules, Crates, and automated testing.",
+            chapters: ["7", "8", "9", "11"],
+        },
+        {
+            id: "intermediate",
+            title: "Module 4: Versatility",
+            description: "Generics, Traits, Lifetimes, and project work.",
+            chapters: ["10", "12", "13", "14"],
+        },
+        {
+            id: "advanced",
+            title: "Module 5: Mastery",
+            description: "Smart Pointers, Concurrency, and advanced patterns.",
+            chapters: ["15", "16", "17", "18", "19"],
+        },
+        {
+            id: "final",
+            title: "Module 6: The Summit",
+            description: "Systems programming and the Final Project.",
+            chapters: ["20", "21"],
+        },
+    ],
 };
 
 export const lessons: Lesson[] = [

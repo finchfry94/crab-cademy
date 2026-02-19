@@ -4,6 +4,7 @@ import { useRouter } from "vue-router";
 import { getPathLessons, getPath } from "../data/lessons";
 import { resetLesson } from "../services/progressStore";
 import { ArrowLeft, BookOpen, CheckCircle, ChevronRight, RotateCcw } from "lucide-vue-next";
+import { Lesson } from "../data/types";
 
 const props = defineProps<{ pathId: string }>();
 const router = useRouter();
@@ -14,11 +15,35 @@ const lessons = computed(() => getPathLessons(props.pathId));
 interface Chapter {
   id: string;
   title: string;
-  lessons: ReturnType<typeof getPathLessons>;
+  lessons: Lesson[];
 }
 
+const chapterTitles: Record<string, string> = {
+  "1": "Getting Started",
+  "2": "Common Concepts",
+  "3": "Guessing Game",
+  "4": "Ownership",
+  "5": "Structs",
+  "6": "Enums",
+  "7": "Project Management",
+  "8": "Collections",
+  "9": "Error Handling",
+  "10": "Generics & Traits",
+  "11": "Testing",
+  "12": "I/O Project",
+  "13": "Iterators & Closures",
+  "14": "Cargo & Crates",
+  "15": "Smart Pointers",
+  "16": "Concurrency",
+  "17": "Async/Await",
+  "18": "OOP / Trait Objects",
+  "19": "Patterns",
+  "20": "Advanced Features",
+  "21": "Final Project",
+};
+
 const chapters = computed<Chapter[]>(() => {
-  const chapterMap = new Map<string, ReturnType<typeof getPathLessons>>();
+  const chapterMap = new Map<string, Lesson[]>();
 
   for (const lesson of lessons.value) {
     const chapterNum = lesson.chapter.split(".")[0];
@@ -28,30 +53,6 @@ const chapters = computed<Chapter[]>(() => {
     chapterMap.get(chapterNum)!.push(lesson);
   }
 
-  const chapterTitles: Record<string, string> = {
-    "1": "Getting Started",
-    "2": "Common Programming Concepts",
-    "3": "Programming a Guessing Game",
-    "4": "Understanding Ownership",
-    "5": "Using Structs",
-    "6": "Enums and Pattern Matching",
-    "7": "Managing Growing Projects",
-    "8": "Common Collections",
-    "9": "Error Handling",
-    "10": "Generics, Traits, and Lifetimes",
-    "11": "Writing Automated Tests",
-    "12": "An I/O Project: Command Line Program",
-    "13": "Functional Language Features",
-    "14": "More about Cargo and Crates",
-    "15": "Smart Pointers",
-    "16": "Fearless Concurrency",
-    "17": "Object-Oriented Programming Features",
-    "18": "Patterns and Matching",
-    "19": "Advanced Features",
-    "20": "Final Project: Multithreaded Web Server",
-    "21": "Appendix",
-  };
-
   return Array.from(chapterMap.entries()).map(([num, chapterLessons]) => ({
     id: num,
     title: chapterTitles[num] || `Chapter ${num}`,
@@ -59,12 +60,40 @@ const chapters = computed<Chapter[]>(() => {
   }));
 });
 
+interface ModuleView {
+  id: string;
+  title: string;
+  description?: string;
+  chapters: Chapter[];
+}
+
+const moduleViews = computed<ModuleView[]>(() => {
+  const meta = pathMeta.value;
+  if (!meta) return [];
+
+  if (meta.modules && meta.modules.length > 0) {
+    return meta.modules.map(m => ({
+      id: m.id,
+      title: m.title,
+      description: m.description,
+      chapters: chapters.value.filter(c => m.chapters.includes(c.id))
+    })).filter(mv => mv.chapters.length > 0);
+  }
+
+  // Fallback: one big module
+  return [{
+    id: "main",
+    title: "All Lessons",
+    description: "Complete the curriculum in order.",
+    chapters: chapters.value
+  }];
+});
+
 // Reactive progress version counter — bumped on reset to trigger re-render
 const progressVersion = ref(0);
 
 // Load progress from localStorage
 function getProgress(lessonId: string) {
-  // Access progressVersion so Vue tracks it as a dependency
   void progressVersion.value;
   try {
     const raw = localStorage.getItem("crabcademy_progress");
@@ -80,8 +109,6 @@ function isCompleted(lessonId: string): boolean {
   return getProgress(lessonId)?.completed ?? false;
 }
 
-
-
 function getLessonStatus(lessonId: string): 'completed' | 'read' | 'none' {
   const p = getProgress(lessonId);
   if (p?.completed) return 'completed';
@@ -93,14 +120,22 @@ function completedCount(chapter: Chapter): number {
   return chapter.lessons.filter((l) => isCompleted(l.id)).length;
 }
 
+function moduleProgress(mv: ModuleView) {
+  const total = mv.chapters.reduce((acc, c) => acc + c.lessons.length, 0);
+  const done = mv.chapters.reduce((acc, c) => acc + c.lessons.filter(l => isCompleted(l.id)).length, 0);
+  return { done, total, percent: total > 0 ? (done / total) * 100 : 0 };
+}
+
 function navigateToLesson(lessonId: string) {
   router.push({ name: "lesson", params: { pathId: props.pathId, id: lessonId } });
 }
 
 function resetLessonProgress(event: Event, lessonId: string) {
   event.stopPropagation();
-  resetLesson(lessonId);
-  progressVersion.value++;
+  if (confirm("Reset progress for this lesson?")) {
+    resetLesson(lessonId);
+    progressVersion.value++;
+  }
 }
 
 function goBack() {
@@ -109,134 +144,134 @@ function goBack() {
 </script>
 
 <template>
-  <div class="min-h-screen bg-neutral-950 text-white">
+  <div class="min-h-screen bg-neutral-950 text-white selection:bg-orange-500/30">
     <!-- Path Header -->
-    <header class="relative overflow-hidden">
-      <div class="absolute inset-0 bg-gradient-to-br from-orange-600/20 via-neutral-950 to-red-900/10"></div>
-      <div class="relative max-w-5xl mx-auto px-6 py-12 text-center">
+    <header class="relative overflow-hidden border-b border-white/5">
+      <div class="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(249,115,22,0.15),transparent_70%)]"></div>
+      <div class="relative max-w-6xl mx-auto px-6 py-16">
         <button
           @click="goBack"
-          class="absolute left-6 top-6 flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-neutral-400 hover:text-orange-400 bg-neutral-900/80 hover:bg-neutral-800 rounded-lg border border-neutral-800 hover:border-orange-500/40 transition-all duration-200"
+          class="absolute left-6 top-8 flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-neutral-400 hover:text-white bg-white/5 hover:bg-white/10 rounded-full border border-white/10 transition-all duration-300 backdrop-blur-sm"
         >
           <ArrowLeft class="w-3.5 h-3.5" />
-          All Paths
+          Back to paths
         </button>
 
-        <div class="flex items-center justify-center gap-3 mb-4" v-if="pathMeta">
-          <div
-            :class="[
-              'w-14 h-14 rounded-2xl bg-gradient-to-br flex items-center justify-center shadow-lg shadow-orange-500/25',
-              pathMeta.color,
-            ]"
-          >
-            <span class="text-3xl">{{ pathMeta.icon }}</span>
+        <div class="flex flex-col items-center text-center mt-4">
+          <div v-if="pathMeta" class="mb-6 relative">
+            <div :class="['w-20 h-20 rounded-3xl bg-gradient-to-br flex items-center justify-center shadow-2xl relative z-10', pathMeta.color]">
+              <span class="text-4xl drop-shadow-lg">{{ pathMeta.icon }}</span>
+            </div>
+            <div :class="['absolute inset-0 blur-2xl opacity-40 rounded-3xl', pathMeta.color]"></div>
           </div>
+          
+          <h1 class="text-5xl font-black tracking-tight mb-4">
+            <span class="bg-gradient-to-b from-white to-neutral-400 bg-clip-text text-transparent">
+              {{ pathMeta?.title ?? "Learning Path" }}
+            </span>
+          </h1>
+          <p class="text-lg text-neutral-400 max-w-2xl mx-auto font-medium leading-relaxed">
+            {{ pathMeta?.description }}
+          </p>
         </div>
-        <h1 class="text-4xl font-extrabold tracking-tight mb-2">
-          <span class="bg-gradient-to-r from-orange-400 via-orange-300 to-red-400 bg-clip-text text-transparent">
-            {{ pathMeta?.title ?? "Learning Path" }}
-          </span>
-        </h1>
-        <p class="text-base text-neutral-400 max-w-xl mx-auto leading-relaxed">
-          {{ pathMeta?.description }}
-        </p>
       </div>
     </header>
 
-    <!-- Lesson Map -->
-    <main class="max-w-4xl mx-auto px-6 pb-20 mt-8">
-      <div class="space-y-6">
-        <div
-          v-for="chapter in chapters"
-          :key="chapter.id"
-          class="group"
+    <!-- Content Area -->
+    <main class="max-w-7xl mx-auto px-6 py-12">
+      <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8">
+        <section 
+          v-for="(mv, idx) in moduleViews" 
+          :key="mv.id"
+          class="flex flex-col bg-neutral-900/40 border border-white/5 rounded-3xl overflow-hidden backdrop-blur-sm transition-all duration-500 hover:border-orange-500/20 group/module"
         >
-          <!-- Chapter Header -->
-          <div class="flex items-center gap-3 mb-3">
-            <div class="w-8 h-8 rounded-lg bg-orange-500/15 border border-orange-500/25 flex items-center justify-center text-orange-400 font-bold text-sm">
-              {{ chapter.id }}
+          <!-- Module Header -->
+          <div class="p-8 bg-gradient-to-b from-white/[0.03] to-transparent border-b border-white/5">
+            <div class="flex items-start justify-between mb-4">
+              <span class="text-[10px] font-black uppercase tracking-[0.2em] text-orange-500/80">Module {{ idx + 1 }}</span>
+              <div class="flex items-center gap-2">
+                <div class="h-1.5 w-24 bg-white/5 rounded-full overflow-hidden">
+                  <div 
+                    class="h-full bg-orange-500 transition-all duration-1000"
+                    :style="{ width: `${moduleProgress(mv).percent}%` }"
+                  ></div>
+                </div>
+                <span class="text-[10px] font-bold text-neutral-500">{{ Math.round(moduleProgress(mv).percent) }}%</span>
+              </div>
             </div>
-            <h2 class="text-lg font-semibold text-neutral-200">{{ chapter.title }}</h2>
-            <span class="text-xs text-neutral-500 ml-auto">
-              {{ completedCount(chapter) }}/{{ chapter.lessons.length }} complete
-            </span>
+            <h2 class="text-2xl font-bold text-white mb-2 group-hover/module:text-orange-400 transition-colors">{{ mv.title }}</h2>
+            <p class="text-sm text-neutral-400 leading-relaxed">{{ mv.description }}</p>
           </div>
 
-          <!-- Lesson Cards -->
-          <div class="grid gap-2 pl-4 border-l-2 border-neutral-800 ml-4">
-            <button
-              v-for="lesson in chapter.lessons"
-              :key="lesson.id"
-              @click="navigateToLesson(lesson.id)"
-              class="group/card flex items-center gap-4 p-4 rounded-xl bg-neutral-900/60 border border-neutral-800 hover:border-orange-500/40 hover:bg-neutral-800/80 transition-all duration-200 text-left"
-            >
-              <!-- Status icon -->
-              <div
-                :class="[
-                  'w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-colors',
-                  getLessonStatus(lesson.id) === 'completed'
-                    ? 'bg-emerald-500/15 border border-emerald-500/30'
-                    : getLessonStatus(lesson.id) === 'read'
-                      ? 'bg-blue-500/15 border border-blue-500/30'
-                      : 'bg-neutral-800 border border-neutral-700 group-hover/card:border-orange-500/30',
-                ]"
-              >
-                <CheckCircle v-if="getLessonStatus(lesson.id) === 'completed'" class="w-5 h-5 text-emerald-400" />
-                <BookOpen v-else-if="getLessonStatus(lesson.id) === 'read'" class="w-5 h-5 text-blue-400" />
-                <BookOpen v-else class="w-5 h-5 text-neutral-400 group-hover/card:text-orange-400 transition-colors" />
+          <!-- Chapters List -->
+          <div class="flex-1 p-4 space-y-4">
+            <div v-for="chapter in mv.chapters" :key="chapter.id" class="space-y-2">
+              <div class="flex items-center gap-2 px-3 mb-1">
+                <span class="text-[10px] font-mono text-neutral-600 font-bold uppercase tracking-widest">Chapter {{ chapter.id }}</span>
+                <span class="h-px flex-1 bg-white/5"></span>
+                <span class="text-[10px] text-neutral-500 font-bold">{{ completedCount(chapter) }}/{{ chapter.lessons.length }}</span>
               </div>
 
-              <!-- Lesson info -->
-              <div class="flex-1 min-w-0">
-                <div class="flex items-center gap-2">
-                  <span class="text-xs font-mono text-neutral-500">{{ lesson.chapter }}</span>
-                  
-                  <!-- Status Badges -->
-                  <span
+              <!-- Lesson Buttons -->
+              <div class="grid gap-1.5">
+                <button
+                  v-for="lesson in chapter.lessons"
+                  :key="lesson.id"
+                  @click="navigateToLesson(lesson.id)"
+                  class="group/btn flex items-center gap-3 p-3 rounded-2xl bg-white/[0.02] border border-white/5 hover:bg-white/5 hover:border-orange-500/30 transition-all duration-300 text-left relative overflow-hidden"
+                >
+                  <!-- Progress Overlay -->
+                  <div 
                     v-if="getLessonStatus(lesson.id) === 'completed'"
-                    class="text-[10px] font-bold uppercase tracking-wider text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20"
-                  >
-                    Complete
-                  </span>
-                  <span
-                    v-else-if="getLessonStatus(lesson.id) === 'read'"
-                    class="text-[10px] font-bold uppercase tracking-wider text-blue-400 bg-blue-500/10 px-1.5 py-0.5 rounded border border-blue-500/20"
-                  >
-                    Read
-                  </span>
-
-                  <span
+                    class="absolute inset-0 bg-emerald-500/5 pointer-events-none"
+                  ></div>
+                  
+                  <div
                     :class="[
-                      'text-[10px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded',
-                      lesson.environment === 'browser'
-                        ? 'text-orange-400 bg-orange-500/10'
-                        : 'text-amber-400 bg-amber-500/10',
+                      'w-8 h-8 rounded-xl flex items-center justify-center shrink-0 transition-all duration-300 relative z-10',
+                      getLessonStatus(lesson.id) === 'completed'
+                        ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/20'
+                        : getLessonStatus(lesson.id) === 'read'
+                          ? 'bg-blue-500/20 text-blue-400 border border-blue-500/20'
+                          : 'bg-neutral-800 text-neutral-500 border border-white/5 group-hover/btn:border-orange-500/30 group-hover/btn:text-orange-400',
                     ]"
                   >
-                    {{ lesson.environment === 'browser' ? '🌐 Browser' : '🖥️ Desktop' }}
-                  </span>
-                </div>
-                <h3 class="text-sm font-medium text-neutral-200 group-hover/card:text-white transition-colors truncate">
-                  {{ lesson.title }}
-                </h3>
+                    <CheckCircle v-if="getLessonStatus(lesson.id) === 'completed'" class="w-4 h-4" />
+                    <BookOpen v-else class="w-4 h-4" />
+                  </div>
+
+                  <div class="flex-1 min-w-0 relative z-10">
+                    <h3 class="text-xs font-bold text-neutral-300 group-hover/btn:text-white transition-colors truncate">
+                      {{ lesson.title }}
+                    </h3>
+                  </div>
+
+                  <div class="flex items-center gap-2 relative z-10">
+                    <button
+                      v-if="isCompleted(lesson.id)"
+                      @click="resetLessonProgress($event, lesson.id)"
+                      class="opacity-0 group-hover/btn:opacity-100 p-1 hover:text-orange-500 transition-opacity"
+                    >
+                      <RotateCcw class="w-3 h-3" />
+                    </button>
+                    <span 
+                      v-if="lesson.environment === 'desktop'"
+                      class="text-[9px] bg-amber-500/10 text-amber-500 px-1.5 py-0.5 rounded-md font-black border border-amber-500/10"
+                    >🖥️</span>
+                    <ChevronRight class="w-3 h-3 text-neutral-700 group-hover/btn:text-orange-500 transition-colors" />
+                  </div>
+                </button>
               </div>
-
-              <!-- Reset button (only for completed lessons) -->
-              <button
-                v-if="isCompleted(lesson.id)"
-                @click="resetLessonProgress($event, lesson.id)"
-                class="w-8 h-8 rounded-lg flex items-center justify-center text-neutral-500 hover:text-orange-400 hover:bg-orange-500/10 transition-all shrink-0"
-                title="Reset lesson progress"
-              >
-                <RotateCcw class="w-4 h-4" />
-              </button>
-
-              <!-- Arrow -->
-              <ChevronRight class="w-4 h-4 text-neutral-600 group-hover/card:text-orange-400 transition-colors shrink-0" />
-            </button>
+            </div>
           </div>
-        </div>
+        </section>
       </div>
     </main>
   </div>
 </template>
+
+<style scoped>
+.prose {
+  font-feature-settings: "cv02", "cv03", "cv04", "ss01";
+}
+</style>

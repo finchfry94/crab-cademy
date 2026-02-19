@@ -21,7 +21,7 @@ export default defineConfig({
     },
     watch: {
       // 3. tell vite to ignore watching `src-tauri` and runners
-      ignored: ["**/src-tauri/**", "**/polars_runner/**", "**/playground_runner/**"],
+      ignored: ["**/src-tauri/**", "**/tauri_runner/**", "**/playground_runner/**"],
     },
   },
 });

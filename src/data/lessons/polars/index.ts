@@ -14,6 +14,14 @@ export const path: LearningPath = {
     description: "Master high-performance data manipulation with the Polars library in Rust.",
     icon: "🐻‍❄️", // Polar bear icon seems appropriate? Or just a chart 📊
     color: "from-blue-500 to-cyan-400",
+    modules: [
+        {
+            id: "polars-basics",
+            title: "Module 1: Getting Started with Polars",
+            description: "Core concepts and basic operations.",
+            chapters: ["1", "2", "3", "4", "5", "6", "7"],
+        }
+    ]
 };
 
 export const lessons: Lesson[] = [

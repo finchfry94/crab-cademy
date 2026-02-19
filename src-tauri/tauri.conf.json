@@ -36,8 +36,8 @@
     ],
     "resources": [
       "resources/lessons/*",
-      "../polars_runner/Cargo.toml",
-      "../polars_runner/src/**/*"
+      "../tauri_runner/Cargo.toml",
+      "../tauri_runner/src/**/*"
     ]
   }
 }

@@ -7,6 +7,14 @@ export const path: LearningPath = {
         "Learn to make HTTP requests in Rust using the reqwest crate — GET, POST, JSON, error handling, and more.",
     icon: "🌐",
     color: "from-blue-500 to-cyan-600",
+    modules: [
+        {
+            id: "reqwest-basics",
+            title: "Module 1: Making Requests",
+            description: "GET, POST, and JSON operations.",
+            chapters: ["1", "2", "3"],
+        }
+    ]
 };
 
 export const lessons: Lesson[] = [

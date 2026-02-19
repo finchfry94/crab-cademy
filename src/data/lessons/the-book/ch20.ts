@@ -9,37 +9,57 @@ export const ch20Lessons: Lesson[] = [
         environment: "browser",
         content: `# Unsafe Rust
 
-All the code we’ve discussed so far has had Rust’s memory safety guarantees enforced at compile time. However, Rust has a second language hidden inside it that doesn’t enforce these memory safety guarantees: it’s called **unsafe Rust**.
+Use the Force, Luke... but be careful.
 
-## Unsafe Superpowers
-Inside an _BT_unsafe_BT_ block, you can:
-- Dereference a raw pointer
-- Call an unsafe function or method
-- Access or modify a mutable static variable
-- Implement an unsafe trait
-- Access fields of unions
+Rust normally enforces memory safety at compile time. **Unsafe Rust** is a dialect of Rust that gives you extra superpowers, but removes the safety net. You use it by wrapping code in an \`unsafe { ... }\` block.
 
-_BT__BT__BT_rust
+## The 5 Superpowers
+Inside \`unsafe\`, you can:
+1.  Dereference a raw pointer.
+2.  Call an unsafe function or method.
+3.  Access or modify a mutable static variable.
+4.  Implement an unsafe trait.
+5.  Access fields of unions.
+
+It does **NOT** disable the borrow checker! You still can't have two mutable references to the same safe variable.
+
+## Raw Pointers
+Raw pointers (\`*const T\` and \`*mut T\`) are like C pointers. They can be null, dangling, or unaligned. Dereferencing them is unsafe because Rust can't guarantee they point to valid memory.
+
+\`\`\`rust
 let mut num = 5;
-let r1 = &num as *const i32; // static pointer
+
+// Creating pointers is SAFE
+let r1 = &num as *const i32;
 let r2 = &mut num as *mut i32;
 
 unsafe {
+    // Dereferencing them is UNSAFE
     println!("r1 is: {}", *r1);
     println!("r2 is: {}", *r2);
 }
-_BT__BT__BT_`.replace(/_BT_/g, '`'),
+\`\`\`
+
+## ⚠️ Common Mistakes
+
+1.  **"Unsafe turns off checks"**: No, it just allows *more* things. The standard rules still apply to normal references.
+2.  **Undefined Behavior (UB)**: If you violate the rules (e.g., writing to read-only memory), your program might crash, or worse, execute code you didn't write. UB is the dragon we are trying to slay.`,
         quiz: [
             {
-                question: "Does 'unsafe' mean the code is definitely dangerous?",
-                options: ["Yes", "No, it just means the compiler can't verify safety", "Yes, it disables all type checking", "No, it just makes the code run faster"],
+                question: "Does 'unsafe' disable the borrow checker?",
+                options: ["Yes", "No", "Only for pointers", "Only in release mode"],
+                correctIndex: 1,
+            },
+            {
+                question: "Is creating a raw pointer unsafe?",
+                options: ["Yes", "No", "Only if it's null", "Only if it's mutable"],
                 correctIndex: 1,
             },
         ],
         objectives: `## Your Mission
 
 1. Create a raw pointer to an integer.
-2. Use an _BT_unsafe_BT_ block to dereference it.`.replace(/_BT_/g, '`'),
+2. Use an _BT_unsafe_BT_ block to dereference it and print the value.`.replace(/_BT_/g, '`'),
         test_code: `#[cfg(test)]
 mod tests {
     #[test]
@@ -53,7 +73,12 @@ mod tests {
 }`,
         starter_code: `fn main() {
     let x = 42;
-    // Create raw pointer and dereference in unsafe block
+    
+    // 1. Create raw pointer
+    // let p = ...
+    
+    // 2. Unsafe block to read it
+    // unsafe { ... }
 }
 `,
     },
@@ -65,14 +90,15 @@ mod tests {
         environment: "desktop",
         content: `# Macros
 
-The term **macro** refers to a family of features in Rust: **declarative** macros with _BT_macro_rules!_BT_ and three kinds of **procedural** macros.
+Macros are code that writes code. This is called **Metaprogramming**.
 
-## Declarative Macros
-They allow you to write something similar to a C-style _BT_#define_BT_ but more powerful and "hygienic".
+## Declarative Macros (\`macro_rules!\`)
+These are the most common. They look like \`match\` expressions. You match against a pattern of Rust syntax code, and replace it with other code.
 
-_BT__BT__BT_rust
+Example: \`vec!\`
+\`\`\`rust
 #[macro_export]
-macro_rules! vec_custom {
+macro_rules! vec {
     ( $( $x:expr ),* ) => {
         {
             let mut temp_vec = Vec::new();
@@ -83,12 +109,23 @@ macro_rules! vec_custom {
         }
     };
 }
-_BT__BT__BT_`.replace(/_BT_/g, '`'),
+\`\`\`
+
+*   \`$x:expr\`: Match any Rust expression and call it \`$x\`.
+*   \`$(...),*\`: Match zero or more times, separated by commas.
+
+## Procedural Macros
+These are more like functions. They take a stream of tokens (code) as input and return a stream of tokens as output. They are used for \`#[derive(Custom)]\` and attribute macros like \`#[tokio::main]\`.
+
+## ⚠️ Common Mistakes
+
+1.  **Overusing Macros**: Macros are harder to read, debug, and maintain than functions. Only use them when you need to abstract over *syntax* (like variable argument lists) that functions can't handle.
+2.  **Hygiene**: Rust macros are "hygienic", meaning variables defined inside the macro don't accidentally clash with variables outside. But be careful when assuming what names differ!`,
         quiz: [
             {
                 question: "What is the main difference between functions and macros?",
                 options: [
-                    "Macros can take variable arguments",
+                    "Macros expand into code at compile time",
                     "Functions are faster",
                     "Macros are only for math",
                     "Functions are defined at compile time"
@@ -98,13 +135,12 @@ _BT__BT__BT_`.replace(/_BT_/g, '`'),
         ],
         objectives: `## Your Mission
 
-1. Write a simple declarative macro _BT_say_hello!_BT_ that prints "Hello!".`.replace(/_BT_/g, '`'),
+1. Define a macro _BT_say_hello!_BT_.
+2. Call it in main.`.replace(/_BT_/g, '`'),
         test_code: `#[cfg(test)]
 mod tests {
     #[test]
     fn test_macro_expansion() {
-        // Since say_hello! only prints, we can't easily assert on it,
-        // but we can verify that a macro that returns a value works.
         macro_rules! add_one {
             ($x:expr) => { $x + 1 };
         }
@@ -112,13 +148,12 @@ mod tests {
     }
 }`,
         starter_code: `macro_rules! say_hello {
-    () => {
-        println!("Hello!");
-    };
+    // Fill in the pattern and expansion
+    // () => { ... };
 }
 
 fn main() {
-    say_hello!();
+    // say_hello!();
 }
 `,
     },

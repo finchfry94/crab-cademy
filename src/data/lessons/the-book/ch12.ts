@@ -8,44 +8,44 @@ export const ch12Lessons: Lesson[] = [
         sort_order: 120,
         environment: "desktop",
         default_args: ["searchstring", "poem.txt"],
-        content: `# Accepting Command Line Arguments
+        content: `# Building a Real Tool: Minigrep
 
-Let's start building _BT_minigrep_BT_! The first step is to accept the two command line arguments: the file path and the string to search for.
+Welcome to your first real-world project! We are going to build **minigrep**, a simplified version of the classic command-line tool \`grep\` (Global Regular Expression Print).
+
+It will take two arguments:
+1.  A string to search for.
+2.  A file to search inside.
+
+Example usage: \`cargo run -- searchstring poem.txt\`
 
 ## Reading the Argument Values
-To read the arguments, we use _BT_std::env::args_BT_. It returns an iterator of the arguments passed to the program.
 
-_BT__BT__BT_rust
+To read the arguments, we use \`std::env::args\`. It returns an iterator of the arguments passed to the program.
+
+\`\`\`rust
 use std::env;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
     println!("{:?}", args);
 }
-_BT__BT__BT_
+\`\`\`
 
-Note: _BT_args[0]_BT_ is the name of the program binary itself.
+## The \`args\` Vector Anatomy
 
-## Running with Arguments
+If you run \`cargo run -- foo bar\`, the vector will look like this:
 
-### Standard Rust (CLI)
-When working on your local machine, you pass arguments after a double dash:
-_BT_cargo run -- searchstring filename.txt_BT_
+| Index | Value | Description |
+|---|---|---|
+| \`args[0]\` | \`"target/debug/minigrep"\` | The name of the binary itself. |
+| \`args[1]\` | \`"foo"\` | The first argument you passed. |
+| \`args[2]\` | \`"bar"\` | The second argument you passed. |
 
-### CrabCademy Playground
-In this lesson, the playground is configured to automatically pass _BT_searchstring_BT_ and _BT_poem.txt_BT_ as arguments when you run your code!
+## ⚠️ Common Mistakes
 
-> [!NOTE]
-> **Behind the Scenes**: When you click "Run", the playground compiles your code into a real binary and executes it with \`["searchstring", "poem.txt"]\` appended to the command usage. This simulates typing \`cargo run -- searchstring poem.txt\` in a terminal.
-
-### Why no automated tests for main()?
-You might notice the automated tests for this lesson are conceptual (verifying you know how to access vectors) rather than testing your \`main\` function directly.
-
-In Rust, \`main\` is notoriously hard to unit test because:
-1. It has no return value to check.
-2. It relies on global state (\`std::env::args\`).
-
-In **Chapter 12.3**, we will learn the "Rust Way" to solve this: refactoring our logic into a separate module that *can* be easily tested!`.replace(/_BT_/g, '`'),
+1.  **The "Off-By-One" Error**: Beginners often assume \`args[0]\` is the first user argument. It's not! \`args[0]\` is the *program name*. Your data starts at \`args[1]\`.
+2.  **Panicking on missing args**: If the user runs the program without arguments, accessing \`args[1]\` will cause a panic (crash). Robust code checks \`args.len()\` first, but for this lesson, we'll keep it simple.
+3.  **Forgetting \`collect()\`**: \`env::args()\` is an *iterator*. To treat it like a list (vector) that you can index into, you must call \`.collect()\`.`,
         quiz: [
             {
                 question: "Which function is used to get command line arguments?",
@@ -57,11 +57,23 @@ In **Chapter 12.3**, we will learn the "Rust Way" to solve this: refactoring our
                 options: ["The first parameter", "The program name", "The number of arguments", "Empty string"],
                 correctIndex: 1,
             },
+            {
+                question: "What does .collect() do?",
+                options: [
+                    "Garbage collects memory",
+                    "Turns an iterator into a collection (like a Vec)",
+                    "Collects user input from stdin",
+                    "Compiles the code",
+                ],
+                correctIndex: 1,
+            },
         ],
         objectives: `## Your Mission
 
 1. Use _BT_std::env::args().collect()_BT_ to get arguments.
-2. Extract the second and third arguments into variables _BT_query_BT_ and _BT_file_path_BT_.`.replace(/_BT_/g, '`'),
+2. Store _BT_args[1]_BT_ in a variable named _BT_query_BT_.
+3. Store _BT_args[2]_BT_ in a variable named _BT_file_path_BT_.
+4. Print them out to prove you got them!`.replace(/_BT_/g, '`'),
         test_code: `// Note: Since main() is hard to unit test directly, this test
 // verifies that you understand how to access vector elements by index.
 // Run your code to see the actual argument parsing in action!
@@ -100,75 +112,46 @@ fn main() {
         environment: "desktop",
         content: `# Reading a File
 
-Now we’ll add the functionality to read the file specified in the _BT_file_path_BT_ argument.
-
-## Reading with fs::read_to_string
 Now that we know *what* the user wants to find (the query) and *where* they want to find it (the filename), we need to actually open and read that file.
 
-## The _BT_std::fs_BT_ Module
+## The \`std::fs\` Module
 
-Rust's standard library provides the _BT_fs_BT_ (filesystem) module for this.
+Rust's standard library provides the \`fs\` (filesystem) module for this.
 
-_BT__BT__BT_rust
+\`\`\`rust
 use std::fs;
 
 // read_to_string takes a path and returns a Result<String, Error>
 let contents = fs::read_to_string(file_path)
     .expect("Something went wrong reading the file");
-_BT__BT__BT_
+\`\`\`
 
-This function:
-1.  Opens the file.
-2.  Allocates a new String.
-3.  Reads all bytes from the file into that String.
-4.  Closes the file.
+This one function does a lot of heavy lifting:
+1.  **Opens** the file (handling permissions).
+2.  **Allocates** memory for the content.
+3.  **Reads** the entire file into that memory.
+4.  **Closes** the file safely (even if the program crashes later).
 
-It handles all the messy system calls for you!
+## ⚠️ Common Mistakes
 
-## Where is the file?
-
-### Standard Rust (CLI)
-You would normally create a file called _BT_poem.txt_BT_ in your project's root directory (next to _BT_Cargo.toml_BT_).
-
-### CrabCademy Playground
-The filesystem here is ephemeral. To test your code, you should **write the file first** using _BT_fs::write_BT_.
-
-## Writing with fs::write
-Before we can read a file, it must exist. In a real project, you might create it manually, but in our playground, we'll use _BT_fs::write_BT_ to create a temporary file for our program to use.
-
-_BT__BT__BT_rust
-use std::fs;
-
-fn main() {
-    let file_path = "poem.txt";
-    let content = "Rust:\\nsafe, fast, productive.";
-    
-    // write takes a path and the content to write
-    fs::write(file_path, content).unwrap();
-}
-_BT__BT__BT_
-
-> [!NOTE]
-> **Behind the Scenes**: Our playground runs in a sandboxed temporary directory that is deleted after execution. Because of this, there is no persistent "project root". Your code must create the file *during execution* so that it exists for \`read_to_string\` to find.
-
-_BT__BT__BT_rust
-use std::fs;
-
-fn main() {
-    let file_path = "poem.txt";
-    let content = "I'm nobody! Who are you?\\nAre you nobody, too?";
-    
-    // Create the file so we can read it back!
-    fs::write(file_path, content).unwrap();
-    
-    // Now you can read it...
-}
-_BT__BT__BT_`.replace(/_BT_/g, '`'),
+1.  **Relative vs Absolute Paths**: If you run \`cargo run poem.txt\`, Rust looks for \`poem.txt\` in the *current working directory* (where you ran the command). If the file is in a subfolder, you need \`cargo run subfolder/poem.txt\`.
+2.  **Missing File Permissions**: In desktop environments, your program might not have permission to read the file. This returns an \`Err\`, which is why we handle it (or use \`expect\` to crash with a message).
+3.  **Assuming UTF-8**: \`read_to_string\` *only* works for text files (UTF-8). If you try to open an image or binary file, it will return an error. For those, you'd use \`read\` (bytes).`,
         quiz: [
             {
                 question: "Which module contains file system functions?",
                 options: ["std::env", "std::io", "std::fs", "std::file"],
                 correctIndex: 2,
+            },
+            {
+                question: "What happens if read_to_string finds non-text (binary) data?",
+                options: [
+                    "It converts it to text automatically",
+                    "It returns an Error",
+                    "It crashes (panics) immediately",
+                    "It skips the bad characters",
+                ],
+                correctIndex: 1,
             },
         ],
         objectives: `## Your Mission
@@ -211,31 +194,32 @@ fn main() {
 "Red, Green, Refactor." This is the mantra of TDD.
 
 Instead of writing code and then checking if it works, passing TDD means we:
-1.  **Write a test that fails** (Red).
-2.  **Write just enough code to make it pass** (Green).
-3.  **Clean up the code** (Refactor).
+1.  **Red**: Write a test that fails (because the feature doesn't exist yet).
+2.  **Green**: Write *just enough* code to make the test pass.
+3.  **Refactor**: Clean up the code without changing behavior (making sure tests still pass).
 
-## Writing the Search Logic
+## The Algorithm
 
-We want a function _BT_search_BT_ that takes a query and text, and returns only the matching lines.
+We want a function \`search\` that looks through lines of text.
 
-_BT__BT__BT_rust
-// note the explicit lifetimes 'a!
-pub fn search<'a>(query: &str, contents: &'a str) -> Vec<&'a str> {
-    let mut results = Vec::new();
+1.  Iterate through each line of the contents.
+2.  Check if the line contains our query string.
+3.  If it does, add it to the list of results.
+4.  Return the list.
 
-    for line in contents.lines() {
-        if line.contains(query) {
-            results.push(line);
-        }
-    }
+## Lifetimes Revisited
 
-    results
-}
-_BT__BT__BT_
+\`\`\`rust
+pub fn search<'a>(query: &str, contents: &'a str) -> Vec<&'a str> { ... }
+\`\`\`
 
-## Why Lifetimes here?
-Returns a _BT_Vec<&'a str>_BT_. We are returning *references* to slices of the original _BT_contents_BT_. Use lifetimes to tell the compiler: "The returned lines are just pointers into the original _BT_contents_BT_ string. Don't drop _BT_contents_BT_ while we are still looking at these lines!"`.replace(/_BT_/g, '`'),
+Why \`'a\` on \`contents\` and the return value?
+Because the **results** (the vector of strings) are just *references* pointing back to the original **contents**. If \`contents\` ceases to exist, the results are invalid. The lifetime annotation tells Rust: "The returned strings live as long as the input contents."
+
+## ⚠️ Common Mistakes
+
+1.  **Testing Implementation**: A bad test would check *how* we search (e.g., "did we use a for loop?"). A good TDD test checks *what* happens (Input: "duct", Output: ["safe, fast, productive."]).
+2.  **Case Sensitivity**: By default, \`contains()\` is case-sensitive. "Rust" != "rust". (We'll fix this later!)`,
         quiz: [
             {
                 question: "Why do we need lifetime annotations in the search function?",
@@ -246,6 +230,16 @@ Returns a _BT_Vec<&'a str>_BT_. We are returning *references* to slices of the o
                     "It's required for all public functions"
                 ],
                 correctIndex: 1,
+            },
+            {
+                question: "What is the 'Green' step in TDD?",
+                options: [
+                    "Write comments",
+                    "Refactor the code",
+                    "Write just enough code to pass the test",
+                    "Deploy to production",
+                ],
+                correctIndex: 2,
             },
         ],
         objectives: `## Your Mission
