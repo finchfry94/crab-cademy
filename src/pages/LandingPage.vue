@@ -8,6 +8,16 @@ import BaseModal from "../components/layout/BaseModal.vue";
 
 const showDownloadModal = ref(false);
 
+const GITHUB_REPO = "https://github.com/finchfry94/crab-cademy";
+
+function handleDownload(platform: 'mac' | 'linux' | 'windows' | 'source') {
+  let url = `${GITHUB_REPO}/releases/latest`;
+  if (platform === 'source') {
+    url = GITHUB_REPO;
+  }
+  window.open(url, '_blank');
+}
+
 const router = useRouter();
 
 const paths = getAllPaths();
@@ -231,7 +241,10 @@ function navigateToPath(path: LearningPath) {
         </p>
 
         <div class="grid gap-3">
-          <button class="flex items-center gap-4 p-4 rounded-2xl bg-neutral-800/50 border border-neutral-700/50 hover:bg-neutral-800 hover:border-orange-500/40 transition-all group">
+          <button 
+            @click="handleDownload('mac')"
+            class="flex items-center gap-4 p-4 rounded-2xl bg-neutral-800/50 border border-neutral-700/50 hover:bg-neutral-800 hover:border-orange-500/40 transition-all group"
+          >
             <div class="w-10 h-10 rounded-xl bg-neutral-900 flex items-center justify-center text-neutral-400 group-hover:text-white transition-colors">
               <Apple class="w-6 h-6" />
             </div>
@@ -241,7 +254,10 @@ function navigateToPath(path: LearningPath) {
             </div>
           </button>
 
-          <button class="flex items-center gap-4 p-4 rounded-2xl bg-neutral-800/50 border border-neutral-700/50 hover:bg-neutral-800 hover:border-orange-500/40 transition-all group">
+          <button 
+            @click="handleDownload('linux')"
+            class="flex items-center gap-4 p-4 rounded-2xl bg-neutral-800/50 border border-neutral-700/50 hover:bg-neutral-800 hover:border-orange-500/40 transition-all group"
+          >
             <div class="w-10 h-10 rounded-xl bg-neutral-900 flex items-center justify-center text-neutral-400 group-hover:text-white transition-colors">
               <Box class="w-6 h-6" />
             </div>
@@ -251,7 +267,10 @@ function navigateToPath(path: LearningPath) {
             </div>
           </button>
 
-          <button class="flex items-center gap-4 p-4 rounded-2xl bg-neutral-800/50 border border-neutral-700/50 hover:bg-neutral-800 hover:border-orange-500/40 transition-all group">
+          <button 
+            @click="handleDownload('windows')"
+            class="flex items-center gap-4 p-4 rounded-2xl bg-neutral-800/50 border border-neutral-700/50 hover:bg-neutral-800 hover:border-orange-500/40 transition-all group"
+          >
             <div class="w-10 h-10 rounded-xl bg-neutral-900 flex items-center justify-center text-neutral-400 group-hover:text-white transition-colors">
               <Monitor class="w-6 h-6" />
             </div>
@@ -261,7 +280,10 @@ function navigateToPath(path: LearningPath) {
             </div>
           </button>
 
-          <button class="flex items-center gap-4 p-4 rounded-2xl bg-neutral-800/50 border border-neutral-700/50 hover:bg-neutral-800 hover:border-orange-500/40 transition-all group">
+          <button 
+            @click="handleDownload('source')"
+            class="flex items-center gap-4 p-4 rounded-2xl bg-neutral-800/50 border border-neutral-700/50 hover:bg-neutral-800 hover:border-orange-500/40 transition-all group"
+          >
             <div class="w-10 h-10 rounded-xl bg-neutral-900 flex items-center justify-center text-neutral-400 group-hover:text-white transition-colors">
               <Github class="w-6 h-6" />
             </div>
