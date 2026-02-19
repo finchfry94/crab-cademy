@@ -19,7 +19,6 @@ import { ch17Lessons } from "./ch17";
 import { ch18Lessons } from "./ch18";
 import { ch19Lessons } from "./ch19";
 import { ch20Lessons } from "./ch20";
-import { ch21Lessons } from "./ch21";
 
 export const path: LearningPath = {
     id: "the-book",
@@ -63,7 +62,7 @@ export const path: LearningPath = {
             id: "final",
             title: "Module 6: The Summit",
             description: "Systems programming and the Final Project.",
-            chapters: ["20", "21"],
+            chapters: ["20"],
         },
     ],
 };
@@ -89,5 +88,4 @@ export const lessons: Lesson[] = [
     ...ch18Lessons,
     ...ch19Lessons,
     ...ch20Lessons,
-    ...ch21Lessons,
 ];

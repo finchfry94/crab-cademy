@@ -79,34 +79,32 @@ handle.join().unwrap();
         ],
         objectives: `## Your Mission
 
-1. Use _BT_thread::spawn_BT_ to run code in a background thread.
-2. Inside the thread, return the number 42.
-3. Save the _BT_JoinHandle_BT_ in a variable.
-4. Use _BT_handle.join()_BT_ in the main thread to get the result.`.replace(/_BT_/g, '`'),
+Write a function \`spawn_forty_two() -> std::thread::JoinHandle<i32>\` that:
+
+1. Spawns a thread.
+2. Inside the thread, returns the number **42**.
+3. Returns the \`JoinHandle\` to the caller.`,
         test_code: `#[cfg(test)]
 mod tests {
+    use super::*;
     use std::thread;
 
     #[test]
     fn test_join() {
-        let handle = thread::spawn(|| {
-            42
-        });
+        let handle = spawn_forty_two();
         let result = handle.join().unwrap();
         assert_eq!(result, 42);
     }
 }`,
         starter_code: `use std::thread;
+use std::thread::JoinHandle;
+
+// Write: spawn_forty_two() -> JoinHandle<i32>
 
 fn main() {
-    let handle = thread::spawn(|| {
-        // Return 42 here
-    });
-
-    // Unwrap the result from join()
-    // let result = ...
-    
-    // println!("Result: {}", result);
+    let handle = spawn_forty_two();
+    let result = handle.join().unwrap();
+    println!("Thread returned: {}", result);
 }
 `,
     },
@@ -168,31 +166,32 @@ fn main() {
         ],
         objectives: `## Your Mission
 
-1. Create a channel.
-2. Spawn a thread.
-3. Send the number 100 from the thread.
-4. Receive it in the main thread and print it.`.replace(/_BT_/g, '`'),
+Write a function \`create_sender() -> std::sync::mpsc::Receiver<i32>\` that:
+
+1. Creates a channel.
+2. Spawns a thread that sends the number **100** into the channel.
+3. Returns the **Receiver** (\`rx\`) to the caller so we can read it.`,
         test_code: `#[cfg(test)]
 mod tests {
+    use super::*;
     use std::sync::mpsc;
     use std::thread;
 
     #[test]
     fn test_channel() {
-        let (tx, rx) = mpsc::channel();
-        thread::spawn(move || {
-            tx.send(100).unwrap();
-        });
+        let rx = create_sender();
+        // We expect to receive 100 within a reasonable time
         assert_eq!(rx.recv().unwrap(), 100);
     }
 }`,
         starter_code: `use std::sync::mpsc;
 use std::thread;
 
+// Write: create_sender() -> mpsc::Receiver<i32>
+
 fn main() {
-    // Create channel
-    // Spawn thread and send 100
-    // Receive and print
+    let rx = create_sender();
+    println!("Received: {}", rx.recv().unwrap());
 }
 `,
     },

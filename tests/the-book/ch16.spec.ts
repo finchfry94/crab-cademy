@@ -1,11 +1,13 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from '../utils/persistentTest';
 
-test.describe('Chapter 16: Fearless Concurrency', () => {
-    test('16.1 Using Threads to Run Code Simultaneously', async ({ page }) => {
+test.describe.serial('Chapter 16: Fearless Concurrency (Persistent)', () => {
+    test('16.1 Using Threads to Run Code Simultaneously', async ({ persistentPage }) => {
+        const page = persistentPage;
         await page.goto('/path/the-book/lesson/ch16-01');
 
         // Quiz
-        await page.locator('label', { hasText: 'All spawned threads are shut down' }).click();
+        await page.locator('label', { hasText: 'All spawned threads are shut down immediately' }).click();
+        await page.locator('label', { hasText: 'Use the \'move\' keyword' }).click();
         await page.click('button:has-text("Check Answers")');
 
         // Coding Challenge
@@ -34,11 +36,13 @@ fn main() {
         await expect(page.locator('text=🎉 All tests passed! Lesson complete!')).toBeVisible({ timeout: 15000 });
     });
 
-    test('16.2 Message Passing with Channels', async ({ page }) => {
+    test('16.2 Message Passing with Channels', async ({ persistentPage }) => {
+        const page = persistentPage;
         await page.goto('/path/the-book/lesson/ch16-02');
 
         // Quiz
         await page.locator('label', { hasText: 'Multiple Producer, Single Consumer' }).click();
+        await page.locator('label', { hasText: 'Yes, ownership moves to the receiver' }).click();
         await page.click('button:has-text("Check Answers")');
 
         // Coding Challenge

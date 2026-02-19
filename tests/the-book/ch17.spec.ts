@@ -6,7 +6,7 @@ test.describe('Chapter 17: Async / Await', () => {
 
         // Quiz
         await page.locator('label', { hasText: 'No, it returns a Future' }).click();
-        await page.locator('label', { hasText: 'An async runtime' }).click();
+        await page.locator('label', { hasText: 'It blocks the entire async runtime (bad!)' }).click();
         await page.click('button:has-text("Check Answers")');
 
         // Coding Challenge

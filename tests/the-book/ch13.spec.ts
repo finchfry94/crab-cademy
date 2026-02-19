@@ -12,12 +12,19 @@ test.describe('Chapter 13: Functional Language Features', () => {
         // Coding Challenge
         await page.click('button:has-text("Objectives")');
 
-        const rustCode = `fn main() {
-    let multiplier = 2;
-    let double = |x: i32| x * multiplier;
+        const rustCode = `fn double_value(x: i32) -> i32 {
+    let double = |n| n * 2;
+    double(x)
+}
 
-    let result = double(5);
-    println!("Result: {}", result);
+fn add_with_closure(x: i32, y: i32) -> i32 {
+    let add = |n| n + y;
+    add(x)
+}
+
+fn main() {
+    println!("Double 5: {}", double_value(5));
+    println!("5 + 10: {}", add_with_closure(5, 10));
 }`;
 
         await page.evaluate((code) => {
@@ -44,15 +51,17 @@ test.describe('Chapter 13: Functional Language Features', () => {
         // Coding Challenge
         await page.click('button:has-text("Objectives")');
 
-        const rustCode = `fn main() {
-    let numbers = vec![1, 2, 3, 4, 5, 6];
-
-    let evens_times_ten: Vec<i32> = numbers.into_iter()
+        const rustCode = `fn process_numbers(input: Vec<i32>) -> Vec<i32> {
+    input.into_iter()
         .filter(|x| x % 2 == 0)
         .map(|x| x * 10)
-        .collect();
+        .collect()
+}
 
-    println!("{:?}", evens_times_ten);
+fn main() {
+    let numbers = vec![1, 2, 3, 4, 5, 6];
+    let result = process_numbers(numbers);
+    println!("{:?}", result);
 }`;
 
         await page.evaluate((code) => {

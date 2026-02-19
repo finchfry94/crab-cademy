@@ -2,8 +2,11 @@
 import { computed, ref } from "vue";
 import { useRouter } from "vue-router";
 import { getAllPaths, getPathLessons, type LearningPath } from "../data/lessons";
-import { BookOpen, ChevronRight, Clock, Sparkles } from "lucide-vue-next";
+import { BookOpen, ChevronRight, Clock, Sparkles, Download, Apple, Box, Monitor, Github } from "lucide-vue-next";
 import CrabCademyIcon from "../components/icons/CrabCademyIcon.vue";
+import BaseModal from "../components/layout/BaseModal.vue";
+
+const showDownloadModal = ref(false);
 
 const router = useRouter();
 
@@ -17,8 +20,8 @@ function getLessonCount(pathId: string): number {
   return getPathLessons(pathId).length;
 }
 
-const availablePaths = computed(() => paths.filter(p => getLessonCount(p.id) > 0));
-const comingSoonPaths = computed(() => paths.filter(p => getLessonCount(p.id) === 0));
+const availablePaths = computed(() => paths.filter(p => p.id === "the-book" && getLessonCount(p.id) > 0));
+const comingSoonPaths = computed(() => paths.filter(p => p.id !== "the-book" || getLessonCount(p.id) === 0));
 
 function getCompletedCount(pathId: string): number {
   void progressVersion.value;
@@ -58,6 +61,13 @@ function navigateToPath(path: LearningPath) {
 
         <div class="mt-8 flex justify-center gap-4">
              <button
+               @click="showDownloadModal = true"
+               class="px-6 py-2.5 rounded-xl bg-orange-600 hover:bg-orange-500 text-white font-semibold transition-all shadow-lg shadow-orange-600/20 active:scale-95 flex items-center gap-2"
+             >
+               <Download class="w-5 h-5" />
+               Download App
+             </button>
+             <button
                @click="router.push({ name: 'how-to' })"
                class="px-6 py-2.5 rounded-xl bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-neutral-300 font-medium transition-colors"
              >
@@ -75,7 +85,14 @@ function navigateToPath(path: LearningPath) {
           <Sparkles class="w-5 h-5 text-orange-400" />
           Available Paths
         </h2>
-        <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div 
+          class="grid gap-4"
+          :class="[
+            availablePaths.length === 1 ? 'grid-cols-1 max-w-md mx-auto' : 
+            availablePaths.length === 2 ? 'grid-cols-1 sm:grid-cols-2' : 
+            'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'
+          ]"
+        >
           <button
             v-for="p in availablePaths"
             :key="p.id"
@@ -148,7 +165,14 @@ function navigateToPath(path: LearningPath) {
           <Clock class="w-5 h-5" />
           Coming Soon
         </h2>
-        <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div 
+          class="grid gap-4"
+          :class="[
+            comingSoonPaths.length === 1 ? 'grid-cols-1 max-w-md mx-auto' : 
+            comingSoonPaths.length === 2 ? 'grid-cols-1 sm:grid-cols-2' : 
+            'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'
+          ]"
+        >
           <div
             v-for="p in comingSoonPaths"
             :key="p.id"
@@ -193,5 +217,67 @@ function navigateToPath(path: LearningPath) {
         </div>
       </section>
     </main>
+
+    <!-- Download Modal -->
+    <BaseModal 
+      :show="showDownloadModal" 
+      title="Download CrabCademy" 
+      @close="showDownloadModal = false"
+    >
+      <div class="space-y-4">
+        <p class="text-neutral-400 text-sm mb-6">
+          Choose your platform to download the CrabCademy desktop app. 
+          Unlock local execution and system-level features.
+        </p>
+
+        <div class="grid gap-3">
+          <button class="flex items-center gap-4 p-4 rounded-2xl bg-neutral-800/50 border border-neutral-700/50 hover:bg-neutral-800 hover:border-orange-500/40 transition-all group">
+            <div class="w-10 h-10 rounded-xl bg-neutral-900 flex items-center justify-center text-neutral-400 group-hover:text-white transition-colors">
+              <Apple class="w-6 h-6" />
+            </div>
+            <div class="text-left">
+              <div class="font-semibold text-white">Apple macOS</div>
+              <div class="text-xs text-neutral-500">Apple Silicon / Intel (.dmg)</div>
+            </div>
+          </button>
+
+          <button class="flex items-center gap-4 p-4 rounded-2xl bg-neutral-800/50 border border-neutral-700/50 hover:bg-neutral-800 hover:border-orange-500/40 transition-all group">
+            <div class="w-10 h-10 rounded-xl bg-neutral-900 flex items-center justify-center text-neutral-400 group-hover:text-white transition-colors">
+              <Box class="w-6 h-6" />
+            </div>
+            <div class="text-left">
+              <div class="font-semibold text-white">Debian / Ubuntu</div>
+              <div class="text-xs text-neutral-500">Linux x64 (.deb)</div>
+            </div>
+          </button>
+
+          <button class="flex items-center gap-4 p-4 rounded-2xl bg-neutral-800/50 border border-neutral-700/50 hover:bg-neutral-800 hover:border-orange-500/40 transition-all group">
+            <div class="w-10 h-10 rounded-xl bg-neutral-900 flex items-center justify-center text-neutral-400 group-hover:text-white transition-colors">
+              <Monitor class="w-6 h-6" />
+            </div>
+            <div class="text-left">
+              <div class="font-semibold text-white">Windows</div>
+              <div class="text-xs text-neutral-500">Windows x64 (.msi)</div>
+            </div>
+          </button>
+
+          <button class="flex items-center gap-4 p-4 rounded-2xl bg-neutral-800/50 border border-neutral-700/50 hover:bg-neutral-800 hover:border-orange-500/40 transition-all group">
+            <div class="w-10 h-10 rounded-xl bg-neutral-900 flex items-center justify-center text-neutral-400 group-hover:text-white transition-colors">
+              <Github class="w-6 h-6" />
+            </div>
+            <div class="text-left">
+              <div class="font-semibold text-white">Build from Source</div>
+              <div class="text-xs text-neutral-500">View on GitHub</div>
+            </div>
+          </button>
+        </div>
+
+        <div class="mt-6 pt-6 border-t border-neutral-800">
+          <p class="text-[11px] text-neutral-500 text-center uppercase tracking-widest font-semibold">
+            Alpha Release v0.1.0
+          </p>
+        </div>
+      </div>
+    </BaseModal>
   </div>
 </template>

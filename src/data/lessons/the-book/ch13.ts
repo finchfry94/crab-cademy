@@ -75,33 +75,35 @@ let equal_to_x = move |z| z == x;
         ],
         objectives: `## Your Mission
 
-1. Create a closure named _BT_double_BT_.
-2. It should take one argument _BT_x_BT_ and return _BT_x * 2_BT_.
-3. Create a variable _BT_multiplier_BT_ = 10.
-4. Create a closure _BT_times_ten_BT_ that captures _BT_multiplier_BT_ and multiplies its input by it.`.replace(/_BT_/g, '`'),
+1. Write a function _BT_double_value(x: i32) -> i32_BT_.
+   - Inside it, define a closure that doubles its input.
+   - Use that closure to return the doubled value of **x**.
+
+2. Write a function _BT_add_with_closure(x: i32, y: i32) -> i32_BT_.
+   - Inside it, define a closure that **captures** _BT_y_BT_ and adds it to the input.
+   - Use that closure to add _BT_y_BT_ to _BT_x_BT_.`.replace(/_BT_/g, '`'),
         test_code: `#[cfg(test)]
 mod tests {
     use super::*;
 
     #[test]
-    fn test_closure_logic() {
-        let n = 5;
-        let double = |x| x * 2;
-        assert_eq!(double(n), 10);
-        
-        let multiplier = 10;
-        let times_ten = |x| x * multiplier;
-        assert_eq!(times_ten(n), 50);
+    fn test_double_value() {
+        assert_eq!(double_value(5), 10);
+        assert_eq!(double_value(-2), -4);
+    }
+
+    #[test]
+    fn test_add_with_closure() {
+        assert_eq!(add_with_closure(5, 10), 15);
+        assert_eq!(add_with_closure(100, 1), 101);
     }
 }`,
-        starter_code: `fn main() {
-    // 1. Define 'double' closure
-    
-    // 2. Define 'multiplier' variable and 'times_ten' closure
-    
-    let n = 5;
-    // println!("Double 5: {}", double(5));
-    // println!("5 times 10: {}", times_ten(5));
+        starter_code: `// Write: double_value(x: i32) -> i32
+// Write: add_with_closure(x: i32, y: i32) -> i32
+
+fn main() {
+    println!("Double 5: {}", double_value(5));
+    println!("5 + 10: {}", add_with_closure(5, 10));
 }
 `,
     },
@@ -167,35 +169,38 @@ let v2: Vec<_> = v1.iter()
         ],
         objectives: `## Your Mission
 
-We have a list of numbers: 1 through 6.
-1.  Filter to keep only **even** numbers.
-2.  Multiply them by **10**.
-3.  Collect them into a new Vector.`.replace(/_BT_/g, '`'),
+Write a function _BT_process_numbers(input: Vec<i32>) -> Vec<i32>_BT_ that:
+
+1. Takes a vector of numbers
+2. Filters to keep only **even** numbers
+3. Multiplies them by **10**
+4. Returns the new vector
+
+Example: _BT_[1, 2, 3, 4]_BT_ -> _BT_[20, 40]_BT_`.replace(/_BT_/g, '`'),
         test_code: `#[cfg(test)]
 mod tests {
     use super::*;
 
     #[test]
-    fn test_iterator_chain() {
-        let v = vec![1, 2, 3, 4, 5, 6];
-        let result: Vec<i32> = v.into_iter()
-            .filter(|x| x % 2 == 0)
-            .map(|x| x * 10)
-            .collect();
-        
+    fn test_process_numbers() {
+        let input = vec![1, 2, 3, 4, 5, 6];
+        let result = process_numbers(input);
         assert_eq!(result, vec![20, 40, 60]);
     }
-}`,
-        starter_code: `fn main() {
-    let numbers = vec![1, 2, 3, 4, 5, 6];
-    
-    // Fill in the blanks!
-    // let result: Vec<i32> = numbers.into_iter()
-    //     .filter(...)
-    //     .map(...)
-    //     .collect();
 
-    // println!("{:?}", result);
+    #[test]
+    fn test_process_empty() {
+        let input = vec![1, 3, 5]; // No evens
+        let result = process_numbers(input);
+        assert!(result.is_empty());
+    }
+}`,
+        starter_code: `// Write: process_numbers(input: Vec<i32>) -> Vec<i32>
+
+fn main() {
+    let numbers = vec![1, 2, 3, 4, 5, 6];
+    let result = process_numbers(numbers);
+    println!("{:?}", result);
 }
 `,
     },

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useRouter } from "vue-router";
-import { ArrowLeft, BookOpen, CheckCircle, Code, Play, Terminal, HelpCircle, GraduationCap, Shield, Server, Laptop } from "lucide-vue-next";
+import { ArrowLeft, BookOpen, CheckCircle, Code, Play, Terminal, HelpCircle, GraduationCap, Shield, Server, Laptop, Smartphone } from "lucide-vue-next";
 
 const router = useRouter();
 
@@ -258,7 +258,7 @@ const steps = [
             <h2 class="text-3xl font-bold text-white">How Your Code Runs</h2>
           </div>
 
-          <div class="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+          <div class="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto">
             <!-- Browser Mode -->
             <div class="relative group p-8 rounded-2xl bg-neutral-900/40 border border-neutral-800 hover:bg-neutral-900/60 transition-all duration-300">
                <div class="w-12 h-12 rounded-xl bg-neutral-800 flex items-center justify-center mb-6">
@@ -312,6 +312,31 @@ const steps = [
                  <li class="flex items-center gap-2">
                    <CheckCircle class="w-4 h-4 text-emerald-500" />
                    Full system file I/O access
+                 </li>
+               </ul>
+            </div>
+
+            <!-- Mobile Mode -->
+            <div class="relative group p-8 rounded-2xl bg-neutral-900/40 border border-neutral-800 hover:bg-neutral-900/60 transition-all duration-300">
+               <div class="w-12 h-12 rounded-xl bg-neutral-800 flex items-center justify-center mb-6">
+                 <Smartphone class="w-6 h-6 text-neutral-400 group-hover:text-blue-400 transition-colors" />
+               </div>
+               <h3 class="text-xl font-bold text-white mb-2">Mobile Mode</h3>
+               <p class="text-neutral-400 leading-relaxed mb-4">
+                 On smaller screens, the editor and terminal are hidden by default to provide a focused reading experience.
+               </p>
+               <ul class="space-y-2 text-sm text-neutral-500">
+                 <li class="flex items-center gap-2">
+                   <CheckCircle class="w-4 h-4 text-emerald-500/50" />
+                   Distraction-free reading
+                 </li>
+                 <li class="flex items-center gap-2">
+                   <CheckCircle class="w-4 h-4 text-emerald-500/50" />
+                   Optimized for touch
+                 </li>
+                 <li class="flex items-center gap-2">
+                   <CheckCircle class="w-4 h-4 text-emerald-500/50" />
+                   Perfect for on-the-go study
                  </li>
                </ul>
             </div>

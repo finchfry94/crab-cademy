@@ -12,18 +12,18 @@ test.describe('Chapter 19: Patterns and Matching', () => {
         // Coding Challenge
         await page.click('button:has-text("Objectives")');
 
-        const rustCode = `struct Color { r: u8, g: u8, b: u8 }
+        const rustCode = `struct Point { x: i32, y: i32 }
 
-fn is_pure_red(c: Color) -> bool {
-    match c {
-        Color { r: 255, g: 0, b: 0 } => true,
-        _ => false,
+fn check_point(p: Point) -> &'static str {
+    match p {
+        Point { x: 0, .. } => "On Y Axis",
+        _ => "Elsewhere",
     }
 }
 
 fn main() {
-    let c = Color { r: 255, g: 0, b: 0 };
-    println!("Is red? {}", is_pure_red(c));
+    let p = Point { x: 0, y: 7 };
+    println!("Point status: {}", check_point(p));
 }`;
 
         await page.evaluate((code) => {

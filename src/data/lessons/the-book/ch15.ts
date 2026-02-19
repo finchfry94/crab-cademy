@@ -9,7 +9,7 @@ export const ch15Lessons: Lesson[] = [
         environment: "browser",
         content: `# Box<T>
 
-\u0060Box<T>\u0060 is the most straightforward smart pointer. It allows you to store data on the **Heap** rather than the **Stack**.
+\`Box<T>\` is the most straightforward smart pointer. It allows you to store data on the **Heap** rather than the **Stack**.
 
 ## Stack vs Heap Refresher
 
@@ -59,26 +59,33 @@ Here, \`b\` is a pointer stored on the stack. It points to the value \`5\`, whic
         ],
         objectives: `## Your Mission
 
-1. Create a _BT_Box_BT_ containing the number 1000.
-2. Dereference the box to multiply the inner value by 2.
-3. Print the result.`.replace(/_BT_/g, '`'),
+Write a function _BT_double_box(b: Box<i32>) -> i32_BT_ that:
+
+1. Takes a boxed integer.
+2. Dereferences it using the _BT_*_BT_ operator.
+3. Multiplies the inner value by 2 and returns it.`.replace(/_BT_/g, '`'),
         test_code: `#[cfg(test)]
 mod tests {
+    use super::*;
+
     #[test]
-    fn test_box() {
+    fn test_double_box() {
+        let b = Box::new(10);
+        assert_eq!(double_box(b), 20);
+    }
+
+    #[test]
+    fn test_double_box_large() {
         let b = Box::new(1000);
-        let val = *b * 2;
-        assert_eq!(val, 2000);
+        assert_eq!(double_box(b), 2000);
     }
 }`,
-        starter_code: `fn main() {
-    // 1. Create a Box with 1000
-    // let b = ...
-    
-    // 2. Dereference and multiply
-    // let result = ...
-    
-    // println!("{}", result);
+        starter_code: `// Write: double_box(b: Box<i32>) -> i32
+
+fn main() {
+    let my_box = Box::new(500);
+    let result = double_box(my_box);
+    println!("Result: {}", result);
 }
 `,
     },
@@ -129,29 +136,30 @@ Note: \`Rc::clone\` doesn't copy the data (deep copy). It just increments the co
             },
         ],
         objectives: `## Your Mission
+        
+Write a function _BT_count_references(s: &str) -> usize_BT_ that:
 
-1. Create an _BT_Rc_BT_ wrapping a String "Rust".
-2. Create two clones of it.
-3. Assert that the strong count is 3.`.replace(/_BT_/g, '`'),
+1. Creates an _BT_Rc<String>_BT_ from the input string.
+2. Creates **two** clones of that _BT_Rc_BT_.
+3. Returns the **strong count** of the original _BT_Rc_BT_.
+   *(Hint: It should be 3 if you did it right!)*`.replace(/_BT_/g, '`'),
         test_code: `#[cfg(test)]
 mod tests {
-    use std::rc::Rc;
+    use super::*;
+    use std::rc::Rc; // Verify they can use it or import it
 
     #[test]
-    fn test_rc_count() {
-        let a = Rc::new(String::from("Rust"));
-        let b = Rc::clone(&a);
-        let c = Rc::clone(&a);
-        assert_eq!(Rc::strong_count(&a), 3);
+    fn test_count_is_three() {
+        assert_eq!(count_references("hello"), 3);
     }
 }`,
         starter_code: `use std::rc::Rc;
 
+// Write: count_references(s: &str) -> usize
+
 fn main() {
-    let a = Rc::new(String::from("Rust"));
-    // Clone 'a' into 'b' and 'c'
-    
-    // println!("Count: {}", Rc::strong_count(&a));
+    let count = count_references("Rust");
+    println!("Reference count: {}", count);
 }
 `,
     },
@@ -200,30 +208,38 @@ Why use it? sometimes the compiler is too strict. You know your code is safe, bu
         ],
         objectives: `## Your Mission
 
-We have an immutable variable \`data\`. Use \`RefCell\` to mutate it anyway.
+Write a function _BT_add_ten(r: &RefCell<i32>)_BT_ that:
 
-1.  Wrap the integer 10 in a \`RefCell\`.
-2.  Use \`borrow_mut()\` to change the value to 20.
-3.  Print the new value using \`borrow()\`.`.replace(/_BT_/g, '`'),
+1. Borrows the contents of the RefCell mutably.
+2. Adds **10** to the inner value.
+3. Prints the new value.`.replace(/_BT_/g, '`'),
         test_code: `#[cfg(test)]
 mod tests {
+    use super::*;
     use std::cell::RefCell;
 
     #[test]
-    fn test_refcell() {
-        let data = RefCell::new(10);
-        *data.borrow_mut() = 20;
-        assert_eq!(*data.borrow(), 20);
+    fn test_modification() {
+        let r = RefCell::new(5);
+        add_ten(&r);
+        assert_eq!(*r.borrow(), 15);
+    }
+
+    #[test]
+    fn test_modification_again() {
+        let r = RefCell::new(100);
+        add_ten(&r);
+        assert_eq!(*r.borrow(), 110);
     }
 }`,
         starter_code: `use std::cell::RefCell;
 
+// Write: add_ten(r: &RefCell<i32>)
+
 fn main() {
     let data = RefCell::new(10);
-    
-    // Mutate it to 20!
-    
-    println!("Value: {}", data.borrow());
+    add_ten(&data);
+    println!("Main sees: {:?}", data);
 }
 `,
     },

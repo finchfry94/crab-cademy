@@ -10,8 +10,9 @@ test.describe('Chapter 10: Generic Types, Traits, and Lifetimes', () => {
         await page.goto('/path/the-book/lesson/ch10-01');
 
         // Quiz
-        await page.locator('label', { hasText: "It's a generic type parameter" }).click();
-        await page.locator('label', { hasText: 'Yes, by using multiple type parameters like <T, U>' }).click();
+        await page.locator('label', { hasText: "It declares a generic type parameter placeholder" }).click();
+        await page.locator('label', { hasText: "No, because 'x' and 'y' must be the EXACT same type" }).click();
+        await page.locator('label', { hasText: "struct Point<T, U> { x: T, y: U }" }).click();
         await page.click('button:has-text("Check Answers")');
 
         // Coding Challenge
@@ -53,8 +54,9 @@ fn main() {
         await page.goto('/path/the-book/lesson/ch10-02');
 
         // Quiz
-        await page.locator('label', { hasText: 'trait' }).click();
-        await page.locator('label', { hasText: 'Yes' }).click();
+        await page.locator('label', { hasText: /^trait$/ }).click();
+        await page.locator('label', { hasText: 'No, I can use the default behavior' }).click();
+        await page.locator('label', { hasText: 'You cannot implement external traits on external types' }).click();
         await page.click('button:has-text("Check Answers")');
 
         // Coding Challenge
@@ -100,8 +102,9 @@ fn main() {
         await page.goto('/path/the-book/lesson/ch10-03');
 
         // Quiz
-        await page.locator('label', { hasText: "'a" }).click();
-        await page.locator('label', { hasText: 'No, they only describe relationships for the compiler' }).click();
+        await page.locator('label', { hasText: "' (single quote/tick)" }).click();
+        await page.locator('label', { hasText: 'No, they only verify relationships for the compiler' }).click();
+        await page.locator('label', { hasText: 'The reference is valid for the entire program duration' }).click();
         await page.click('button:has-text("Check Answers")');
 
         // Coding Challenge

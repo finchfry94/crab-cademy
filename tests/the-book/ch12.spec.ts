@@ -25,6 +25,7 @@ test.describe('Chapter 12: I/O Project (Desktop)', () => {
         // Quiz
         await page.locator('label', { hasText: 'std::env::args()' }).click();
         await page.locator('label', { hasText: 'The program name' }).click();
+        await page.locator('label', { hasText: 'Turns an iterator into a collection (like a Vec)' }).click();
         await page.click('button:has-text("Check Answers")');
 
         // Coding Challenge
@@ -66,6 +67,7 @@ fn main() {
 
         // Quiz
         await page.locator('label', { hasText: 'std::fs' }).click();
+        await page.locator('label', { hasText: 'It returns an Error' }).click();
         await page.click('button:has-text("Check Answers")');
 
         // Coding Challenge
@@ -98,6 +100,7 @@ fn main() {
 
         // Quiz
         await page.locator('label', { hasText: "To tell the compiler the returned slices live as long as 'contents'" }).click();
+        await page.locator('label', { hasText: 'Write just enough code to pass the test' }).click();
         await page.click('button:has-text("Check Answers")');
 
         // Coding Challenge

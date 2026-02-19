@@ -6,7 +6,7 @@ test.describe('Chapter 14: More about Cargo and Crates.io', () => {
 
         // Quiz
         await page.locator('label', { hasText: 'Cargo.toml' }).click();
-        await page.locator('label', { hasText: '3' }).click();
+        await page.locator('label', { hasText: 'It performs advanced optimizations to make the code run faster' }).click();
         await page.click('button:has-text("Check Answers")');
 
         // Coding Challenge (TOML based, so we just supply the expected text)
@@ -38,6 +38,7 @@ opt-level = 1`;
 
         // Quiz
         await page.locator('label', { hasText: 'The Cargo.lock file' }).click();
+        await page.locator('label', { hasText: '[workspace]' }).click();
         await page.click('button:has-text("Check Answers")');
 
         // Coding Challenge

@@ -18,7 +18,7 @@ interface Chapter {
   lessons: Lesson[];
 }
 
-const chapterTitles: Record<string, string> = {
+const chapterTitles: { [key: string]: string } = {
   "1": "Getting Started",
   "2": "Common Concepts",
   "3": "Guessing Game",
@@ -179,7 +179,14 @@ function goBack() {
 
     <!-- Content Area -->
     <main class="max-w-7xl mx-auto px-6 py-12">
-      <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8">
+      <div 
+        class="grid gap-8"
+        :class="[
+          moduleViews.length === 1 ? 'grid-cols-1 max-w-2xl mx-auto' : 
+          moduleViews.length === 2 ? 'grid-cols-1 lg:grid-cols-2' : 
+          'grid-cols-1 lg:grid-cols-2 xl:grid-cols-3'
+        ]"
+      >
         <section 
           v-for="(mv, idx) in moduleViews" 
           :key="mv.id"

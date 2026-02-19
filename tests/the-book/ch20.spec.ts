@@ -1,11 +1,18 @@
 import { test, expect } from '@playwright/test';
+import { mockPlayground } from '../utils/mockPlayground';
 
 test.describe('Chapter 20: Advanced Features', () => {
+    test.beforeEach(async ({ page }) => {
+        await mockPlayground(page);
+    });
+
     test('20.1 Unsafe Rust', async ({ page }) => {
         await page.goto('/path/the-book/lesson/ch20-01');
 
         // Quiz
-        await page.locator('label', { hasText: "No, it just means the compiler can't verify safety" }).click();
+        await page.getByText(/^No$/, { exact: true }).nth(0).click();
+        await page.getByText(/^No$/, { exact: true }).nth(1).click();
+
         await page.click('button:has-text("Check Answers")');
 
         // Coding Challenge
@@ -36,7 +43,7 @@ test.describe('Chapter 20: Advanced Features', () => {
         await page.goto('/path/the-book/lesson/ch20-05');
 
         // Quiz
-        await page.locator('label', { hasText: 'Macros can take variable arguments' }).click();
+        await page.locator('label', { hasText: 'Macros expand into code at compile time' }).click();
         await page.click('button:has-text("Check Answers")');
 
         // Coding Challenge

@@ -23,10 +23,8 @@ fn farewell(name: &str) -> String {
 }
 
 fn main() {
-    let hello = greet("World");
-    let bye = farewell("World");
-    println!("{hello}");
-    println!("{bye}");
+    println!("{}", greet("World"));
+    println!("{}", farewell("World"));
 }`;
 
         await page.evaluate((code) => {
