@@ -1,9 +1,10 @@
 [package]
 name = "tauri_runner"
 version = "0.1.0"
-edition = "2024"
+authors = ["Nicholas Finch"]
+license = "MIT"
+edition = "2021"
 
 [dependencies]
 polars = { version = "0.53.0", features = ["lazy", "random", "strings", "is_in", "zip_with", "round_series", "checked_arithmetic", "csv", "parquet", "json", "ipc", "dtype-datetime", "dtype-struct", "dtype-categorical", "regex", "fmt"] }
 tokio = { version = "1", features = ["full"] }
-
