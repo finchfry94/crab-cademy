@@ -1,6 +1,7 @@
 import { LearningPath, Lesson, QuizQuestion } from "./types";
 
 import * as theBook from "./lessons/the-book/index";
+import * as webDev from "./lessons/web-dev/index";
 import * as reqwest from "./lessons/reqwest/index";
 import * as plotters from "./lessons/plotters/index";
 import * as polars from "./lessons/polars/index";
@@ -12,7 +13,7 @@ interface PathModule {
     lessons: Lesson[];
 }
 
-const registry: PathModule[] = [theBook, reqwest, plotters, polars];
+const registry: PathModule[] = [theBook, webDev, reqwest, plotters, polars];
 
 /** All registered learning paths */
 export function getAllPaths(): LearningPath[] {

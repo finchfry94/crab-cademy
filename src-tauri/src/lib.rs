@@ -24,6 +24,23 @@ async fn run_code(
     )
 }
 
+#[tauri::command]
+async fn run_code_multi(
+    app: tauri::AppHandle,
+    files: std::collections::HashMap<String, String>,
+    use_sandbox: bool,
+    is_test: bool,
+    args: Option<Vec<String>>,
+) -> String {
+    execution::execute_multi_file(
+        Some(&app),
+        files,
+        use_sandbox,
+        is_test,
+        args.unwrap_or_default(),
+    )
+}
+
 use tauri_plugin_sql::{Migration, MigrationKind};
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -53,6 +70,7 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             greet,
             run_code,
+            run_code_multi,
             lessons::get_all_lessons,
             lessons::get_lesson,
             lessons::get_first_lesson

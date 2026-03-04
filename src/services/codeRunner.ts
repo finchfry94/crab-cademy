@@ -218,6 +218,112 @@ async function runTestsViaPlayground(combinedCode: string): Promise<Omit<TestRun
 }
 
 /**
+ * Execute multiple Rust source files. Desktop-only (requires Tauri).
+ * If only one file, falls back to single-file execution.
+ */
+export async function executeRustCodeMulti(
+    files: Record<string, string>,
+    environment: "browser" | "desktop" = "desktop",
+    args: string[] = []
+): Promise<string> {
+    const fileKeys = Object.keys(files);
+
+    // Single file: delegate to existing function
+    if (fileKeys.length === 1) {
+        return executeRustCode(files[fileKeys[0]], environment, args);
+    }
+
+    if (!isTauri()) {
+        return "Error: Multi-file lessons require the desktop app (Tauri).";
+    }
+
+    try {
+        const rawOutput = await invoke<string>("run_code_multi", {
+            files,
+            useSandbox: false,
+            isTest: false,
+            args,
+        });
+        return `\x1b[33m[Running via Local Rust (multi-file)]\x1b[0m\r\n${rawOutput}`;
+    } catch (e: any) {
+        return `Tauri Error: ${e.message || e.toString()}`;
+    }
+}
+
+/**
+ * Run tests for multi-file lessons.
+ * Merges testFiles entries into corresponding source files before execution.
+ */
+export async function runTestsMulti(
+    files: Record<string, string>,
+    testFiles: Record<string, string>,
+    environment: "browser" | "desktop" = "desktop",
+    args: string[] = []
+): Promise<TestRunResult> {
+    // Merge test code into source files
+    const combinedFiles: Record<string, string> = { ...files };
+    for (const [path, testCode] of Object.entries(testFiles)) {
+        if (combinedFiles[path]) {
+            combinedFiles[path] = `${combinedFiles[path]}\n\n${testCode}`;
+        } else {
+            combinedFiles[path] = testCode;
+        }
+    }
+
+    const fileKeys = Object.keys(combinedFiles);
+
+    // Single file: delegate to existing function
+    if (fileKeys.length === 1) {
+        return runTests(combinedFiles[fileKeys[0]], "", environment, args);
+    }
+
+    if (!isTauri()) {
+        return {
+            results: [],
+            allPassed: false,
+            rawOutput: "Error: Multi-file lessons require the desktop app (Tauri).",
+        };
+    }
+
+    try {
+        const rawOutput = await invoke<string>("run_code_multi", {
+            files: combinedFiles,
+            useSandbox: false,
+            isTest: true,
+            args,
+        });
+        const cleanOutput = stripAnsi(rawOutput);
+        const testResults = parseTestOutput(rawOutput);
+
+        const isError = rawOutput.startsWith("Error:") || rawOutput.includes("Error running");
+        const explicitSuccess = cleanOutput.includes("All tests passed!");
+        const standardSuccess = /test result: ok/.test(cleanOutput);
+
+        const allPassed = !isError && (
+            testResults.length > 0
+                ? testResults.every((t) => t.passed)
+                : (!rawOutput.toLowerCase().includes("failed") && (explicitSuccess || standardSuccess))
+        );
+
+        if ((explicitSuccess || standardSuccess) && testResults.length === 0) {
+            testResults.push({ name: "Lesson Check", passed: true });
+        }
+
+        return {
+            results: testResults,
+            allPassed,
+            rawOutput: `\x1b[33m[Running via Local Rust (multi-file)]\x1b[0m\r\n${rawOutput}`,
+        };
+    } catch (e: any) {
+        return {
+            results: [],
+            allPassed: false,
+            rawOutput: `Tauri Error: ${e.message || e.toString()}`,
+        };
+    }
+}
+
+/**
  * Parse cargo test output to extract individual test results.
  * Matches lines like: "test test_name ... ok" or "test tests::test_name ... FAILED"
  */

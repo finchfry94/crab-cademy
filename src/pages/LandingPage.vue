@@ -5,6 +5,7 @@ import { getAllPaths, getPathLessons, type LearningPath } from "../data/lessons"
 import { BookOpen, ChevronRight, Clock, Sparkles, Download, Apple, Box, Monitor, Github } from "lucide-vue-next";
 import CrabCademyIcon from "../components/icons/CrabCademyIcon.vue";
 import BaseModal from "../components/layout/BaseModal.vue";
+import { isTauri } from "../services/codeRunner";
 
 const showDownloadModal = ref(false);
 
@@ -30,8 +31,9 @@ function getLessonCount(pathId: string): number {
   return getPathLessons(pathId).length;
 }
 
-const availablePaths = computed(() => paths.filter(p => p.id === "the-book" && getLessonCount(p.id) > 0));
-const comingSoonPaths = computed(() => paths.filter(p => p.id !== "the-book" || getLessonCount(p.id) === 0));
+const AVAILABLE_IDS = ["the-book"];
+const availablePaths = computed(() => paths.filter(p => AVAILABLE_IDS.includes(p.id) && getLessonCount(p.id) > 0));
+const comingSoonPaths = computed(() => paths.filter(p => !AVAILABLE_IDS.includes(p.id) || getLessonCount(p.id) === 0));
 
 function getCompletedCount(pathId: string): number {
   void progressVersion.value;
@@ -65,12 +67,16 @@ function navigateToPath(path: LearningPath) {
           <span class="bg-gradient-to-r from-orange-400 via-orange-300 to-red-400 bg-clip-text text-transparent">CrabCademy</span>
         </h1>
         <p class="text-lg text-neutral-400 max-w-2xl mx-auto leading-relaxed">
-          Start coding Rust instantly in your browser with zero friction. Ready for more? 
-          Download our desktop app to unlock system-level capabilities like file I/O, powered directly by your local machine.
+          Start coding Rust instantly in your browser with zero friction.
+          <template v-if="!isTauri()">
+            Ready for more? 
+            Download our desktop app to unlock system-level capabilities like file I/O, powered directly by your local machine.
+          </template>
         </p>
 
         <div class="mt-8 flex justify-center gap-4">
              <button
+               v-if="!isTauri()"
                @click="showDownloadModal = true"
                class="px-6 py-2.5 rounded-xl bg-orange-600 hover:bg-orange-500 text-white font-semibold transition-all shadow-lg shadow-orange-600/20 active:scale-95 flex items-center gap-2"
              >

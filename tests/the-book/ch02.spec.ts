@@ -64,19 +64,9 @@ fn tuple_sum(t: (i32, i32, i32)) -> i32 {
     t.0 + t.1 + t.2
 }
 
-fn safe_index(arr: &[i32], index: usize) -> i32 {
-    if index < arr.len() {
-        arr[index]
-    } else {
-        -1
-    }
-}
-
 fn main() {
     println!("100°C = {}°F", celsius_to_fahrenheit(100.0));
     println!("Sum: {}", tuple_sum((1, 2, 3)));
-    println!("Index 1: {}", safe_index(&[10, 20, 30], 1));
-    println!("Index 5: {}", safe_index(&[10, 20, 30], 5));
 }`;
 
         await page.evaluate((code) => {

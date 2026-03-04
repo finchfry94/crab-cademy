@@ -1,14 +1,15 @@
 <script setup lang="ts">
-import { ref, watch } from "vue";
+import { ref, watch, computed } from "vue";
 import { useRouter } from "vue-router";
 import SplitPane from "../components/layout/SplitPane.vue";
 import CodeEditor from "../components/editor/CodeEditor.vue";
+import MultiFileEditor from "../components/editor/MultiFileEditor.vue";
 import OutputTerminal from "../components/terminal/OutputTerminal.vue";
 import LessonTabs from "../components/lesson/LessonTabs.vue";
 import { useCodeRunner } from "../composables/useCodeRunner";
 import { useLessonState } from "../composables/useLessonState";
 import { markCompleted } from "../services/progressStore";
-import { runTests, colorizeRustOutput } from "../services/codeRunner";
+import { runTests, runTestsMulti, colorizeRustOutput } from "../services/codeRunner";
 import { Play, FlaskConical, ArrowLeft, ChevronRight, BookOpen, Code2 } from "lucide-vue-next";
 
 const props = defineProps<{ pathId: string; id: string }>();
@@ -28,11 +29,17 @@ window.addEventListener('resize', () => {
 });
 
 
-const { runCode, isRunning } = useCodeRunner();
+const { runCode, runCodeMulti, isRunning } = useCodeRunner();
 const { currentLesson, loadLessonById, setTestResults, setActiveTab, allTestsPassed, nextLesson } = useLessonState();
 const code = ref("// Write your Rust code here\nfn main() {\n    println!(\"Hello, CrabCademy!\");\n}\n");
+const files = ref<Record<string, string>>({});
 const terminalRef = ref<InstanceType<typeof OutputTerminal> | null>(null);
 const isTestRunning = ref(false);
+
+const isMultiFile = computed(() =>
+  currentLesson.value &&
+  typeof currentLesson.value.starter_code === 'object'
+);
 
 // Load lesson when ID changes
 watch(
@@ -40,7 +47,11 @@ watch(
   async (newId) => {
     await loadLessonById(props.pathId, newId);
     if (currentLesson.value) {
-      code.value = currentLesson.value.starter_code;
+      if (typeof currentLesson.value.starter_code === 'object') {
+        files.value = { ...currentLesson.value.starter_code };
+      } else {
+        code.value = currentLesson.value.starter_code;
+      }
     }
   },
   { immediate: true }
@@ -50,7 +61,12 @@ async function handleRun() {
   if (terminalRef.value && currentLesson.value) {
     terminalRef.value.clear();
     terminalRef.value.writeln("\x1b[33mRunning...\x1b[0m");
-    const output = await runCode(code.value, currentLesson.value.environment, currentLesson.value.default_args);
+    let output: string;
+    if (isMultiFile.value) {
+      output = await runCodeMulti(files.value, currentLesson.value.environment, currentLesson.value.default_args);
+    } else {
+      output = await runCode(code.value, currentLesson.value.environment, currentLesson.value.default_args);
+    }
     terminalRef.value.write(colorizeRustOutput(output));
   }
 }
@@ -62,7 +78,16 @@ async function handleRunTests() {
   terminalRef.value.clear();
   terminalRef.value.writeln("\x1b[36m🧪 Running tests...\x1b[0m\n");
 
-  const result = await runTests(code.value, currentLesson.value.test_code, currentLesson.value.environment);
+  let result;
+  if (isMultiFile.value) {
+    result = await runTestsMulti(
+      files.value,
+      currentLesson.value.test_files || {},
+      currentLesson.value.environment
+    );
+  } else {
+    result = await runTests(code.value, currentLesson.value.test_code, currentLesson.value.environment);
+  }
 
   // Show colorized output in terminal
   terminalRef.value.write(colorizeRustOutput(result.rawOutput));
@@ -149,7 +174,7 @@ function goToNextLesson() {
         <template #editor>
           <div class="h-full flex flex-col">
             <div class="flex items-center justify-between p-2 bg-neutral-950 border-b border-neutral-800">
-              <span class="text-sm font-bold text-neutral-400 pl-2">main.rs</span>
+              <span v-if="!isMultiFile" class="text-sm font-bold text-neutral-400 pl-2">main.rs</span>
               <div class="flex items-center gap-2">
                 <button
                   @click="handleRunTests"
@@ -180,7 +205,8 @@ function goToNextLesson() {
               </div>
             </div>
             <div class="flex-1 min-h-0">
-              <CodeEditor v-model:value="code" language="rust" />
+              <MultiFileEditor v-if="isMultiFile" v-model:files="files" language="rust" />
+              <CodeEditor v-else v-model:value="code" language="rust" />
             </div>
           </div>
         </template>
