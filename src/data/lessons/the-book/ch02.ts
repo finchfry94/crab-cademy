@@ -264,8 +264,7 @@ _BT__BT__BT_
         objectives: `## Your Mission
 
 1. _BT_celsius_to_fahrenheit(c: f64) -> f64_BT_ — Converts Celsius to Fahrenheit using _BT_F = C × 9/5 + 32_BT_
-2. _BT_tuple_sum(t: (i32, i32, i32)) -> i32_BT_ — Returns the sum of all three elements
-3. _BT_safe_index(arr: &[i32], index: usize) -> i32_BT_ — Returns the element at _BT_index_BT_, or _BT_-1_BT_ if out of bounds`.replace(/_BT_/g, '`'),
+2. _BT_tuple_sum(t: (i32, i32, i32)) -> i32_BT_ — Returns the sum of all three elements`.replace(/_BT_/g, '`'),
         test_code: `#[cfg(test)]
 mod tests {
     use super::*;
@@ -294,26 +293,13 @@ mod tests {
     fn test_tuple_sum_negatives() {
         assert_eq!(tuple_sum((-1, -2, -3)), -6);
     }
-
-    #[test]
-    fn test_safe_index_valid() {
-        assert_eq!(safe_index(&[10, 20, 30], 1), 20);
-    }
-
-    #[test]
-    fn test_safe_index_out_of_bounds() {
-        assert_eq!(safe_index(&[10, 20, 30], 5), -1);
-    }
 }`,
         starter_code: `// Write: celsius_to_fahrenheit(c: f64) -> f64
 // Write: tuple_sum(t: (i32, i32, i32)) -> i32
-// Write: safe_index(arr: &[i32], index: usize) -> i32
 
 fn main() {
     println!("100°C = {}°F", celsius_to_fahrenheit(100.0));
     println!("Sum: {}", tuple_sum((1, 2, 3)));
-    println!("Index 1: {}", safe_index(&[10, 20, 30], 1));
-    println!("Index 5: {}", safe_index(&[10, 20, 30], 5));
 }
 `,
     },
