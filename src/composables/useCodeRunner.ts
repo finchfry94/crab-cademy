@@ -1,5 +1,5 @@
 import { ref } from 'vue';
-import { executeRustCode } from '../services/codeRunner';
+import { executeRustCode, executeRustCodeMulti } from '../services/codeRunner';
 
 export function useCodeRunner() {
     const isRunning = ref(false);
@@ -24,8 +24,27 @@ export function useCodeRunner() {
         }
     }
 
+    async function runCodeMulti(files: Record<string, string>, environment: "browser" | "desktop" = "desktop", args: string[] = []) {
+        isRunning.value = true;
+        error.value = null;
+        result.value = '';
+
+        try {
+            const output = await executeRustCodeMulti(files, environment, args);
+            result.value = output;
+            return output;
+        } catch (e: any) {
+            const errorMsg = e.toString();
+            error.value = errorMsg;
+            return `Error: ${errorMsg}`;
+        } finally {
+            isRunning.value = false;
+        }
+    }
+
     return {
         runCode,
+        runCodeMulti,
         isRunning,
         result,
         error

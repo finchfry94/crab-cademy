@@ -18,28 +18,36 @@ interface Chapter {
   lessons: Lesson[];
 }
 
-const chapterTitles: { [key: string]: string } = {
-  "1": "Getting Started",
-  "2": "Common Concepts",
-  "3": "Guessing Game",
-  "4": "Ownership",
-  "5": "Structs",
-  "6": "Enums",
-  "7": "Project Management",
-  "8": "Collections",
-  "9": "Error Handling",
-  "10": "Generics & Traits",
-  "11": "Testing",
-  "12": "I/O Project",
-  "13": "Iterators & Closures",
-  "14": "Cargo & Crates",
-  "15": "Smart Pointers",
-  "16": "Concurrency",
-  "17": "Async/Await",
-  "18": "OOP / Trait Objects",
-  "19": "Patterns",
-  "20": "Advanced Features",
-  "21": "Final Project",
+const chapterTitlesByPath: { [pathId: string]: { [key: string]: string } } = {
+  "the-book": {
+    "1": "Getting Started",
+    "2": "Common Concepts",
+    "3": "Guessing Game",
+    "4": "Ownership",
+    "5": "Structs",
+    "6": "Enums",
+    "7": "Project Management",
+    "8": "Collections",
+    "9": "Error Handling",
+    "10": "Generics & Traits",
+    "11": "Testing",
+    "12": "I/O Project",
+    "13": "Iterators & Closures",
+    "14": "Cargo & Crates",
+    "15": "Smart Pointers",
+    "16": "Concurrency",
+    "17": "Async/Await",
+    "18": "OOP / Trait Objects",
+    "19": "Patterns",
+    "20": "Advanced Features",
+    "21": "Final Project",
+  },
+  "web-dev": {
+    "1": "Axum Fundamentals",
+    "2": "Enter Loco",
+    "3": "Building a Full App",
+    "4": "Production Patterns",
+  },
 };
 
 const chapters = computed<Chapter[]>(() => {
@@ -53,9 +61,10 @@ const chapters = computed<Chapter[]>(() => {
     chapterMap.get(chapterNum)!.push(lesson);
   }
 
+  const titles = chapterTitlesByPath[props.pathId] || {};
   return Array.from(chapterMap.entries()).map(([num, chapterLessons]) => ({
     id: num,
-    title: chapterTitles[num] || `Chapter ${num}`,
+    title: titles[num] || `Chapter ${num}`,
     lessons: chapterLessons,
   }));
 });

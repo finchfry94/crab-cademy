@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::fs;
 use std::process::Command;
 use syn::visit::Visit;
@@ -122,9 +123,12 @@ pub fn execute_rust_code(
     is_test: bool,
     args: Vec<String>,
 ) -> String {
-    // Check if code requires heavy dependencies (Polars, Tokio)
-    if code.contains("polars") || code.contains("tokio") {
-        return execute_with_runner(app, code, is_test);
+    // Check if code requires heavy dependencies — route to appropriate runner
+    if code.contains("polars") {
+        return execute_with_runner(app, code, is_test, "tauri_runner");
+    }
+    if code.contains("axum") || code.contains("sqlx") || code.contains("sea_orm") {
+        return execute_with_runner(app, code, is_test, "web_dev_runner");
     }
 
     // Step 1: Validate code for security violations if requested
@@ -208,72 +212,74 @@ pub fn execute_rust_code(
     }
 }
 
-/// Execute code using the persistent Cargo project 'tauri_runner'
-fn execute_with_runner(app: Option<&tauri::AppHandle>, code: &str, is_test: bool) -> String {
-    // In production, we bundle the runner as a resource.
-    // In dev, it's at the project root.
-    // In dev, this is relative to where the command is run (usually project root or src-tauri)
-    // We'll try to locate it.
+/// Locate a runner directory by name, checking relative paths, resources, and exe-relative paths
+fn find_runner_path(
+    app: Option<&tauri::AppHandle>,
+    runner_name: &str,
+) -> Result<std::path::PathBuf, String> {
     let possible_paths = [
-        "tauri_runner",
-        "../tauri_runner",    // If running from src-tauri
-        "../../tauri_runner", // If running from src-tauri/target/debug/...
+        runner_name.to_string(),
+        format!("../{}", runner_name),
+        format!("../../{}", runner_name),
     ];
 
     let mut attempted_paths = Vec::new();
-    let mut runner_path = std::path::PathBuf::new();
-    let mut found = false;
 
-    for path in possible_paths {
+    for path in &possible_paths {
         let p = std::path::Path::new(path);
         attempted_paths.push(format!("(Relative) {}", path));
         if p.exists() {
-            runner_path = std::path::PathBuf::from(path);
-            found = true;
-            break;
+            return Ok(std::path::PathBuf::from(path));
         }
     }
 
-    if !found {
-        // Fallback: Try to find it in Tauri resources (for bundled apps)
-        if let Some(app) = app {
-            if let Ok(res_path) = app.path().resource_dir() {
-                let bundled_path = res_path.join("tauri_runner");
-                attempted_paths.push(format!("(Resource) {}", bundled_path.display()));
-                if bundled_path.exists() {
-                    runner_path = bundled_path;
-                    found = true;
-                }
+    // Fallback: Try to find it in Tauri resources (for bundled apps)
+    if let Some(app) = app {
+        if let Ok(res_path) = app.path().resource_dir() {
+            let bundled_path = res_path.join(runner_name);
+            attempted_paths.push(format!("(Resource) {}", bundled_path.display()));
+            if bundled_path.exists() {
+                return Ok(bundled_path);
             }
         }
     }
 
-    if !found {
-        // Fallback: Try to find it relative to the current executable
-        if let Ok(mut exe_path) = std::env::current_exe() {
-            exe_path.pop(); // binary dir
-            exe_path.pop(); // debug/release
-            exe_path.pop(); // target
-            exe_path.push("tauri_runner");
-            attempted_paths.push(format!("(Exe Relative) {}", exe_path.display()));
-            if exe_path.exists() {
-                runner_path = exe_path;
-                found = true;
-            }
+    // Fallback: Try to find it relative to the current executable
+    if let Ok(mut exe_path) = std::env::current_exe() {
+        exe_path.pop(); // binary dir
+        exe_path.pop(); // debug/release
+        exe_path.pop(); // target
+        exe_path.push(runner_name);
+        attempted_paths.push(format!("(Exe Relative) {}", exe_path.display()));
+        if exe_path.exists() {
+            return Ok(exe_path);
         }
     }
 
-    if !found {
-        let mut msg =
-            String::from("Error: Could not locate 'tauri_runner' directory.\nChecked paths:");
-        for path in attempted_paths {
-            msg.push_str(&format!("\n - {}", path));
-        }
-        if let Ok(cwd) = std::env::current_dir() {
-            msg.push_str(&format!("\nCurrent working directory: {}", cwd.display()));
-        }
-        return msg;
+    let mut msg = format!(
+        "Error: Could not locate '{}' directory.\nChecked paths:",
+        runner_name
+    );
+    for path in attempted_paths {
+        msg.push_str(&format!("\n - {}", path));
     }
+    if let Ok(cwd) = std::env::current_dir() {
+        msg.push_str(&format!("\nCurrent working directory: {}", cwd.display()));
+    }
+    Err(msg)
+}
+
+/// Execute code using a persistent Cargo runner project
+fn execute_with_runner(
+    app: Option<&tauri::AppHandle>,
+    code: &str,
+    is_test: bool,
+    runner_name: &str,
+) -> String {
+    let runner_path = match find_runner_path(app, runner_name) {
+        Ok(p) => p,
+        Err(msg) => return msg,
+    };
 
     // 1. Write the code to src/main.rs
     let main_rs = runner_path.join("src/main.rs");
@@ -304,6 +310,98 @@ fn execute_with_runner(app: Option<&tauri::AppHandle>, code: &str, is_test: bool
                 format!("{}{}", stdout, stderr) // stderr might contain warnings
             } else {
                 // If it failed, it might be a compilation error which cargo prints to stderr
+                format!("Execution Error:\n{}{}", stdout, stderr)
+            }
+        }
+        Err(e) => format!("Error executing cargo: {}", e),
+    }
+}
+
+/// Execute multiple source files using a Cargo runner project.
+/// `files` maps relative paths (e.g. "src/main.rs", "src/handlers.rs") to source code.
+pub fn execute_multi_file(
+    app: Option<&tauri::AppHandle>,
+    files: HashMap<String, String>,
+    use_sandbox: bool,
+    is_test: bool,
+    args: Vec<String>,
+) -> String {
+    // Determine which runner to use based on file contents
+    let all_code: String = files.values().cloned().collect::<Vec<_>>().join("\n");
+    let runner_name = if all_code.contains("polars") {
+        "tauri_runner"
+    } else if all_code.contains("axum") || all_code.contains("sqlx") || all_code.contains("sea_orm")
+    {
+        "web_dev_runner"
+    } else {
+        "web_dev_runner" // Default for multi-file lessons
+    };
+
+    let runner_path = match find_runner_path(app, runner_name) {
+        Ok(p) => p,
+        Err(msg) => return msg,
+    };
+
+    // Validate all files if sandbox is enabled
+    if use_sandbox {
+        for (path, code) in &files {
+            if let Err(e) = validate_code(code) {
+                return format!("🛡️ Sandbox Violation in {}:\n{}", path, e);
+            }
+        }
+    }
+
+    // Track which extra files we write so we can clean them up
+    let mut extra_files: Vec<std::path::PathBuf> = Vec::new();
+
+    // Write all source files
+    for (rel_path, code) in &files {
+        let file_path = runner_path.join(rel_path);
+
+        // Ensure parent directories exist
+        if let Some(parent) = file_path.parent() {
+            if let Err(e) = fs::create_dir_all(parent) {
+                return format!("Error creating directory for {}: {}", rel_path, e);
+            }
+        }
+
+        if let Err(e) = fs::write(&file_path, code) {
+            return format!("Error writing {}: {}", rel_path, e);
+        }
+
+        // Track non-main files for cleanup
+        if rel_path != "src/main.rs" {
+            extra_files.push(file_path);
+        }
+    }
+
+    // Run cargo
+    let mut command = Command::new("cargo");
+    if is_test {
+        command.arg("test");
+    } else {
+        command.arg("run");
+    }
+
+    let output = command
+        .arg("--quiet")
+        .arg("--manifest-path")
+        .arg(runner_path.join("Cargo.toml"))
+        .args(&args)
+        .output();
+
+    // Clean up extra source files to avoid stale state
+    for file_path in &extra_files {
+        let _ = fs::remove_file(file_path);
+    }
+
+    match output {
+        Ok(out) => {
+            let stdout = String::from_utf8_lossy(&out.stdout);
+            let stderr = String::from_utf8_lossy(&out.stderr);
+            if out.status.success() {
+                format!("{}{}", stdout, stderr)
+            } else {
                 format!("Execution Error:\n{}{}", stdout, stderr)
             }
         }

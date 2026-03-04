@@ -12,7 +12,8 @@ export interface Lesson {
     quiz: QuizQuestion[];
     objectives: string;
     test_code: string;
-    starter_code: string;
+    test_files?: Record<string, string>;  // Per-file test code for multi-file lessons
+    starter_code: string | Record<string, string>;
     sort_order: number;
     environment: "browser" | "desktop";
     default_args?: string[];

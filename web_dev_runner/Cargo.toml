@@ -1,0 +1,25 @@
+[package]
+name = "web_dev_runner"
+version = "0.1.0"
+authors = ["Nicholas Finch"]
+license = "MIT"
+edition = "2021"
+
+[dependencies]
+# Web framework
+axum = "0.8"
+tokio = { version = "1", features = ["full"] }
+tower = "0.5.2"
+tower-http = { version = "0.6", features = ["cors", "trace"] }
+
+# Serialization
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+# SQL / ORM
+rusqlite = { version = "0.29.0", features = ["bundled"] }
+sqlx = { version = "0.7", features = ["runtime-tokio-native-tls", "sqlite", "postgres"] }
+sea-orm = { version = "1", features = ["sqlx-sqlite", "runtime-tokio-native-tls"] }
+
+# HTTP client
+reqwest = { version = "0.12", features = ["json"] }

@@ -57,4 +57,7 @@ playwright-report
 
 **/error-context.md
 .vercel
-tauri_runner/target
+tauri_runner/target 
+
+claude.md
+web_dev_runner/target
