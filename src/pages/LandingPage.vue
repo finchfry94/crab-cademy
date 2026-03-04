@@ -31,7 +31,7 @@ function getLessonCount(pathId: string): number {
   return getPathLessons(pathId).length;
 }
 
-const AVAILABLE_IDS = ["the-book", "web-dev"];
+const AVAILABLE_IDS = ["the-book"];
 const availablePaths = computed(() => paths.filter(p => AVAILABLE_IDS.includes(p.id) && getLessonCount(p.id) > 0));
 const comingSoonPaths = computed(() => paths.filter(p => !AVAILABLE_IDS.includes(p.id) || getLessonCount(p.id) === 0));
 
